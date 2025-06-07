@@ -9,6 +9,7 @@ type Siswa struct {
 	NamaLengkap     string    `gorm:"column:nama_lengkap;size:100;not null" json:"nama_lengkap"`
 	KelasID         int       `gorm:"column:kelas_id;not null" json:"kelas_id"`
 	Email           string    `gorm:"column:email;size:100;unique" json:"email"`
+	NoTelepon string `gorm:"column:no_telepon; size:100" json:"no_telepon"`
 	PasswordHash    string    `gorm:"column:password_hash;size:255;not null" json:"-"`
 	PoinMotivasi    int       `gorm:"column:poin_motivasi;default:0" json:"poin_motivasi"`
 	TingkatDisiplin string    `gorm:"column:tingkat_disiplin;type:enum('Sangat Baik','Baik','Cukup','Kurang','Sangat Kurang');default:'Baik'" json:"tingkat_disiplin"`

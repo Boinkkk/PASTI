@@ -213,12 +213,10 @@ import {
                   email: email,
                   password: password,
                   no_telepon: noTelepon,
-                  poin_motivasi: 0,
-                  tingkat_disiplin: 'Baik',
-                  foto_profil: null
+                  confirm_password: confirmPassword
               }
               
-              const response = await fetch('http://localhost:8080/api/v1/register', {
+              const response = await fetch('http://localhost:8080/api/auth/register', {
                   method: 'POST',
                   headers: {
                       'Content-Type': 'application/json',
