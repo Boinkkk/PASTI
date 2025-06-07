@@ -36,6 +36,22 @@ type Login struct {
 	Password string `json:"password"`
 }
 
+type SiswaProfile struct {
+	SiswaID         int       `json:"siswa_id"`
+	NIS             string    `json:"nis"`
+	NamaLengkap     string    `json:"nama_lengkap"`
+	KelasID         int       `json:"kelas_id"`
+	Email           string    `json:"email"`
+	NoTelepon       string    `json:"no_telepon"`
+	PoinMotivasi    int       `json:"poin_motivasi"`
+	TingkatDisiplin string    `json:"tingkat_disiplin"`
+	FotoProfil      string    `json:"foto_profil"`
+
+	// Relasi
+	Kelas Kelas `json:"kelas,omitempty"`
+}
+
+
 // TableName method untuk menentukan nama tabel yang benar
 func (Siswa) TableName() string {
 	return "siswa"
