@@ -31,6 +31,11 @@ type Register struct {
 	ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=Password"`
 }
 
+type Login struct {
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
+
 // TableName method untuk menentukan nama tabel yang benar
 func (Siswa) TableName() string {
 	return "siswa"

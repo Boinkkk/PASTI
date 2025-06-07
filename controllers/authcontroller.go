@@ -46,6 +46,37 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helpers.Response(w, 201, "Register Succesfully", nil)
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	var login models.Login
+
+	if err := json.NewDecoder(r.Body).Decode(&login); err != nil {
+		helpers.Response(w, 500, err.Error(), nil)
+		return
+	}
+
+	var siswa models.Siswa 
+	if err := config.DB.First(&siswa, "email = ?", login.Email).Error; err != nil {
+		helpers.Response(w, 404, "Wrong Email Or Password", nil)
+		return
+	}
+
+	if err := helpers.VerifyPassword(siswa.PasswordHash, login.Password); err != nil {
+		helpers.Response(w, 404, "Wrong Password or Email", nil)
+		return
+	}
+
+	token, err := helpers.CreateToken(&siswa)
+
+	if err != nil {
+		helpers.Response(w, 500, err.Error(), nil)
+		return
+	}
+
+	helpers.Response(w, 200, "Succesfully Login", token)
+
+
 
 
 

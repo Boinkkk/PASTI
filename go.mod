@@ -3,6 +3,7 @@ module Pasti
 go 1.24.3
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/mux v1.8.1
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.30.0
