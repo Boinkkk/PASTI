@@ -29,7 +29,6 @@ import {
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../components/Middleware';
-import { getDetailAbsensiByJadwalID, getCourseInfoByJadwalID, type DetailAbsensiData, type CourseInfo } from '../services/api';
 
 const Kelas: React.FC = () => {
   const { mata_pelajaran } = useParams<{ mata_pelajaran: string }>();

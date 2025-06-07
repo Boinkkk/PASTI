@@ -214,3 +214,22 @@ export const getCourseInfoByJadwalID = async (jadwalID: number): Promise<CourseI
     throw error;
   }
 };
+
+import axios from "axios";
+
+export const fetchSiswaProfile = async () => {
+  const token = localStorage.getItem("token")
+  console.log(token)
+
+  if (!token) throw new Error("Invalid Token")
+
+  const response = await axios.get("http://localhost:8080/api/users/me", {
+    headers:{
+      Authorization: `${token}`
+    }
+  })
+
+  console.log(response)
+
+  return response.data
+}

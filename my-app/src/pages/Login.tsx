@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../components/Middleware'
+import axios from "axios";
 import { 
   Box, 
   Typography, 
@@ -15,26 +15,6 @@ import {
   Stack
 } from '@mui/joy';
 
-// Interface untuk response login
-interface LoginResponse {
-  message: string;
-  token: string;
-  user: {
-    siswa_id: number;
-    nis: string;
-    nama_lengkap: string;
-    kelas_id: number;
-    email: string;
-    poin_motivasi?: number;
-    tingkat_disiplin?: string;
-  };
-}
-
-// Interface untuk error response
-interface ErrorResponse {
-  error: string;
-  message: string;
-}
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -43,7 +23,6 @@ function Login() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const navigate = useNavigate()
-  const { login } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,36 +37,24 @@ function Login() {
     setSuccess(null)
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
+      const response = await axios.post("http://localhost:8080/api/auth/login", {
+        email,
+        password
       })
 
-      const data = await response.json()
+      console.log(response)
 
-      if (!response.ok) {
-        const errorData = data as ErrorResponse
-        throw new Error(errorData.message || 'Login gagal')
-      }
-
-      const loginData = data as LoginResponse
+      const token = response.data.data
+      localStorage.setItem("token", token)
       
-      login(loginData.token, loginData.user)
-      
-      setSuccess(loginData.message)
+      setSuccess(response.data.message)
       
       setTimeout(() => {
-        navigate('/dashboard')
+        navigate('/test')
       }, 1000)
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat login')
+      setError("Wrong Password And Email")
     } finally {
       setLoading(false)
     }
