@@ -21,14 +21,13 @@ import GuruSiswa from './pages/GuruSiswa.tsx'
 import GuruAbsensi from './pages/GuruAbsensi.tsx'
 import GuruQRGenerator from './pages/GuruQRGenerator.tsx'
 import RoleBasedRedirect from './components/RoleBasedRedirect.tsx'
+import { Test } from './pages/test.tsx'
 
 const router = createBrowserRouter([
   {
     path: '/', 
     element: (
-      <ProtectedRoute>
-        <RoleBasedRedirect/>
-      </ProtectedRoute>
+      <Test/>
     )
   },
   {

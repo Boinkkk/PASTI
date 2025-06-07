@@ -1,45 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"Pasti/config"
 	"log"
+	"net/http"
 
-	"d/Pasti/controllers"
-	"d/Pasti/models"
-
-	"github.com/Boinkkk/PASTI.git/config"
-	"github.com/gin-gonic/gin"
-	"github.com/gofiber/fiber/v2"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Koneksi GORM
-	dsn := "root:ivan@tcp(127.0.0.1:3306)/pasti?parseTime=true"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Gagal koneksi GORM:", err)
-	}
-	models.SetDB(db)
-
-	// Setup Gin
-	r := gin.Default()
-	r.POST("/api/v1/login", controllers.LoginHandler(db))
-
-	go func() {
-		r.Run(":8080")
-	}()
-
-	// Fiber untuk endpoint lama
 	config.ConnectDB()
-	fmt.Println("Hello World")
 
-	app := fiber.New()
+	r := mux.NewRouter()
+	router := r.PathPrefix("/api").Subrouter()
 
-	app.Get("/", func (c *fiber.Ctx) error {
-		return c.Status(200).JSON(fiber.Map{"msg": "Hello World"})
-	})
-
-	log.Fatal(app.Listen(":4000"))
+	log.Println("Server Running On port 8080")
+	http.ListenAndServe(":8080", router)
 }

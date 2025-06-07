@@ -1,10 +1,19 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../components/Middleware'
-import logo from '../../public/svg/Login-logo.svg'
-import Input from '@mui/joy/Input';
-import { Button, FormControl, Alert, CircularProgress, Typography } from '@mui/joy';
-import FormLabel from '@mui/joy/FormLabel';
+import { 
+  Box, 
+  Typography, 
+  Button, 
+  FormControl, 
+  FormLabel,
+  Input,
+  Alert, 
+  CircularProgress,
+  Card,
+  CardContent,
+  Stack
+} from '@mui/joy';
 
 // Interface untuk response login
 interface LoginResponse {
@@ -34,7 +43,7 @@ function Login() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const navigate = useNavigate()
-  const { login } = useAuth() // Gunakan AuthContext
+  const { login } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,21 +69,19 @@ function Login() {
         }),
       })
 
-      console.log(response)
-
       const data = await response.json()
 
       if (!response.ok) {
         const errorData = data as ErrorResponse
         throw new Error(errorData.message || 'Login gagal')
-      }      const loginData = data as LoginResponse
+      }
+
+      const loginData = data as LoginResponse
       
-      // Gunakan AuthContext untuk login (akan trigger ProtectedRoute)
       login(loginData.token, loginData.user)
       
       setSuccess(loginData.message)
       
-      // ProtectedRoute akan otomatis redirect, tapi tambahkan fallback
       setTimeout(() => {
         navigate('/dashboard')
       }, 1000)
@@ -87,70 +94,133 @@ function Login() {
   }
 
   return (
-    <div className="container flex h-screen w-screen">
-        <div className='flex items-center justify-center w-screen flex-col px-4'>
-            <h1 className='text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-widest mt-3 mb-3 mx-3 text-secondary text-center'>PASTI</h1>
-            <img src={logo} className='w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 mt-3'/>
+    <Box 
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: 2
+      }}
+    >
+      <Card 
+        sx={{ 
+          width: '100%', 
+          maxWidth: 400,
+          boxShadow: 'lg'
+        }}
+      >
+        <CardContent>
+          <Stack spacing={3} alignItems="center">
+            {/* Logo/Title */}
+            <Typography 
+              level="h1" 
+              sx={{ 
+                fontSize: { xs: '2rem', sm: '2.5rem' },
+                fontWeight: 'bold',
+                color: 'primary.500',
+                textAlign: 'center',
+                letterSpacing: '0.2em'
+              }}
+            >
+              PASTI
+            </Typography>
             
-            <form onSubmit={handleLogin}  autoComplete='on' className='w-full max-w-sm'>
-              {error && (
-                <Alert color="danger" variant="soft" sx={{ mb: 2 }}>
-                  <Typography level="body-sm">{error}</Typography>
-                </Alert>
-              )}
-              
-              {success && (
-                <Alert color="success" variant="soft" sx={{ mb: 2 }}>
-                  <Typography level="body-sm">{success}</Typography>
-                </Alert>
-              )}
-                  <FormControl className='w-full max-w-sm mb-3'>
-                    <FormLabel>Email</FormLabel>
-                    <Input 
-                      id="email"
-                      name='email'
-                      type="email"
-                      placeholder="Enter Your Email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading}
-                      autoComplete='username'
-                    />
-                  </FormControl>
+            {/* Avatar/Logo Circle */}
+            <Box
+              sx={{
+                width: { xs: 60, sm: 80 },
+                height: { xs: 60, sm: 80 },
+                borderRadius: '50%',
+                backgroundColor: 'primary.500',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 2
+              }}
+            >
+              <Typography 
+                sx={{ 
+                  color: 'white', 
+                  fontSize: { xs: '1.5rem', sm: '2rem' },
+                  fontWeight: 'bold' 
+                }}
+              >
+                P
+              </Typography>
+            </Box>
 
-                  <FormControl className='w-full max-w-sm mb-3'>
-                    <FormLabel>Password</FormLabel>
-                    <Input
-                      id='password'
-                      name='password'
-                      type="password"
-                      placeholder="Enter Your Password" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={loading}
-                      autoComplete='current-password'
-                      
-                    />
-                  </FormControl>
+            {/* Login Form */}
+            <Box component="form" onSubmit={handleLogin} sx={{ width: '100%' }}>
+              <Stack spacing={2}>
+                {/* Error Alert */}
+                {error && (
+                  <Alert color="danger" variant="soft">
+                    <Typography level="body-sm">{error}</Typography>
+                  </Alert>
+                )}
+                
+                {/* Success Alert */}
+                {success && (
+                  <Alert color="success" variant="soft">
+                    <Typography level="body-sm">{success}</Typography>
+                  </Alert>
+                )}
 
-                  <Button 
-                    type="submit"
-                    className='w-full mb-3' 
-                    sx={{ bgcolor: 'background.main' }}
+                {/* Email Input */}
+                <FormControl>
+                  <FormLabel>Email</FormLabel>
+                  <Input 
+                    type="email"
+                    placeholder="Masukkan email Anda" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
-                    startDecorator={loading ? <CircularProgress size="sm" /> : null}
-                  >
-                    {loading ? 'Logging in...' : 'Login'}
-                  </Button>
-            </form>            <div className="mt-4 text-center">
+                    autoComplete="username"
+                    size="lg"
+                  />
+                </FormControl>
+
+                {/* Password Input */}
+                <FormControl>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    type="password"
+                    placeholder="Masukkan password Anda" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    autoComplete="current-password"
+                    size="lg"
+                  />
+                </FormControl>
+
+                {/* Login Button */}
+                <Button 
+                  type="submit"
+                  size="lg"
+                  disabled={loading}
+                  startDecorator={loading ? <CircularProgress size="sm" /> : null}
+                  sx={{ mt: 2 }}
+                >
+                  {loading ? 'Masuk...' : 'Masuk'}
+                </Button>
+              </Stack>
+            </Box>
+
+            {/* Navigation Links */}
+            <Stack spacing={1} alignItems="center" sx={{ mt: 2 }}>
               <Typography level="body-sm" color="neutral">
                 Login sebagai{' '}
                 <Typography 
-                  component="a" 
+                  component="button"
                   level="body-sm" 
                   sx={{ 
                     color: 'primary.500', 
                     textDecoration: 'none',
+                    border: 'none',
+                    background: 'none',
                     cursor: 'pointer',
                     '&:hover': { textDecoration: 'underline' }
                   }}
@@ -159,14 +229,17 @@ function Login() {
                   Guru
                 </Typography>
               </Typography>
-              <Typography level="body-xs" color="neutral" sx={{ mt: 1 }}>
+              
+              <Typography level="body-xs" color="neutral">
                 Belum punya akun?{' '}
                 <Typography 
-                  component="a" 
+                  component="button"
                   level="body-xs" 
                   sx={{ 
                     color: 'primary.500', 
                     textDecoration: 'none',
+                    border: 'none',
+                    background: 'none',
                     cursor: 'pointer',
                     '&:hover': { textDecoration: 'underline' }
                   }}
@@ -175,9 +248,11 @@ function Login() {
                   Daftar disini
                 </Typography>
               </Typography>
-            </div>
-        </div>       
-    </div>
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
 

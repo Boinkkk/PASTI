@@ -1,766 +1,479 @@
-import logo from '../../public/svg/Login-logo.svg'
-import Input from '@mui/joy/Input';
-import { Button, FormControl, Alert, Select, Option, Typography } from '@mui/joy';
-import FormLabel from '@mui/joy/FormLabel';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-// Interface untuk response API
-interface RegisterResponse {
-    message: string;
-    user: {
-        id: number;
-        nis: string;
-        nama_lengkap: string;
-        kelas_id: number;
-        email: string;
-    };
-}
-
-interface ValidationError {
-    field: string;
-    message: string;
-}
-
-interface ErrorResponse {
-    error: string;
-    message: string;
-    errors?: ValidationError[];
-}
-
-function Register() {
-    const navigate = useNavigate();
-    
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [noTelepon, setNoTelepon] = useState('')
-    
-    // Field baru untuk siswa
-    const [nis, setNis] = useState('')
-    const [namaLengkap, setNamaLengkap] = useState('')
-    const [kelasId, setKelasId] = useState<number>(1) // Default kelas A (value 1)
-    const [poinMotivasi] = useState(0) // Default 0
-    const [tingkatDisiplin] = useState('Baik') // Default Baik
-    const [fotoProfil] = useState<string | null>(null) // Default null
-    
-    // State untuk loading dan error
-    const [isLoading, setIsLoading] = useState(false)
-    const [submitError, setSubmitError] = useState('')
-    const [submitSuccess, setSubmitSuccess] = useState('')
-    
-    // State untuk validasi email
-    const [emailError, setEmailError] = useState('')
-    const [isEmailValid, setIsEmailValid] = useState(false)
-    const [emailTouched, setEmailTouched] = useState(false)
-    
-    // State untuk validasi password
-    const [passwordError, setPasswordError] = useState('')
-    const [isPasswordValid, setIsPasswordValid] = useState(false)
-    const [passwordTouched, setPasswordTouched] = useState(false)
-    const [passwordStrength, setPasswordStrength] = useState('')
-    
-    // State untuk validasi nomor telepon
-    const [phoneError, setPhoneError] = useState('')
-    const [isPhoneValid, setIsPhoneValid] = useState(false)
-    const [phoneTouched, setPhoneTouched] = useState(false)
-    
-    // State untuk validasi NIS
-    const [nisError, setNisError] = useState('')
-    const [isNisValid, setIsNisValid] = useState(false)
-    const [nisTouched, setNisTouched] = useState(false)
-    
-    // State untuk validasi Nama Lengkap
-    const [namaError, setNamaError] = useState('')
-    const [isNamaValid, setIsNamaValid] = useState(false)
-    const [namaTouched, setNamaTouched] = useState(false)
-
-    // Opsi kelas
-    const kelasOptions = [
-        { value: 1, label: 'Kelas A' },
-        { value: 2, label: 'Kelas B' },
-        { value: 3, label: 'Kelas C' },
-        { value: 4, label: 'Kelas D' },
-        { value: 5, label: 'Kelas E' }
-    ]
-
-    // Fungsi validasi email
-    const validateEmail = (email: string) => {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-        
-        if (!email) {
-            setEmailError('')
-            setIsEmailValid(false)
-            return false
-        }
-        
-        if (email.length < 5) {
-            setEmailError('Email terlalu pendek (minimal 5 karakter)')
-            setIsEmailValid(false)
-            return false
-        }
-        
-        if (!emailRegex.test(email)) {
-            setEmailError('Format email tidak valid (contoh: user@domain.com)')
-            setIsEmailValid(false)
-            return false
-        }
-        
-        const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'student.com', 'sman1.sch.id']
-        const domain = email.split('@')[1]
-        
-        if (domain && !commonDomains.some(validDomain => domain.includes(validDomain.split('.')[0]))) {
-            setEmailError('Gunakan email dari domain yang umum (gmail, yahoo, dll)')
-            setIsEmailValid(false)
-            return false
-        }
-        
-        setEmailError('')
-        setIsEmailValid(true)
-        return true
-    }
-
-    // Fungsi validasi password
-    const validatePassword = (password: string) => {
-        if (!password) {
-            setPasswordError('')
-            setIsPasswordValid(false)
-            setPasswordStrength('')
-            return false
-        }
-
-        const minLength = 8
-        const hasUpperCase = /[A-Z]/.test(password)
-        const hasLowerCase = /[a-z]/.test(password)
-        const hasNumbers = /\d/.test(password)
-        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
-
-        if (password.length < minLength) {
-            setPasswordError(`Password minimal ${minLength} karakter`)
-            setIsPasswordValid(false)
-            setPasswordStrength('Lemah')
-            return false
-        }
-
-        let strength = 0
-        let strengthText = ''
-        let errors = []
-
-        if (hasLowerCase) strength++
-        else errors.push('huruf kecil')
-
-        if (hasUpperCase) strength++
-        else errors.push('huruf besar')
-
-        if (hasNumbers) strength++
-        else errors.push('angka')
-
-        if (hasSpecialChar) strength++
-        else errors.push('karakter khusus (!@#$%^&*)')
-
-        if (errors.length > 0) {
-            setPasswordError(`Password harus mengandung: ${errors.join(', ')}`)
-            setIsPasswordValid(false)
-        } else {
-            setPasswordError('')
-            setIsPasswordValid(true)
-        }
-
-        if (strength <= 2) {
-            strengthText = 'Lemah'
-        } else if (strength === 3) {
-            strengthText = 'Sedang'
-        } else {
-            strengthText = 'Kuat'
-        }
-
-        setPasswordStrength(strengthText)
-        return errors.length === 0
-    }
-
-    // Fungsi validasi nomor telepon
-    const validatePhone = (phone: string) => {
-        if (!phone) {
-            setPhoneError('')
-            setIsPhoneValid(false)
-            return false
-        }
-
-        const cleanPhone = phone.replace(/\D/g, '')
-
-        if (cleanPhone.length < 10) {
-            setPhoneError('Nomor telepon terlalu pendek (minimal 10 digit)')
-            setIsPhoneValid(false)
-            return false
-        }
-
-        if (cleanPhone.length > 15) {
-            setPhoneError('Nomor telepon terlalu panjang (maksimal 15 digit)')
-            setIsPhoneValid(false)
-            return false
-        }
-
-        const indonesianPrefixes = ['08', '62', '+62']
-        const isValidPrefix = indonesianPrefixes.some(prefix => {
-            if (prefix === '08') {
-                return cleanPhone.startsWith('08')
-            } else if (prefix === '62') {
-                return cleanPhone.startsWith('62')
-            }
-            return false
-        }) || phone.startsWith('+62')
-
-        if (!isValidPrefix) {
-            setPhoneError('Nomor telepon harus dimulai dengan 08, 62, atau +62')
-            setIsPhoneValid(false)
-            return false
-        }
-
-        const validOperators = ['0811', '0812', '0813', '0821', '0822', '0823', '0851', '0852', '0853', '0855', '0856', '0857', '0858']
-        const phonePrefix = cleanPhone.substring(0, 4)
-        
-        if (cleanPhone.startsWith('08') && !validOperators.includes(phonePrefix)) {
-            setPhoneError('Format nomor operator tidak valid')
-            setIsPhoneValid(false)
-            return false
-        }
-
-        setPhoneError('')
-        setIsPhoneValid(true)
-        return true
-    }
-
-    // Fungsi validasi NIS
-    const validateNis = (nis: string) => {
-        if (!nis) {
-            setNisError('')
-            setIsNisValid(false)
-            return false
-        }
-
-        const cleanNis = nis.replace(/\D/g, '')
-        
-        if (cleanNis.length < 8) {
-            setNisError('NIS minimal 8 digit')
-            setIsNisValid(false)
-            return false
-        }
-
-        if (cleanNis.length > 12) {
-            setNisError('NIS maksimal 12 digit')
-            setIsNisValid(false)
-            return false
-        }
-
-        setNisError('')
-        setIsNisValid(true)
-        return true
-    }
-
-    // Fungsi validasi Nama Lengkap
-    const validateNama = (nama: string) => {
-        if (!nama) {
-            setNamaError('')
-            setIsNamaValid(false)
-            return false
-        }
-
-        if (nama.length < 3) {
-            setNamaError('Nama terlalu pendek (minimal 3 karakter)')
-            setIsNamaValid(false)
-            return false
-        }
-
-        if (nama.length > 50) {
-            setNamaError('Nama terlalu panjang (maksimal 50 karakter)')
-            setIsNamaValid(false)
-            return false
-        }
-
-        const nameRegex = /^[a-zA-Z\s]+$/
-        if (!nameRegex.test(nama)) {
-            setNamaError('Nama hanya boleh berisi huruf dan spasi')
-            setIsNamaValid(false)
-            return false
-        }
-
-        setNamaError('')
-        setIsNamaValid(true)
-        return true
-    }
-
-    // Fungsi untuk mengirim data registrasi ke backend
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        
-        // Reset error states
-        setSubmitError('')
-        setSubmitSuccess('')
-        
-        // Validasi semua field sekali lagi
-        const isEmailValidFinal = validateEmail(email)
-        const isPasswordValidFinal = validatePassword(password)
-        const isPhoneValidFinal = validatePhone(noTelepon)
-        const isNisValidFinal = validateNis(nis)
-        const isNamaValidFinal = validateNama(namaLengkap)
-        
-        if (!isEmailValidFinal || !isPasswordValidFinal || !isPhoneValidFinal || !isNisValidFinal || !isNamaValidFinal) {
-            setSubmitError('Mohon perbaiki semua field yang tidak valid')
-            return
-        }
-        
-        setIsLoading(true)
-        
-        try {
-            const registrationData = {
-                nis: nis,
-                nama_lengkap: namaLengkap,
-                kelas_id: kelasId,
-                email: email,
-                password: password,
-                no_telepon: noTelepon,
-                poin_motivasi: poinMotivasi,
-                tingkat_disiplin: tingkatDisiplin,
-                foto_profil: fotoProfil
-            }
-            
-            const response = await fetch('http://localhost:8080/api/v1/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(registrationData), 
-            })
-            
-            const data: RegisterResponse | ErrorResponse = await response.json()
-            
-            if (response.ok) {
-                const successData = data as RegisterResponse
-                setSubmitSuccess(`${successData.message}! Selamat datang ${successData.user.nama_lengkap}`)
-                
-                // Reset form
-                setEmail('')
-                setPassword('')
-                setNoTelepon('')
-                setNis('')
-                setNamaLengkap('')
-                setKelasId(1)
-                
-                // Reset validation states
-                setEmailTouched(false)
-                setPasswordTouched(false)
-                setPhoneTouched(false)
-                setNisTouched(false)
-                setNamaTouched(false)
-                
-                // Redirect ke login setelah 2 detik
-                setTimeout(() => {
-                    navigate('/login')
-                }, 2000)
-                
-            } else {
-                const errorData = data as ErrorResponse
-                
-                if (errorData.errors && errorData.errors.length > 0) {
-                    // Handle validation errors from backend
-                    const errorMessages = errorData.errors.map(err => `${err.field}: ${err.message}`).join(', ')
-                    setSubmitError(`Validasi gagal: ${errorMessages}`)
-                } else {
-                    setSubmitError(errorData.message || 'Gagal mendaftarkan akun')
-                }
-            }
-            
-        } catch (error) {
-            console.error('Registration error:', error)
-            setSubmitError('Terjadi kesalahan koneksi. Pastikan server backend berjalan.')
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    // Real-time validation untuk semua field
-    useEffect(() => {
-        if (emailTouched) validateEmail(email)
-    }, [email, emailTouched])
-
-    useEffect(() => {
-        if (passwordTouched) validatePassword(password)
-    }, [password, passwordTouched])
-
-    useEffect(() => {
-        if (phoneTouched) validatePhone(noTelepon)
-    }, [noTelepon, phoneTouched])
-
-    useEffect(() => {
-        if (nisTouched) validateNis(nis)
-    }, [nis, nisTouched])
-
-    useEffect(() => {
-        if (namaTouched) validateNama(namaLengkap)
-    }, [namaLengkap, namaTouched])
-
-    // Handle functions
-    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newEmail = e.target.value
-        setEmail(newEmail)
-        if (!emailTouched) setEmailTouched(true)
-    }
-
-    const handleEmailBlur = () => {
-        setEmailTouched(true)
-        validateEmail(email)
-    }
-
-    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newPassword = e.target.value
-        setPassword(newPassword)
-        if (!passwordTouched) setPasswordTouched(true)
-    }
-
-    const handlePasswordBlur = () => {
-        setPasswordTouched(true)
-        validatePassword(password)
-    }
-
-    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newPhone = e.target.value
-        const formattedPhone = newPhone.replace(/[^\d+]/g, '')
-        setNoTelepon(formattedPhone)
-        if (!phoneTouched) setPhoneTouched(true)
-    }
-
-    const handlePhoneBlur = () => {
-        setPhoneTouched(true)
-        validatePhone(noTelepon)
-    }
-
-    const handleNisChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newNis = e.target.value
-        const formattedNis = newNis.replace(/\D/g, '')
-        setNis(formattedNis)
-        if (!nisTouched) setNisTouched(true)
-    }
-
-    const handleNisBlur = () => {
-        setNisTouched(true)
-        validateNis(nis)
-    }
-
-    const handleNamaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newNama = e.target.value
-        setNamaLengkap(newNama)
-        if (!namaTouched) setNamaTouched(true)
-    }
-
-    const handleNamaBlur = () => {
-        setNamaTouched(true)
-        validateNama(namaLengkap)
-    }
-
-    // Fungsi untuk menentukan warna input
-    const getEmailInputColor = () => {
-        if (!emailTouched || !email) return 'neutral'
-        return isEmailValid ? 'success' : 'danger'
-    }
-
-    const getPasswordInputColor = () => {
-        if (!passwordTouched || !password) return 'neutral'
-        return isPasswordValid ? 'success' : 'danger'
-    }
-
-    const getPhoneInputColor = () => {
-        if (!phoneTouched || !noTelepon) return 'neutral'
-        return isPhoneValid ? 'success' : 'danger'
-    }
-
-    const getNisInputColor = () => {
-        if (!nisTouched || !nis) return 'neutral'
-        return isNisValid ? 'success' : 'danger'
-    }
-
-    const getNamaInputColor = () => {
-        if (!namaTouched || !namaLengkap) return 'neutral'
-        return isNamaValid ? 'success' : 'danger'
-    }
-
-    const getPasswordStrengthColor = () => {
-        if (passwordStrength === 'Lemah') return 'text-red-600'
-        if (passwordStrength === 'Sedang') return 'text-yellow-600'
-        if (passwordStrength === 'Kuat') return 'text-green-600'
-        return 'text-gray-600'
-    }
-
-    // Check if all fields are valid
-    const isFormValid = isEmailValid && isPasswordValid && isPhoneValid && isNisValid && isNamaValid
-
-    return (
-        <div className="container flex h-screen w-screen overflow-y-auto">
-            <div className='flex items-center justify-center w-screen flex-col px-4 py-8'>
-                <h1 className='text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-widest mt-3 mb-3 mx-3 text-secondary text-center'>
-                    PASTI REGISTER
-                </h1>
-                <img src={logo} className='w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 mt-3 mb-6'/>
-                
-                <form onSubmit={handleSubmit} className='w-full max-w-sm space-y-4'>
-                    {/* SUCCESS MESSAGE */}
-                    {submitSuccess && (
-                        <Alert color="success" variant="soft" size="md">
-                            {submitSuccess}
-                        </Alert>
-                    )}
-
-                    {/* ERROR MESSAGE */}
-                    {submitError && (
-                        <Alert color="danger" variant="soft" size="md">
-                            {submitError}
-                        </Alert>
-                    )}
-
-                    {/* NIS FIELD */}
-                    <FormControl>
-                        <FormLabel>
-                            NIS (Nomor Induk Siswa) {nis && (
-                                <span className={isNisValid ? 'text-green-600' : 'text-red-600'}>
-                                    {isNisValid ? '✓' : '✗'}
-                                </span>
-                            )}
-                        </FormLabel>
-                        <Input 
-                            placeholder="Masukkan NIS (8-12 digit)" 
-                            className='w-full rounded-none'
-                            value={nis}
-                            onChange={handleNisChange}
-                            onBlur={handleNisBlur}
-                            color={getNisInputColor()}
-                            type="text"
-                            inputMode="numeric"
-                            disabled={isLoading}
-                        />
-                        {nisTouched && nis && (
-                            <div className="mt-1">
-                                {nisError ? (
-                                    <Alert color="danger" variant="soft" size="sm">
-                                        {nisError}
-                                    </Alert>
-                                ) : isNisValid ? (
-                                    <Alert color="success" variant="soft" size="sm">
-                                        NIS valid ✓
-                                    </Alert>
-                                ) : null}
-                            </div>
-                        )}
-                    </FormControl>
-
-                    {/* NAMA LENGKAP FIELD */}
-                    <FormControl>
-                        <FormLabel>
-                            Nama Lengkap {namaLengkap && (
-                                <span className={isNamaValid ? 'text-green-600' : 'text-red-600'}>
-                                    {isNamaValid ? '✓' : '✗'}
-                                </span>
-                            )}
-                        </FormLabel>
-                        <Input 
-                            placeholder="Masukkan Nama Lengkap" 
-                            className='w-full rounded-none'
-                            value={namaLengkap}
-                            onChange={handleNamaChange}
-                            onBlur={handleNamaBlur}
-                            color={getNamaInputColor()}
-                            type="text"
-                            autoComplete="name"
-                            disabled={isLoading}
-                        />
-                        {namaTouched && namaLengkap && (
-                            <div className="mt-1">
-                                {namaError ? (
-                                    <Alert color="danger" variant="soft" size="sm">
-                                        {namaError}
-                                    </Alert>
-                                ) : isNamaValid ? (
-                                    <Alert color="success" variant="soft" size="sm">
-                                        Nama valid ✓
-                                    </Alert>
-                                ) : null}
-                            </div>
-                        )}
-                    </FormControl>
-
-                    {/* KELAS FIELD */}
-                    <FormControl>
-                        <FormLabel>
-                            Kelas
-                            <span className="text-green-600 ml-2">✓</span>
-                        </FormLabel>
-                        <Select 
-                            placeholder="Pilih Kelas"
-                            className='w-full rounded-none'
-                            value={kelasId}
-                            onChange={(_, newValue) => setKelasId(newValue as number)}
-                            color="success"
-                            disabled={isLoading}
-                        >
-                            {kelasOptions.map((kelas) => (
-                                <Option key={kelas.value} value={kelas.value}>
-                                    {kelas.label}
-                                </Option>
-                            ))}
-                        </Select>
-                    </FormControl>
-
-                    {/* EMAIL FIELD */}
-                    <FormControl>
-                        <FormLabel>
-                            Email {email && (
-                                <span className={isEmailValid ? 'text-green-600' : 'text-red-600'}>
-                                    {isEmailValid ? '✓' : '✗'}
-                                </span>
-                            )}
-                        </FormLabel>
-                        <Input 
-                            placeholder="Enter Your Email" 
-                            className='w-full rounded-none'
-                            value={email}
-                            onChange={handleEmailChange}
-                            onBlur={handleEmailBlur}
-                            color={getEmailInputColor()}
-                            type="email"
-                            autoComplete="email"
-                            disabled={isLoading}
-                        />
-                        {emailTouched && email && (
-                            <div className="mt-1">
-                                {emailError ? (
-                                    <Alert color="danger" variant="soft" size="sm">
-                                        {emailError}
-                                    </Alert>
-                                ) : isEmailValid ? (
-                                    <Alert color="success" variant="soft" size="sm">
-                                        Email valid ✓
-                                    </Alert>
-                                ) : null}
-                            </div>
-                        )}
-                    </FormControl>
-
-                    {/* PASSWORD FIELD */}
-                    <FormControl>
-                        <FormLabel>
-                            Password {password && (
-                                <span className={isPasswordValid ? 'text-green-600' : 'text-red-600'}>
-                                    {isPasswordValid ? '✓' : '✗'}
-                                </span>
-                            )}
-                            {passwordStrength && (
-                                <span className={`ml-2 text-xs ${getPasswordStrengthColor()}`}>
-                                    ({passwordStrength})
-                                </span>
-                            )}
-                        </FormLabel>
-                        <Input 
-                            placeholder="Enter Your Password" 
-                            className='w-full rounded-none'
-                            type="password"
-                            value={password}
-                            onChange={handlePasswordChange}
-                            onBlur={handlePasswordBlur}
-                            color={getPasswordInputColor()}
-                            autoComplete="new-password"
-                            disabled={isLoading}
-                        />
-                        {passwordTouched && password && (
-                            <div className="mt-1">
-                                {passwordError ? (
-                                    <Alert color="danger" variant="soft" size="sm">
-                                        {passwordError}
-                                    </Alert>
-                                ) : isPasswordValid ? (
-                                    <Alert color="success" variant="soft" size="sm">
-                                        Password kuat ✓
-                                    </Alert>
-                                ) : null}
-                            </div>
-                        )}
-                    </FormControl>
-
-                    {/* PHONE FIELD */}
-                    <FormControl>
-                        <FormLabel>
-                            Nomor Telepon {noTelepon && (
-                                <span className={isPhoneValid ? 'text-green-600' : 'text-red-600'}>
-                                    {isPhoneValid ? '✓' : '✗'}
-                                </span>
-                            )}
-                        </FormLabel>
-                        <Input 
-                            placeholder="08xxxxxxxxxx atau +62xxxxxxxxx" 
-                            className='w-full rounded-none'
-                            value={noTelepon}
-                            onChange={handlePhoneChange}
-                            onBlur={handlePhoneBlur}
-                            color={getPhoneInputColor()}
-                            type="tel"
-                            disabled={isLoading}
-                        />
-                        {phoneTouched && noTelepon && (
-                            <div className="mt-1">
-                                {phoneError ? (
-                                    <Alert color="danger" variant="soft" size="sm">
-                                        {phoneError}
-                                    </Alert>
-                                ) : isPhoneValid ? (
-                                    <Alert color="success" variant="soft" size="sm">
-                                        Nomor telepon valid ✓
-                                    </Alert>
-                                ) : null}
-                            </div>
-                        )}
-                    </FormControl>
-
-                    {/* INFO FIELDS */}
-                    <div className="p-3 bg-blue-50 rounded-md">
-                        <Typography level="body-sm" className="text-blue-800 font-medium">
-                            Informasi Default:
-                        </Typography>
-                        <Typography level="body-xs" className="text-blue-600">
-                            • Poin Motivasi: {poinMotivasi} (akan diatur otomatis)
-                        </Typography>
-                        <Typography level="body-xs" className="text-blue-600">
-                            • Tingkat Disiplin: {tingkatDisiplin} (default)
-                        </Typography>
-                        <Typography level="body-xs" className="text-blue-600">
-                            • Foto Profil: Belum ada (dapat diupload nanti)
-                        </Typography>
-                    </div>
-                    
-                    <Button 
-                        type="submit"
-                        className='w-full' 
-                        sx={{ bgcolor: 'background.main' }}
-                        disabled={!isFormValid || isLoading}
-                        size="lg"
-                        loading={isLoading}
-                    >
-                        {isLoading ? 'Mendaftarkan...' : 'Daftar Sekarang'}
-                    </Button>
-
-                    {/* Login Link */}
-                    <div className="text-center">
-                        <Typography level="body-sm" className="text-gray-600">
-                            Sudah punya akun?{' '}
-                            <button
-                                type="button"
-                                onClick={() => navigate('/login')}
-                                className="text-blue-600 hover:text-blue-800 underline"
-                                disabled={isLoading}
-                            >
-                                Login di sini
-                            </button>
-                        </Typography>
-                    </div>
-                </form>
-            </div>       
-        </div>
-    )
-}
-
-export default Register
+import { 
+    Box, 
+    Typography, 
+    Button, 
+    FormControl, 
+    FormLabel,
+    Input,
+    Alert, 
+    CircularProgress,
+    Card,
+    CardContent,
+    Stack,
+    Select,
+    Option,
+    FormHelperText
+  } from '@mui/joy';
+  import { useState, useEffect } from 'react';
+  import { useNavigate } from 'react-router-dom';
+  
+  // Interface untuk response API
+  interface RegisterResponse {
+      message: string;
+      user: {
+          siswa_id: number;
+          nis: string;
+          nama_lengkap: string;
+          kelas_id: number;
+          email: string;
+      };
+  }
+  
+  interface ValidationError {
+      field: string;
+      message: string;
+  }
+  
+  interface ErrorResponse {
+      error: string;
+      message: string;
+      errors?: ValidationError[];
+  }
+  
+  function Register() {
+      const navigate = useNavigate();
+      
+      const [email, setEmail] = useState('')
+      const [password, setPassword] = useState('')
+      const [confirmPassword, setConfirmPassword] = useState('')
+      const [noTelepon, setNoTelepon] = useState('')
+      
+      // Field untuk siswa
+      const [nis, setNis] = useState('')
+      const [namaLengkap, setNamaLengkap] = useState('')
+      const [kelasId, setKelasId] = useState<number>(1)
+      
+      // State untuk loading dan error
+      const [isLoading, setIsLoading] = useState(false)
+      const [submitError, setSubmitError] = useState('')
+      const [submitSuccess, setSubmitSuccess] = useState('')
+      
+      // State untuk validasi
+      const [emailError, setEmailError] = useState('')
+      const [passwordError, setPasswordError] = useState('')
+      const [confirmPasswordError, setConfirmPasswordError] = useState('')
+      const [phoneError, setPhoneError] = useState('')
+      const [nisError, setNisError] = useState('')
+      const [namaError, setNamaError] = useState('')
+  
+      // Opsi kelas
+      const kelasOptions = [
+          { value: 1, label: 'Kelas X-A' },
+          { value: 2, label: 'Kelas X-B' },
+          { value: 3, label: 'Kelas XI-A' },
+          { value: 4, label: 'Kelas XI-B' },
+          { value: 5, label: 'Kelas XII-A' },
+          { value: 6, label: 'Kelas XII-B' }
+      ]
+  
+      // Fungsi validasi
+      const validateEmail = (email: string) => {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+          if (!email) {
+              setEmailError('Email wajib diisi')
+              return false
+          }
+          if (!emailRegex.test(email)) {
+              setEmailError('Format email tidak valid')
+              return false
+          }
+          setEmailError('')
+          return true
+      }
+  
+      const validatePassword = (password: string) => {
+          if (!password) {
+              setPasswordError('Password wajib diisi')
+              return false
+          }
+          if (password.length < 6) {
+              setPasswordError('Password minimal 6 karakter')
+              return false
+          }
+          setPasswordError('')
+          return true
+      }
+  
+      const validateConfirmPassword = (confirmPassword: string) => {
+          if (!confirmPassword) {
+              setConfirmPasswordError('Konfirmasi password wajib diisi')
+              return false
+          }
+          if (password !== confirmPassword) {
+              setConfirmPasswordError('Password tidak cocok')
+              return false
+          }
+          setConfirmPasswordError('')
+          return true
+      }
+  
+      const validatePhone = (phone: string) => {
+          const phoneRegex = /^(\+62|62|0)[0-9]{9,12}$/
+          if (!phone) {
+              setPhoneError('Nomor telepon wajib diisi')
+              return false
+          }
+          if (!phoneRegex.test(phone)) {
+              setPhoneError('Format nomor telepon tidak valid (contoh: 08123456789)')
+              return false
+          }
+          setPhoneError('')
+          return true
+      }
+  
+      const validateNis = (nis: string) => {
+          if (!nis) {
+              setNisError('NIS wajib diisi')
+              return false
+          }
+          if (nis.length < 8 || nis.length > 12) {
+              setNisError('NIS harus 8-12 digit')
+              return false
+          }
+          setNisError('')
+          return true
+      }
+  
+      const validateNama = (nama: string) => {
+          if (!nama) {
+              setNamaError('Nama lengkap wajib diisi')
+              return false
+          }
+          if (nama.length < 3) {
+              setNamaError('Nama minimal 3 karakter')
+              return false
+          }
+          setNamaError('')
+          return true
+      }
+  
+      // Real-time validation
+      useEffect(() => {
+          if (email) validateEmail(email)
+      }, [email])
+  
+      useEffect(() => {
+          if (password) validatePassword(password)
+      }, [password])
+  
+      useEffect(() => {
+          if (confirmPassword) validateConfirmPassword(confirmPassword)
+      }, [confirmPassword, password])
+  
+      useEffect(() => {
+          if (noTelepon) validatePhone(noTelepon)
+      }, [noTelepon])
+  
+      useEffect(() => {
+          if (nis) validateNis(nis)
+      }, [nis])
+  
+      useEffect(() => {
+          if (namaLengkap) validateNama(namaLengkap)
+      }, [namaLengkap])
+  
+      // Fungsi submit
+      const handleSubmit = async (e: React.FormEvent) => {
+          e.preventDefault()
+          
+          setSubmitError('')
+          setSubmitSuccess('')
+          
+          // Validasi semua field
+          const isEmailValid = validateEmail(email)
+          const isPasswordValid = validatePassword(password)
+          const isConfirmPasswordValid = validateConfirmPassword(confirmPassword)
+          const isPhoneValid = validatePhone(noTelepon)
+          const isNisValid = validateNis(nis)
+          const isNamaValid = validateNama(namaLengkap)
+          
+          if (!isEmailValid || !isPasswordValid || !isConfirmPasswordValid || 
+              !isPhoneValid || !isNisValid || !isNamaValid) {
+              setSubmitError('Mohon perbaiki semua field yang tidak valid')
+              return
+          }
+          
+          setIsLoading(true)
+          
+          try {
+              const registrationData = {
+                  nis: nis,
+                  nama_lengkap: namaLengkap,
+                  kelas_id: kelasId,
+                  email: email,
+                  password: password,
+                  no_telepon: noTelepon,
+                  poin_motivasi: 0,
+                  tingkat_disiplin: 'Baik',
+                  foto_profil: null
+              }
+              
+              const response = await fetch('http://localhost:8080/api/v1/register', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(registrationData), 
+              })
+              
+              const data: RegisterResponse | ErrorResponse = await response.json()
+              
+              if (response.ok) {
+                  const successData = data as RegisterResponse
+                  setSubmitSuccess(`Registrasi berhasil! Selamat datang ${successData.user.nama_lengkap}`)
+                  
+                  // Reset form
+                  setEmail('')
+                  setPassword('')
+                  setConfirmPassword('')
+                  setNoTelepon('')
+                  setNis('')
+                  setNamaLengkap('')
+                  setKelasId(1)
+                  
+                  // Redirect ke login
+                  setTimeout(() => {
+                      navigate('/login')
+                  }, 2000)
+                  
+              } else {
+                  const errorData = data as ErrorResponse
+                  setSubmitError(errorData.message || 'Gagal mendaftarkan akun')
+              }
+              
+          } catch (error) {
+              console.error('Registration error:', error)
+              setSubmitError('Terjadi kesalahan koneksi. Pastikan server backend berjalan.')
+          } finally {
+              setIsLoading(false)
+          }
+      }
+  
+      return (
+          <Box 
+              sx={{
+                  minHeight: '100vh',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  padding: 2
+              }}
+          >
+              <Card 
+                  sx={{ 
+                      width: '100%', 
+                      maxWidth: 500,
+                      boxShadow: 'lg'
+                  }}
+              >
+                  <CardContent>
+                      <Stack spacing={3} alignItems="center">
+                          {/* Logo/Title */}
+                          <Typography 
+                              level="h1" 
+                              sx={{ 
+                                  fontSize: { xs: '1.8rem', sm: '2.2rem' },
+                                  fontWeight: 'bold',
+                                  color: 'primary.500',
+                                  textAlign: 'center',
+                                  letterSpacing: '0.1em'
+                              }}
+                          >
+                              DAFTAR PASTI
+                          </Typography>
+                          
+                          {/* Avatar/Logo Circle */}
+                          <Box
+                              sx={{
+                                  width: { xs: 50, sm: 60 },
+                                  height: { xs: 50, sm: 60 },
+                                  borderRadius: '50%',
+                                  backgroundColor: 'primary.500',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  mb: 1
+                              }}
+                          >
+                              <Typography 
+                                  sx={{ 
+                                      color: 'white', 
+                                      fontSize: { xs: '1.2rem', sm: '1.5rem' },
+                                      fontWeight: 'bold' 
+                                  }}
+                              >
+                                  P
+                              </Typography>
+                          </Box>
+  
+                          {/* Register Form */}
+                          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+                              <Stack spacing={2}>
+                                  {/* Error Alert */}
+                                  {submitError && (
+                                      <Alert color="danger" variant="soft">
+                                          <Typography level="body-sm">{submitError}</Typography>
+                                      </Alert>
+                                  )}
+                                  
+                                  {/* Success Alert */}
+                                  {submitSuccess && (
+                                      <Alert color="success" variant="soft">
+                                          <Typography level="body-sm">{submitSuccess}</Typography>
+                                      </Alert>
+                                  )}
+  
+                                  {/* NIS Input */}
+                                  <FormControl error={!!nisError}>
+                                      <FormLabel>NIS</FormLabel>
+                                      <Input 
+                                          type="text"
+                                          placeholder="Masukkan NIS (8-12 digit)" 
+                                          value={nis}
+                                          onChange={(e) => setNis(e.target.value)}
+                                          disabled={isLoading}
+                                          color={nisError ? 'danger' : nis ? 'success' : 'neutral'}
+                                      />
+                                      {nisError && <FormHelperText>{nisError}</FormHelperText>}
+                                  </FormControl>
+  
+                                  {/* Nama Lengkap Input */}
+                                  <FormControl error={!!namaError}>
+                                      <FormLabel>Nama Lengkap</FormLabel>
+                                      <Input 
+                                          type="text"
+                                          placeholder="Masukkan nama lengkap" 
+                                          value={namaLengkap}
+                                          onChange={(e) => setNamaLengkap(e.target.value)}
+                                          disabled={isLoading}
+                                          color={namaError ? 'danger' : namaLengkap ? 'success' : 'neutral'}
+                                      />
+                                      {namaError && <FormHelperText>{namaError}</FormHelperText>}
+                                  </FormControl>
+  
+                                  {/* Kelas Select */}
+                                  <FormControl>
+                                      <FormLabel>Kelas</FormLabel>
+                                      <Select 
+                                          placeholder="Pilih Kelas"
+                                          value={kelasId}
+                                          onChange={(_, newValue) => setKelasId(newValue as number)}
+                                          disabled={isLoading}
+                                      >
+                                          {kelasOptions.map((kelas) => (
+                                              <Option key={kelas.value} value={kelas.value}>
+                                                  {kelas.label}
+                                              </Option>
+                                          ))}
+                                      </Select>
+                                  </FormControl>
+  
+                                  {/* Email Input */}
+                                  <FormControl error={!!emailError}>
+                                      <FormLabel>Email</FormLabel>
+                                      <Input 
+                                          type="email"
+                                          placeholder="Masukkan email" 
+                                          value={email}
+                                          onChange={(e) => setEmail(e.target.value)}
+                                          disabled={isLoading}
+                                          color={emailError ? 'danger' : email ? 'success' : 'neutral'}
+                                      />
+                                      {emailError && <FormHelperText>{emailError}</FormHelperText>}
+                                  </FormControl>
+  
+                                  {/* No Telepon Input */}
+                                  <FormControl error={!!phoneError}>
+                                      <FormLabel>Nomor Telepon</FormLabel>
+                                      <Input 
+                                          type="tel"
+                                          placeholder="08123456789" 
+                                          value={noTelepon}
+                                          onChange={(e) => setNoTelepon(e.target.value)}
+                                          disabled={isLoading}
+                                          color={phoneError ? 'danger' : noTelepon ? 'success' : 'neutral'}
+                                      />
+                                      {phoneError && <FormHelperText>{phoneError}</FormHelperText>}
+                                  </FormControl>
+  
+                                  {/* Password Input */}
+                                  <FormControl error={!!passwordError}>
+                                      <FormLabel>Password</FormLabel>
+                                      <Input
+                                          type="password"
+                                          placeholder="Masukkan password" 
+                                          value={password}
+                                          onChange={(e) => setPassword(e.target.value)}
+                                          disabled={isLoading}
+                                          color={passwordError ? 'danger' : password ? 'success' : 'neutral'}
+                                      />
+                                      {passwordError && <FormHelperText>{passwordError}</FormHelperText>}
+                                  </FormControl>
+  
+                                  {/* Confirm Password Input */}
+                                  <FormControl error={!!confirmPasswordError}>
+                                      <FormLabel>Konfirmasi Password</FormLabel>
+                                      <Input
+                                          type="password"
+                                          placeholder="Ulangi password" 
+                                          value={confirmPassword}
+                                          onChange={(e) => setConfirmPassword(e.target.value)}
+                                          disabled={isLoading}
+                                          color={confirmPasswordError ? 'danger' : confirmPassword ? 'success' : 'neutral'}
+                                      />
+                                      {confirmPasswordError && <FormHelperText>{confirmPasswordError}</FormHelperText>}
+                                  </FormControl>
+  
+                                  {/* Register Button */}
+                                  <Button 
+                                      type="submit"
+                                      size="lg"
+                                      disabled={isLoading}
+                                      startDecorator={isLoading ? <CircularProgress size="sm" /> : null}
+                                      sx={{ mt: 2 }}
+                                  >
+                                      {isLoading ? 'Mendaftar...' : 'Daftar'}
+                                  </Button>
+                              </Stack>
+                          </Box>
+  
+                          {/* Navigation Links */}
+                          <Stack spacing={1} alignItems="center" sx={{ mt: 2 }}>
+                              <Typography level="body-sm" color="neutral">
+                                  Sudah punya akun?{' '}
+                                  <Typography 
+                                      component="button"
+                                      level="body-sm" 
+                                      sx={{ 
+                                          color: 'primary.500', 
+                                          textDecoration: 'none',
+                                          border: 'none',
+                                          background: 'none',
+                                          cursor: 'pointer',
+                                          '&:hover': { textDecoration: 'underline' }
+                                      }}
+                                      onClick={() => navigate('/login')}
+                                  >
+                                      Masuk disini
+                                  </Typography>
+                              </Typography>
+                          </Stack>
+                      </Stack>
+                  </CardContent>
+              </Card>
+          </Box>
+      )
+  }
+  
+  export default Register

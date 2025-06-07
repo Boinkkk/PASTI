@@ -1,20 +1,21 @@
 package config
 
 import (
-	"database/sql"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-var DB *sql.DB
+var DB *gorm.DB
 
 func ConnectDB() {
-	db, err := sql.Open("mysql", "root:ivan@/pasti")
+	db, err := gorm.Open(mysql.Open("root:ivan@tcp(127.0.0.1:3306)/rplpasti?parseTime=true"), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		panic("Failed TO connect database")
 	}
-	log.Println("Database Connected")
-	
+
 	DB = db
+
+	log.Println("Database Connected")
 }
