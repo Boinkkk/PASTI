@@ -1,6 +1,7 @@
 package config
 
 import (
+	"Pasti/models"
 	"log"
 
 	"gorm.io/driver/mysql"
@@ -16,6 +17,8 @@ func ConnectDB() {
 	}
 
 	DB = db
+
+	db.AutoMigrate(&models.Siswa{})
 
 	log.Println("Database Connected")
 }
