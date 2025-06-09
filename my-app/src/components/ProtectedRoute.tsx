@@ -1,52 +1,25 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './Middleware';
-import { CircularProgress, Box } from '@mui/joy';
+import type { JSX } from '@emotion/react/jsx-runtime'
+import { Navigate } from 'react-router-dom'
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requireAuth?: boolean;
+  requireAuth?: boolean
+  children: JSX.Element
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requireAuth = true 
-}) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const location = useLocation();
+const ProtectedRoute = ({ requireAuth = true, children }: ProtectedRouteProps) => {
+  const token = localStorage.getItem('token')
 
-  // Tampilkan loading saat masih mengecek autentikasi
-  if (isLoading) {
-    return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        minHeight="100vh"
-      >
-        <CircularProgress size="lg" />
-      </Box>
-    );
+  if (requireAuth && !token) {
+    // Butuh login, tapi belum login → redirect ke /login
+    return <Navigate to="/login" replace />
   }
 
-  // Jika route memerlukan autentikasi tetapi user belum login
-  if (requireAuth && !isAuthenticated) {
-    // Simpan halaman yang ingin diakses untuk redirect setelah login
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!requireAuth && token) {
+    // Tidak boleh login (misal halaman login/register), tapi sudah login → redirect ke /dashboard
+    return <Navigate to="/dashboard" replace />
   }
 
-  // Jika user sudah login tetapi mengakses halaman login/register
-  if (!requireAuth && isAuthenticated) {
-    // Redirect berdasarkan role user
-    if (user?.guru_id || user?.nip) {
-      // User adalah guru
-      return <Navigate to="/guru/dashboard" replace />;
-    } else {
-      // User adalah siswa
-      return <Navigate to="/dashboard" replace />;
-    }
-  }
+  return children
+}
 
-  return <>{children}</>;
-};
-
-export default ProtectedRoute;
+export default ProtectedRoute

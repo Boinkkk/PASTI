@@ -12,7 +12,8 @@ import {
 import { 
   Dashboard as DashboardIcon,
   EventNote as AbsensiIcon,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
 
 interface SidebarItem {
@@ -45,10 +46,14 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
   const handleNavigation = (path: string) => {
     navigate(path);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    navigate('/login')
+  }
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -176,9 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
             );
           })}
         </List>
-      </Box>
-
-      {/* Footer/User Info (Optional) */}
+      </Box>      {/* Footer/User Info (Optional) */}
       <Box
         sx={{
           p: 2,
@@ -187,6 +190,54 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = true, onToggle }) => {
           mt: 'auto'
         }}
       >
+        {/* Logout Button */}
+        <ListItemButton
+          onClick={handleLogout}
+          sx={{
+            py: 1.5,
+            px: 2,
+            borderRadius: 'sm',
+            backgroundColor: 'transparent',
+            color: 'danger.600',
+            fontWeight: 500,
+            border: '1px solid transparent',
+            '&:hover': {
+              backgroundColor: 'danger.50',
+              borderColor: 'danger.200',
+            },
+            transition: 'all 0.2s ease',
+            justifyContent: isOpen ? 'flex-start' : 'center',
+            minHeight: 48,
+            mb: 1
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 20,
+              minWidth: 24,
+              justifyContent: 'center'
+            }}
+          >
+            <LogoutIcon />
+          </Box>
+          
+          {isOpen && (
+            <ListItemContent sx={{ ml: 2 }}>
+              <Typography 
+                level="body-md"
+                sx={{ 
+                  fontWeight: 500,
+                  color: 'inherit'
+                }}
+              >
+                Logout
+              </Typography>
+            </ListItemContent>
+          )}
+        </ListItemButton>
+
         {isOpen && (
           <Typography 
             level="body-xs" 
