@@ -20,13 +20,13 @@ import GuruJadwal from './pages/GuruJadwal.tsx'
 import GuruSiswa from './pages/GuruSiswa.tsx'
 import GuruAbsensi from './pages/GuruAbsensi.tsx'
 import GuruQRGenerator from './pages/GuruQRGenerator.tsx'
-import { Test } from './pages/test.tsx'
+import KelasTest from './pages/Kelas_test.tsx'
 
 const router = createBrowserRouter([
   {
     path: '/', 
     element: (
-      <Test/>
+      <Login/>
     )
   },
   {
@@ -123,6 +123,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Kelas/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/absensi/kelas/test', 
+    element: (
+      <ProtectedRoute>
+        <KelasTest/>
       </ProtectedRoute>
     )
   },

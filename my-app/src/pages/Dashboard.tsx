@@ -16,7 +16,7 @@ function Dashboard() {
   useEffect(() => {
     const getProfile = async () => {
       const token = localStorage.getItem("token");
-      console.log("token",token)
+      console.log("token", token)
   
       // Kalau token tidak ada, langsung redirect ke login
       if (!token) {

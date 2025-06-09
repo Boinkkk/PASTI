@@ -27,6 +27,7 @@ interface CardAbsensiProps {
   semester: string;
   teacher: Teacher;
   absensiCount?: number;
+  loading?: boolean;
   onAbsensiClick?: () => void;
   onCalendarClick?: () => void;
   onDocumentClick?: () => void;
@@ -37,6 +38,7 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
   semester,
   teacher,
   absensiCount = 0,
+  loading = false,
   onAbsensiClick,
   onCalendarClick,
   onDocumentClick
@@ -57,8 +59,7 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
         position: 'relative'
       }}
     >
-      <CardContent sx={{ p: 0 }}>
-        {/* Course Title and Semester */}
+      <CardContent sx={{ p: 0 }}>        {/* Course Title and Semester */}
         <Box sx={{ mb: 2 }}>
           <Typography 
             level="title-lg" 
@@ -66,20 +67,22 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
               fontWeight: 'bold',
               color: 'primary.600',
               mb: 0.5,
-              fontSize: '1.1rem'
+              fontSize: '1.1rem',
+              lineHeight: 1.3
             }}
           >
-            {title}
+            {title || 'Mata Pelajaran'}
           </Typography>
           <Typography 
             level="body-sm" 
-            sx={{ color: 'text.secondary' }}
+            sx={{ 
+              color: 'text.secondary',
+              fontWeight: 500
+            }}
           >
-            {semester}
+            Kelas: {semester || 'Tidak tersedia'}
           </Typography>
-        </Box>
-
-        {/* Teacher Info */}
+        </Box>{/* Teacher Info */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
           <Avatar 
             sx={{ 
@@ -89,7 +92,7 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
               height: 40
             }}
           >
-            {teacher.name.split(' ')[0].charAt(0)}
+            {teacher.name ? teacher.name.split(' ')[0].charAt(0).toUpperCase() : '?'}
           </Avatar>
           <Box sx={{ flex: 1 }}>
             <Typography 
@@ -99,7 +102,7 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
                 fontSize: '0.95rem'
               }}
             >
-              {teacher.name}
+              {teacher.name || 'Nama tidak tersedia'}
             </Typography>
             <Typography 
               level="body-xs" 
@@ -108,7 +111,7 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
                 fontSize: '0.8rem'
               }}
             >
-              {teacher.nip}
+              NIP: {teacher.nip || 'Tidak tersedia'}
             </Typography>
           </Box>
         </Box>
@@ -118,12 +121,13 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
           display: 'flex', 
           justifyContent: 'space-between',
           alignItems: 'center' 
-        }}>
-          <Button 
+        }}>          <Button 
             variant="outlined" 
             color="primary"
             startDecorator={<AssignmentIcon sx={{ fontSize: 18 }} />}
             onClick={onAbsensiClick}
+            loading={loading}
+            disabled={loading}
             sx={{ 
               flex: 1, 
               mr: 1,
@@ -134,13 +138,18 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
             Absensi
           </Button>
           
-          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-            <IconButton 
+          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>            <IconButton 
               variant="outlined" 
               color="neutral"
               size="sm"
               onClick={onCalendarClick}
-              sx={{ p: 1 }}
+              disabled={loading}
+              sx={{ 
+                p: 1,
+                '&:hover': {
+                  bgcolor: 'neutral.100'
+                }
+              }}
             >
               <CalendarIcon sx={{ fontSize: 18 }} />
             </IconButton>
@@ -149,19 +158,26 @@ const CardAbsensi: React.FC<CardAbsensiProps> = ({
               color="neutral"
               size="sm"
               onClick={onDocumentClick}
-              sx={{ p: 1 }}
+              disabled={loading}
+              sx={{ 
+                p: 1,
+                '&:hover': {
+                  bgcolor: 'neutral.100'
+                }
+              }}
             >
               <DescriptionIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-            {absensiCount > 0 && (
+            </IconButton>{absensiCount > 0 && (
               <Chip 
                 color="danger" 
                 size="sm"
+                variant="solid"
                 sx={{ 
                   minWidth: 24, 
                   height: 24,
                   fontSize: '0.75rem',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  ml: 0.5
                 }}
               >
                 {absensiCount}

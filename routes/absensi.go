@@ -13,4 +13,5 @@ func AbsensiRoute(r *mux.Router) {
 	router.Use(middleware.Auth)
 
 	router.HandleFunc("/daftarPelajaran", controllers.GetDaftarPelajaranPerKelas).Methods("GET")
+	router.HandleFunc("/daftarPertemuan", controllers.GetDaftarPertemuanPerPelajaran).Methods("GET")
 }

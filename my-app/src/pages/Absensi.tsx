@@ -13,9 +13,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import CardAbsensi from '../components/CardAbsensi';
-import { getMataPelajaranByKelasID, getMataPelajaranBySiswaID } from '../services/api';
+import { fetchDaftarKelas } from '../services/api';
 import type { CourseData } from '../services/api';
-import { useAuth } from '../components/Middleware';
 
 // Remove the local interface since we're importing it from api.ts
 // interface CourseData {
@@ -32,27 +31,34 @@ import { useAuth } from '../components/Middleware';
 // }
 
 const Absensi: React.FC = () => {
+  const [daftarAbsensi, setDaftarAbsensi] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [coursesData, setCoursesData] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const {user} = useAuth()
 
   // Fetch data on component mount
   useEffect(() => {
     const fetchCoursesData = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
         
-        // For now, use a dummy siswa ID (1) - in real app, get from auth context
-        if (!user || !user.kelas_id) {
-            throw new Error("Kelas Belum terdaftar")
-        }
-        const kelas = user?.kelas_id;
-        const courses = await getMataPelajaranByKelasID(kelas);
-        setCoursesData(courses);
+        const dataAbsensi = await fetchDaftarKelas()
+        setDaftarAbsensi(dataAbsensi.data);
+
+        console.log("daftarAbsensi", dataAbsensi.data)
+        console.log("daftarAbsneis sudah set", daftarAbsensi)
+
+
       } catch (err) {
         console.error('Failed to fetch courses:', err);
         setError('Gagal memuat data mata pelajaran. Silakan coba lagi.');
@@ -163,28 +169,28 @@ const Absensi: React.FC = () => {
           <Alert color="danger" sx={{ mb: 3 }}>
             {error}
           </Alert>
-        )}
-
-        {/* Course Cards Grid */}
-        {!loading && !error && (
+        )}        {/* Course Cards Grid */}
+        {!loading && !error && daftarAbsensi.length > 0 && (
           <Box 
             sx={{ 
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
               gap: 3
             }}
-          >
-            {coursesData.map((course) => (
+          >   {daftarAbsensi.map((course) => (
               <CardAbsensi
-                key={course.id}
-                id={course.id}
-                title={course.title}
-                semester={course.semester}
-                teacher={course.teacher}
-                absensiCount={course.absensiCount}
-                onAbsensiClick={() => handleAbsensiClick(course.id)}
-                onCalendarClick={() => handleCalendarClick(course.id)}
-                onDocumentClick={() => handleDocumentClick(course.id)}
+                key={course.id_jadwal_pelajaran}
+                id={course.id_jadwal_pelajaran.toString()}
+                title={`${course.nama_mapel} (${course.kode_mapel})`}
+                semester={course.nama_kelas}
+                teacher={{
+                  name: course.nama_guru,
+                  nip: course.nip_guru || '',
+                }}
+                loading={loading}
+                onAbsensiClick={() => handleAbsensiClick(course.id_jadwal_pelajaran.toString())}
+                onCalendarClick={() => handleCalendarClick(course.id_jadwal_pelajaran.toString())}
+                onDocumentClick={() => handleDocumentClick(course.id_jadwal_pelajaran.toString())}
               />
             ))}
           </Box>
@@ -199,7 +205,7 @@ const Absensi: React.FC = () => {
               gap: 3
             }}
           >
-            {coursesData.map((course) => (
+            {daftarAbsensi.map((course) => (
               <CardAbsensi
                 key={course.id}
                 id={course.id}

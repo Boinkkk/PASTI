@@ -29,6 +29,47 @@ type DaftarAbsensi struct {
 	JadwalID          int    `json:"jadwal_id"`
 }
 
+type AbsensiPertemuan struct {
+	IDJadwalPelajaran int       `json:"id_jadwal_pelajaran"`
+	NamaMapel		 string    `json:"nama_mapel"`
+	NamaKelas		 string    `json:"nama_kelas"`
+	NamaGuru		 string    `json:"nama_guru"`
+	NIPGuru		  string    `json:"nip_guru"`
+	IDPertemuan      int       `json:"id_pertemuan"`
+	PertemuanKe      int       `json:"pertemuan_ke"`
+	TanggalPertemuan string    `json:"tanggal_pertemuan"`
+	MateriPertemuan  string    `json:"materi_pertemuan"`
+	TokenAbsen      string    `json:"token_absen"`
+	StatusKehadiran string    `json:"status_kehadiran"`
+	WaktuAbsen      time.Time `json:"waktu_absen"`
+	IDAbsensi	   int       `json:"id_absensi"`
+}
+
+type InfoMapel struct {
+	IDJadwalPelajaran uint   `json:"id_jadwal_pelajaran"`
+	NamaMapel         string `json:"nama_mapel"`
+	NamaKelas         string `json:"nama_kelas"`
+	NamaGuru          string `json:"nama_guru"`
+	NipGuru           string `json:"nip_guru"`
+}
+
+type PertemuanItem struct {
+	IDPertemuan      uint      `json:"id_pertemuan"`
+	PertemuanKe      int       `json:"pertemuan_ke"`
+	TanggalPertemuan time.Time `json:"tanggal_pertemuan"`
+	MateriPertemuan  string    `json:"materi_pertemuan"`
+	TokenAbsen       string    `json:"token_absen"`
+	StatusKehadiran  string    `json:"status_kehadiran"`
+	WaktuAbsen       *time.Time `json:"waktu_absen,omitempty"`
+	IDAbsensi        *uint     `json:"id_absensi,omitempty"`
+}
+
+type ResponsePertemuan struct {
+	Mapel     InfoMapel       `json:"mapel"`
+	Pertemuan []PertemuanItem `json:"pertemuan"`
+}
+
+
 
 
 // TableName method untuk menentukan nama tabel yang benar

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -11,7 +11,6 @@ import {
   Input,
   Breadcrumbs,
   Link,
-  Avatar,
   Chip,
   CircularProgress,
   Alert,
@@ -21,15 +20,12 @@ import {
   ArrowBackIos as ArrowBackIcon,
   Book as BookIcon,
   Quiz as QuizIcon,
-  Person as PersonIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Schedule as ScheduleIcon,
   LocalHospital as LocalHospitalIcon,
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
-import { useAuth } from '../components/Middleware';
-import { getCourseInfoByJadwalID, getDetailAbsensiByJadwalID } from '../services/api';
 import type { DetailAbsensiData, CourseInfo } from '../services/api';
 
 // Dummy data for when API fails
@@ -133,72 +129,38 @@ const DUMMY_ABSENSI_DATA: DetailAbsensiData[] = [
   }
 ];
 
-const Kelas: React.FC = () => {
-  const { mata_pelajaran } = useParams<{ mata_pelajaran: string }>();
+const KelasTest: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [courseInfo, setCourseInfo] = useState<CourseInfo | null>(null);
   const [absensiData, setAbsensiData] = useState<DetailAbsensiData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null); // Keep for UI consistency but don't set it
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  const itemsPerPage = 10;
+    const itemsPerPage = 10;
 
+  // Load dummy data immediately
   useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem('token');
-      if (!mata_pelajaran) {
-        setError('ID mata pelajaran tidak ditemukan');
-        setLoading(false);
-        return;
-      }
-
-      if (!token) {
-        navigate('/login');
-        return
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Parse the jadwal_id from the mata_pelajaran parameter
-        const jadwalId = parseInt(mata_pelajaran);
-        
-        if (isNaN(jadwalId)) {
-          throw new Error('ID mata pelajaran tidak valid');
-        }        
-        
-        const courseInfoData = await getCourseInfoByJadwalID(jadwalId);
-        const absensiInfoData = await getDetailAbsensiByJadwalID(jadwalId);
-        setAbsensiData(absensiInfoData);
-        setCourseInfo(courseInfoData);
-        console.log('Course Info:', courseInfoData);
-        console.log('Absensi Data:', absensiInfoData);
-
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat data');
-        
-        // Use dummy data when API fails
-        console.log('Using dummy data due to API failure');
+    const loadData = () => {
+      setLoading(true);
+      // Simulate loading delay
+      setTimeout(() => {
         setCourseInfo(DUMMY_COURSE_INFO);
         setAbsensiData(DUMMY_ABSENSI_DATA);
-      } finally {
         setLoading(false);
-      }
+      }, 500);
     };
 
-    fetchData();
-  }, [mata_pelajaran, user?.siswa_id]);
-  // Filter data based on search term (searching by meeting details)
-  const filteredData = absensiData.filter(item =>
-    item.materi_pertemuan?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.pertemuan_ke?.toString().includes(searchTerm.toLowerCase())
+    loadData();
+  }, []);
+
+  // Filter data based on search term
+  const filteredData = absensiData.filter((item) =>
+    item.materi_pertemuan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.tanggal_pertemuan.includes(searchTerm) ||
+    item.status_kehadiran?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Pagination
@@ -332,19 +294,13 @@ const Kelas: React.FC = () => {
                   <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 2 }}>
                     Kelas {courseInfo.nama_kelas}
                   </Typography>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Avatar size="sm">
-                      <PersonIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography level="body-sm" fontWeight="bold">
-                        {courseInfo.guru_pengampu}
-                      </Typography>
-                      <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
-                        NIP: {courseInfo.nip_guru}
-                      </Typography>
-                    </Box>
+                    <Box sx={{ mb: 2 }}>
+                    <Typography level="body-sm" fontWeight="bold">
+                      Pengampu: {courseInfo.guru_pengampu}
+                    </Typography>
+                    <Typography level="body-xs" sx={{ color: 'text.secondary' }}>
+                      NIP: {courseInfo.nip_guru}
+                    </Typography>
                   </Box>
 
                   {/* Statistics */}
@@ -431,8 +387,7 @@ const Kelas: React.FC = () => {
                       <Typography level="body-sm" fontWeight="bold">
                         Pertemuan {item.pertemuan_ke}
                       </Typography>
-                    </td>                    
-                    <td>
+                    </td>                    <td>
                       <Typography level="body-sm">
                         {item.tanggal_pertemuan ? 
                           new Date(item.tanggal_pertemuan).toLocaleDateString('id-ID', {
@@ -442,8 +397,7 @@ const Kelas: React.FC = () => {
                             day: 'numeric'
                           }) : '-'}
                       </Typography>
-                    </td>                    
-                    <td>
+                    </td>                    <td>
                       <Typography 
                         level="body-sm" 
                         sx={{ 
@@ -469,8 +423,7 @@ const Kelas: React.FC = () => {
                     </td>
                   </tr>
                 ))
-              ) : (    
-              <tr>
+              ) : (                <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '3rem' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <BookIcon sx={{ fontSize: 48, color: 'text.tertiary' }} />
@@ -535,4 +488,4 @@ const Kelas: React.FC = () => {
   );
 };
 
-export default Kelas;
+export default KelasTest;
