@@ -16,6 +16,21 @@ type Absensi struct {
 	Siswa     Siswa     `gorm:"foreignKey:IDSiswa;references:SiswaID" json:"siswa,omitempty"`
 }
 
+type DaftarAbsensi struct {
+	IDJadwalPelajaran int    `json:"id_jadwal_pelajaran"`
+	KelasID           int    `json:"kelas_id"`
+	NamaKelas         string `json:"nama_kelas"`
+	IDMapel           int    `json:"id_mapel"`
+	NamaMapel         string `json:"nama_mapel"`
+	KodeMapel         string `json:"kode_mapel"`
+	GuruID            int    `json:"guru_id"`
+	NamaGuru          string `json:"nama_guru"`
+	NIPGuru           string `json:"nip_guru"`
+	JadwalID          int    `json:"jadwal_id"`
+}
+
+
+
 // TableName method untuk menentukan nama tabel yang benar
 func (Absensi) TableName() string {
 	return "absensi"

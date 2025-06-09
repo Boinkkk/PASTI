@@ -85,15 +85,17 @@ DROP TABLE IF EXISTS `guru`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `guru` (
   `guru_id` int NOT NULL AUTO_INCREMENT,
-  `nip` varchar(20) NOT NULL,
-  `nama_lengkap` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password_hash` varchar(255) NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `nip` varchar(191) DEFAULT NULL,
+  `nama_lengkap` longtext,
+  `email` varchar(191) DEFAULT NULL,
+  `password_hash` longtext,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`guru_id`),
+  UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `nip_UNIQUE` (`nip`),
-  UNIQUE KEY `email_UNIQUE` (`email`)
+  UNIQUE KEY `nip` (`nip`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -103,7 +105,7 @@ CREATE TABLE `guru` (
 
 LOCK TABLES `guru` WRITE;
 /*!40000 ALTER TABLE `guru` DISABLE KEYS */;
-INSERT INTO `guru` (`guru_id`, `nip`, `nama_lengkap`, `email`, `password_hash`, `created_at`, `updated_at`) VALUES (1,'196501011990031001','Dr. Ahmad Syarif, S.Ag., M.Pd.I','ahmad.syarif@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:08','2025-06-01 13:39:33'),(2,'196803151991032002','Dra. Siti Fatimah, M.Pd','siti.fatimah@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:08','2025-06-01 13:39:33'),(3,'197205101995121001','Dr. Bambang Sutrisno, S.Pd., M.Pd','bambang.sutrisno@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:08','2025-06-01 13:39:33'),(4,'196812201992032003','Prof. Dr. Endang Sari, S.Si., M.Pd','endang.sari@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:08','2025-06-01 13:39:33'),(5,'198203151999031002','James Richardson, S.Pd., M.Hum','james.richardson@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:08','2025-06-01 13:39:33'),(6,'197409082000032001','Dra. Kartini Dewi, M.Sn','kartini.dewi@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:16','2025-06-01 13:39:33'),(7,'196911121994121001','Drs. Agus Salim, M.Pd','agus.salim@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:16','2025-06-01 13:39:33'),(8,'197801052003032002','Ir. Ratna Sari, M.T','ratna.sari@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:16','2025-06-01 13:39:33'),(9,'197506201998031001','Dr. Budi Santoso, S.Si., M.Si','budi.santoso@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:16','2025-06-01 13:39:33'),(10,'197812152001032003','Dr. Dewi Kusuma, S.Si., M.Si','dewi.kusuma@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:16','2025-06-01 13:39:33'),(11,'197003101995121002','Drs. Hendra Wijaya, M.Pd','hendra.wijaya@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:26','2025-06-01 13:39:33'),(12,'197707252002032001','Dr. Indira Sari, S.Pd., M.Hum','indira.sari@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:26','2025-06-01 13:39:33'),(13,'196805141993032002','Dra. Lestari Wati, M.Si','lestari.wati@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:26','2025-06-01 13:39:33'),(14,'197404101999031001','Dr. Muhammad Iqbal, S.E., M.Pd','muhammad.iqbal@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 10:57:26','2025-06-01 13:39:33'),(15,'TEST001','Ahmad Fajar, S.Pd.','ahmad.fajar@test.com','$2a$10$Lqwp8.xKj94Adw.GuurBCuYHUvSj7Fl3G6cBgzsdFOJ0FdBlo5.Aq','2025-06-01 13:45:56','2025-06-01 13:45:56'),(16,'TEST002','Maya Sari, M.Kom.','maya.sari@test.com','$2a$10$Lqwp8.xKj94Adw.GuurBCuYHUvSj7Fl3G6cBgzsdFOJ0FdBlo5.Aq','2025-06-01 13:45:56','2025-06-01 13:45:56');
+INSERT INTO `guru` (`guru_id`, `nip`, `nama_lengkap`, `email`, `password_hash`, `created_at`, `updated_at`) VALUES (1,'196501011990031001','Dr. Ahmad Syarif, S.Ag., M.Pd.I','ahmad.syarif@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:08.000','2025-06-01 20:39:33.000'),(2,'196803151991032002','Dra. Siti Fatimah, M.Pd','siti.fatimah@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:08.000','2025-06-01 20:39:33.000'),(3,'197205101995121001','Dr. Bambang Sutrisno, S.Pd., M.Pd','bambang.sutrisno@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:08.000','2025-06-01 20:39:33.000'),(4,'196812201992032003','Prof. Dr. Endang Sari, S.Si., M.Pd','endang.sari@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:08.000','2025-06-01 20:39:33.000'),(5,'198203151999031002','James Richardson, S.Pd., M.Hum','james.richardson@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:08.000','2025-06-01 20:39:33.000'),(6,'197409082000032001','Dra. Kartini Dewi, M.Sn','kartini.dewi@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:16.000','2025-06-01 20:39:33.000'),(7,'196911121994121001','Drs. Agus Salim, M.Pd','agus.salim@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:16.000','2025-06-01 20:39:33.000'),(8,'197801052003032002','Ir. Ratna Sari, M.T','ratna.sari@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:16.000','2025-06-01 20:39:33.000'),(9,'197506201998031001','Dr. Budi Santoso, S.Si., M.Si','budi.santoso@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:16.000','2025-06-01 20:39:33.000'),(10,'197812152001032003','Dr. Dewi Kusuma, S.Si., M.Si','dewi.kusuma@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:16.000','2025-06-01 20:39:33.000'),(11,'197003101995121002','Drs. Hendra Wijaya, M.Pd','hendra.wijaya@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:26.000','2025-06-01 20:39:33.000'),(12,'197707252002032001','Dr. Indira Sari, S.Pd., M.Hum','indira.sari@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:26.000','2025-06-01 20:39:33.000'),(13,'196805141993032002','Dra. Lestari Wati, M.Si','lestari.wati@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:26.000','2025-06-01 20:39:33.000'),(14,'197404101999031001','Dr. Muhammad Iqbal, S.E., M.Pd','muhammad.iqbal@sman1.sch.id','$2b$10$GMI2poyXKcSoAzXB23N4zuR0LeMQZ7BSMNqMLTo0vO8EJeAo5cRWG','2025-06-01 17:57:26.000','2025-06-01 20:39:33.000'),(15,'TEST001','Ahmad Fajar, S.Pd.','ahmad.fajar@test.com','$2a$10$Lqwp8.xKj94Adw.GuurBCuYHUvSj7Fl3G6cBgzsdFOJ0FdBlo5.Aq','2025-06-01 20:45:56.000','2025-06-01 20:45:56.000'),(16,'TEST002','Maya Sari, M.Kom.','maya.sari@test.com','$2a$10$Lqwp8.xKj94Adw.GuurBCuYHUvSj7Fl3G6cBgzsdFOJ0FdBlo5.Aq','2025-06-01 20:45:56.000','2025-06-01 20:45:56.000');
 /*!40000 ALTER TABLE `guru` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -196,7 +198,7 @@ CREATE TABLE `jurusan` (
 
 LOCK TABLES `jurusan` WRITE;
 /*!40000 ALTER TABLE `jurusan` DISABLE KEYS */;
-INSERT INTO `jurusan` (`id_jurusan`, `nama_jurusan`) VALUES (1,'IPA'),(2,'IPS'),(3,'IPA'),(4,'IPS');
+INSERT INTO `jurusan` (`id_jurusan`, `nama_jurusan`) VALUES (1,'IPA'),(2,'IPS');
 /*!40000 ALTER TABLE `jurusan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -209,7 +211,7 @@ DROP TABLE IF EXISTS `kelas`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `kelas` (
   `kelas_id` int NOT NULL AUTO_INCREMENT,
-  `nama_kelas` varchar(50) NOT NULL,
+  `nama_kelas` longtext,
   `wali_kelas_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -265,13 +267,14 @@ DROP TABLE IF EXISTS `matapelajaran`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `matapelajaran` (
   `mapel_id` int NOT NULL AUTO_INCREMENT,
-  `kode_mapel` varchar(10) NOT NULL,
-  `nama_mapel` varchar(100) NOT NULL,
-  `deskripsi` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `kode_mapel` varchar(191) DEFAULT NULL,
+  `nama_mapel` longtext,
+  `deskripsi` longtext,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`mapel_id`),
-  UNIQUE KEY `kode_mapel_UNIQUE` (`kode_mapel`)
+  UNIQUE KEY `kode_mapel_UNIQUE` (`kode_mapel`),
+  UNIQUE KEY `kode_mapel` (`kode_mapel`)
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -281,7 +284,7 @@ CREATE TABLE `matapelajaran` (
 
 LOCK TABLES `matapelajaran` WRITE;
 /*!40000 ALTER TABLE `matapelajaran` DISABLE KEYS */;
-INSERT INTO `matapelajaran` (`mapel_id`, `kode_mapel`, `nama_mapel`, `deskripsi`, `created_at`, `updated_at`) VALUES (1,'PAI','Pendidikan Agama Islam','Mata pelajaran agama Islam','2025-06-01 10:57:38','2025-06-01 10:57:38'),(2,'PKN','Pendidikan Pancasila','Mata pelajaran Pancasila dan Kewarganegaraan','2025-06-01 10:57:38','2025-06-01 10:57:38'),(3,'IND','Bahasa Indonesia','Mata pelajaran Bahasa Indonesia','2025-06-01 10:57:38','2025-06-01 10:57:38'),(4,'MAT','Matematika','Mata pelajaran Matematika','2025-06-01 10:57:38','2025-06-01 10:57:38'),(5,'ENG','Bahasa Inggris','Mata pelajaran Bahasa Inggris','2025-06-01 10:57:38','2025-06-01 10:57:38'),(6,'SBU','Seni Budaya','Mata pelajaran Seni Budaya','2025-06-01 10:57:38','2025-06-01 10:57:38'),(7,'PJO','Pendidikan Jasmani','Mata pelajaran Pendidikan Jasmani dan Olahraga','2025-06-01 10:57:38','2025-06-01 10:57:38'),(8,'PKA','Prakarya','Mata pelajaran Prakarya dan Kewirausahaan','2025-06-01 10:57:45','2025-06-01 10:57:45'),(9,'FIS','Fisika','Mata pelajaran Fisika','2025-06-01 10:57:45','2025-06-01 10:57:45'),(10,'KIM','Kimia','Mata pelajaran Kimia','2025-06-01 10:57:45','2025-06-01 10:57:45'),(11,'GEO','Geografi','Mata pelajaran Geografi','2025-06-01 10:57:45','2025-06-01 10:57:45'),(12,'SEJ','Sejarah','Mata pelajaran Sejarah','2025-06-01 10:57:45','2025-06-01 10:57:45'),(13,'SOS','Sosiologi','Mata pelajaran Sosiologi','2025-06-01 10:57:45','2025-06-01 10:57:45'),(14,'EKO','Ekonomi','Mata pelajaran Ekonomi','2025-06-01 10:57:45','2025-06-01 10:57:45');
+INSERT INTO `matapelajaran` (`mapel_id`, `kode_mapel`, `nama_mapel`, `deskripsi`, `created_at`, `updated_at`) VALUES (1,'PAI','Pendidikan Agama Islam','Mata pelajaran agama Islam','2025-06-01 17:57:38.000','2025-06-01 17:57:38.000'),(2,'PKN','Pendidikan Pancasila','Mata pelajaran Pancasila dan Kewarganegaraan','2025-06-01 17:57:38.000','2025-06-01 17:57:38.000'),(3,'IND','Bahasa Indonesia','Mata pelajaran Bahasa Indonesia','2025-06-01 17:57:38.000','2025-06-01 17:57:38.000'),(4,'MAT','Matematika','Mata pelajaran Matematika','2025-06-01 17:57:38.000','2025-06-01 17:57:38.000'),(5,'ENG','Bahasa Inggris','Mata pelajaran Bahasa Inggris','2025-06-01 17:57:38.000','2025-06-01 17:57:38.000'),(6,'SBU','Seni Budaya','Mata pelajaran Seni Budaya','2025-06-01 17:57:38.000','2025-06-01 17:57:38.000'),(7,'PJO','Pendidikan Jasmani','Mata pelajaran Pendidikan Jasmani dan Olahraga','2025-06-01 17:57:38.000','2025-06-01 17:57:38.000'),(8,'PKA','Prakarya','Mata pelajaran Prakarya dan Kewirausahaan','2025-06-01 17:57:45.000','2025-06-01 17:57:45.000'),(9,'FIS','Fisika','Mata pelajaran Fisika','2025-06-01 17:57:45.000','2025-06-01 17:57:45.000'),(10,'KIM','Kimia','Mata pelajaran Kimia','2025-06-01 17:57:45.000','2025-06-01 17:57:45.000'),(11,'GEO','Geografi','Mata pelajaran Geografi','2025-06-01 17:57:45.000','2025-06-01 17:57:45.000'),(12,'SEJ','Sejarah','Mata pelajaran Sejarah','2025-06-01 17:57:45.000','2025-06-01 17:57:45.000'),(13,'SOS','Sosiologi','Mata pelajaran Sosiologi','2025-06-01 17:57:45.000','2025-06-01 17:57:45.000'),(14,'EKO','Ekonomi','Mata pelajaran Ekonomi','2025-06-01 17:57:45.000','2025-06-01 17:57:45.000');
 /*!40000 ALTER TABLE `matapelajaran` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -403,12 +406,13 @@ CREATE TABLE `siswa` (
   `foto_profil` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `no_telepon` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`siswa_id`),
   UNIQUE KEY `nis_UNIQUE` (`nis`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `fk_Siswa_Kelas1_idx` (`kelas_id`),
   CONSTRAINT `fk_Siswa_Kelas1` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`kelas_id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -417,7 +421,7 @@ CREATE TABLE `siswa` (
 
 LOCK TABLES `siswa` WRITE;
 /*!40000 ALTER TABLE `siswa` DISABLE KEYS */;
-INSERT INTO `siswa` (`siswa_id`, `nis`, `nama_lengkap`, `kelas_id`, `email`, `password_hash`, `poin_motivasi`, `tingkat_disiplin`, `foto_profil`, `created_at`, `updated_at`) VALUES (1,'2025001','Ahmad Rizki Pratama',1,'ahmad.rizki@student.sch.id','hashed_password_123',85,'Baik',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11'),(2,'2025002','Siti Nur Aisyah',1,'siti.aisyah@student.sch.id','hashed_password_123',92,'Sangat Baik',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11'),(3,'2025003','Budi Santoso',1,'budi.santoso@student.sch.id','hashed_password_123',78,'Baik',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11'),(4,'2025004','Dewi Lestari',1,'dewi.lestari@student.sch.id','hashed_password_123',88,'Baik',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11'),(5,'2025005','Eko Prasetyo',1,'eko.prasetyo@student.sch.id','hashed_password_123',75,'Cukup',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11'),(6,'2025006','Fatimah Zahra',1,'fatimah.zahra@student.sch.id','hashed_password_123',90,'Sangat Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11'),(7,'2025007','Gilang Ramadhan',1,'gilang.ramadhan@student.sch.id','hashed_password_123',82,'Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11'),(8,'2025008','Hana Safitri',1,'hana.safitri@student.sch.id','hashed_password_123',87,'Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11'),(9,'2025009','Indra Kurniawan',1,'indra.kurniawan@student.sch.id','hashed_password_123',79,'Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11'),(10,'2025010','Jihan Putri',1,'jihan.putri@student.sch.id','hashed_password_123',94,'Sangat Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11'),(11,'2025031','Adinda Maharani',2,'adinda.maharani@student.sch.id','hashed_password_123',86,'Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11'),(12,'2025032','Bagas Firmansyah',2,'bagas.firmansyah@student.sch.id','hashed_password_123',81,'Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11'),(13,'2025033','Citra Dewi',2,'citra.dewi@student.sch.id','hashed_password_123',89,'Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11'),(14,'2025034','Dani Pratama',2,'dani.pratama@student.sch.id','hashed_password_123',77,'Cukup',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11'),(15,'2025035','Eka Sari',2,'eka.sari@student.sch.id','hashed_password_123',93,'Sangat Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11'),(16,'20250368','Ivan Roisus Salam',1,'ivanroisussalam1234@gmail.com','$2a$10$pAi35MjrFdXzALarfn.wtuCHt5t4cf.OL0bcLHeoR1XVkUpJQjV.2',0,'Baik',NULL,'2025-06-01 11:06:46','2025-06-01 11:06:46');
+INSERT INTO `siswa` (`siswa_id`, `nis`, `nama_lengkap`, `kelas_id`, `email`, `password_hash`, `poin_motivasi`, `tingkat_disiplin`, `foto_profil`, `created_at`, `updated_at`, `no_telepon`) VALUES (1,'2025001','Ahmad Rizki Pratama',1,'ahmad.rizki@student.sch.id','hashed_password_123',85,'Baik',NULL,'2025-06-01 10:57:54','2025-06-09 05:42:00','081230238972'),(2,'2025002','Siti Nur Aisyah',1,'siti.aisyah@student.sch.id','hashed_password_123',92,'Sangat Baik',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11',NULL),(3,'2025003','Budi Santoso',1,'budi.santoso@student.sch.id','hashed_password_123',78,'Baik',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11',NULL),(4,'2025004','Dewi Lestari',1,'dewi.lestari@student.sch.id','hashed_password_123',88,'Baik',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11',NULL),(5,'2025005','Eko Prasetyo',1,'eko.prasetyo@student.sch.id','hashed_password_123',75,'Cukup',NULL,'2025-06-01 10:57:54','2025-06-01 11:13:11',NULL),(6,'2025006','Fatimah Zahra',1,'fatimah.zahra@student.sch.id','hashed_password_123',90,'Sangat Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11',NULL),(7,'2025007','Gilang Ramadhan',1,'gilang.ramadhan@student.sch.id','hashed_password_123',82,'Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11',NULL),(8,'2025008','Hana Safitri',1,'hana.safitri@student.sch.id','hashed_password_123',87,'Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11',NULL),(9,'2025009','Indra Kurniawan',1,'indra.kurniawan@student.sch.id','hashed_password_123',79,'Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11',NULL),(10,'2025010','Jihan Putri',1,'jihan.putri@student.sch.id','hashed_password_123',94,'Sangat Baik',NULL,'2025-06-01 10:58:03','2025-06-01 11:13:11',NULL),(11,'2025031','Adinda Maharani',2,'adinda.maharani@student.sch.id','hashed_password_123',86,'Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11',NULL),(12,'2025032','Bagas Firmansyah',2,'bagas.firmansyah@student.sch.id','hashed_password_123',81,'Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11',NULL),(13,'2025033','Citra Dewi',2,'citra.dewi@student.sch.id','hashed_password_123',89,'Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11',NULL),(14,'2025034','Dani Pratama',2,'dani.pratama@student.sch.id','hashed_password_123',77,'Cukup',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11',NULL),(15,'2025035','Eka Sari',2,'eka.sari@student.sch.id','hashed_password_123',93,'Sangat Baik',NULL,'2025-06-01 10:58:11','2025-06-01 11:13:11',NULL),(16,'20250368','Ivan Roisus Salam',1,'ivanroisussalam1234@gmail.com','$2a$10$pAi35MjrFdXzALarfn.wtuCHt5t4cf.OL0bcLHeoR1XVkUpJQjV.2',0,'Baik',NULL,'2025-06-01 11:06:46','2025-06-09 05:42:00','081230238972'),(17,'9817271112','Ami Kemala Putri',1,'rahmawati4064@gmail.com','$2a$10$xtewcpWwYpJULPv1gWJRnOsFYyW6b4g1C9SveBYCHVab2g4APvl.q',0,'Baik','','2025-06-08 22:43:15','2025-06-08 22:43:15','08889281221'),(20,'981727111222','Ami Kemala Putri',1,'ivan1739@gmail.com','$2a$10$a5LtUzhQEjXuqxTA3CmtTec2toZw8QaWn9zU6tHHO59JoMweHRYCG',0,'Baik','','2025-06-08 22:43:41','2025-06-08 22:43:41','08889281221'),(23,'1872662','',1,'ivanroisussalam@gmail.com','$2a$10$kX6CIQohrnSOvpMAySfTweB6L6kFPLobVqdzY6VwMZ.WjF8JokZNy',0,'Baik','','2025-06-08 22:45:55','2025-06-08 22:45:55','081230238972'),(24,'99271831','Ami Kemala Putris',1,'ivan17329@gmail.com','$2a$10$uU6Nfh4Q94LAnXiPnzbPduQ7LbD9wZcErHqTSQamIFJ6vlAA3o99y',0,'Baik','','2025-06-08 22:46:55','2025-06-08 22:46:55','08889281211'),(25,'98271000','Kola Kola',2,'ihunsh@gmail.com','$2a$10$ejpgGAUxDdkqgMZj9//JceGjBGC.aJeevgCJ9TSDPa1kc09P3F2Ju',0,'Baik','','2025-06-08 22:54:31','2025-06-08 22:54:31','0819283221'),(26,'982710001','Kola Kola',2,'ihunsh2@gmail.com','$2a$10$x43xy.vhe3w9gKje203GZOi2sOrwNz9q8qOmGxb18QkONh6xzLkea',0,'Baik','','2025-06-08 22:54:49','2025-06-08 22:54:49','0819283221'),(27,'08172122','Cupidatat voluptatib',1,'vohyzihosi@mailinator.com','$2a$10$z4aAH9NEGgYWhNbY12IZneXm0J.MsNCViuDNCTTkHuaHgUx5/iAEy',0,'Baik','','2025-06-08 23:01:12','2025-06-08 23:01:12','0812392812');
 /*!40000 ALTER TABLE `siswa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -613,4 +617,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-01 22:20:38
+-- Dump completed on 2025-06-09 14:22:45

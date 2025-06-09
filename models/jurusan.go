@@ -5,7 +5,7 @@ type Jurusan struct {
 	IDJurusan   int    `gorm:"column:id_jurusan;primaryKey;autoIncrement" json:"id_jurusan"`
 	NamaJurusan string `gorm:"column:nama_jurusan;size:50;not null" json:"nama_jurusan"`
 
-	Kelas []Kelas `gorm:"foreignKey:IDJurusan" json:"kelas,omitempty"`
+	Kelas []Kelas `gorm:"-" json:"kelas,omitempty"`
 
 }
 

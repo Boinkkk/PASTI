@@ -10,11 +10,9 @@ type Guru struct {
     Email        string    `gorm:"column:email;size:100;unique;not null" json:"email"`
     PasswordHash string    `gorm:"column:password_hash;size:255;not null" json:"-"`
     CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at"`
-    UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
-
-    // Relasi has many - TANPA foreign key constraint di sini
-    JadwalPelajaran []JadwalPelajaran `gorm:"foreignKey:GuruID" json:"jadwal_pelajaran,omitempty"`
-    KelasWaliKelas  []Kelas           `gorm:"foreignKey:WaliKelasID" json:"kelas_wali,omitempty"`
+    UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`    // Relasi has many - TANPA foreign key constraint di sini
+    JadwalPelajaran []JadwalPelajaran `gorm:"-" json:"jadwal_pelajaran,omitempty"`
+    KelasWaliKelas  []Kelas           `gorm:"-" json:"kelas_wali,omitempty"`
 }
 
 // TableName method untuk menentukan nama tabel yang benar

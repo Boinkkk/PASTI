@@ -8,11 +8,11 @@ type Tugas struct {
     JadwalID             int       `gorm:"column:jadwal_id;not null" json:"jadwal_id"`
     JudulTugas           string    `gorm:"column:judul_tugas;size:255;not null" json:"judul_tugas"`
     DeskripsiTugas       string    `gorm:"column:deskripsi_tugas;type:text" json:"deskripsi_tugas"`
-    TanggalPenugasan     time.Time `gorm:"column:tanggal_penugasan;autoCreateTime" json:"tanggal_penugasan"`
+    FileTugasGuru        string    `gorm:"column:file_tugas_guru;size:255" json:"file_tugas_guru"`
+    TanggalDibuat        time.Time `gorm:"column:tanggal_dibuat;autoCreateTime" json:"tanggal_dibuat"`
     DeadlinePengumpulan  time.Time `gorm:"column:deadline_pengumpulan;not null" json:"deadline_pengumpulan"`
-    FileSoal             string    `gorm:"column:file_soal;size:255" json:"file_soal"`
     PoinMaksimal         int       `gorm:"column:poin_maksimal;default:100" json:"poin_maksimal"`
-    StatusTugas          string    `gorm:"column:status_tugas;type:enum('Draft','Aktif','Berakhir');default:'Draft'" json:"status_tugas"`
+    TipeTugas            string    `gorm:"column:tipe_tugas;type:enum('Individu','Kelompok');default:'Individu'" json:"tipe_tugas"`
     CreatedAt            time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at"`
     UpdatedAt            time.Time `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
 

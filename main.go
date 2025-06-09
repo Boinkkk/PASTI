@@ -18,6 +18,7 @@ func main() {
 	// Tambahkan routes
 	routes.AuthRoutes(router)
 	routes.SiswaRoutes(router)
+	routes.AbsensiRoute(router)
 
 	// Bungkus dengan CORS middleware
 	log.Println("Server Running On port 8080")

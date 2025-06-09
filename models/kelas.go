@@ -14,9 +14,8 @@ type Kelas struct {
     // Relasi - KELAS belongs to JURUSAN
     WaliKelas *Guru   `gorm:"foreignKey:WaliKelasID;references:GuruID" json:"wali_kelas,omitempty"`
     Jurusan   Jurusan `gorm:"foreignKey:IDJurusan;references:IDJurusan" json:"jurusan,omitempty"`
-    
-    // Relasi has many
-    Siswa []Siswa `gorm:"foreignKey:KelasID" json:"siswa,omitempty"`
+      // Relasi has many
+    Siswa []Siswa `gorm:"-" json:"siswa,omitempty"`
 }
 
 // TableName method untuk menentukan nama tabel yang benar
