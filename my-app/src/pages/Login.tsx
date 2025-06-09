@@ -50,7 +50,7 @@ function Login() {
       setSuccess(response.data.message)
       
       setTimeout(() => {
-        navigate('/test')
+        navigate('/dashboard')
       }, 1000)
 
     } catch (err) {

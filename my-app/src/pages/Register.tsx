@@ -14,6 +14,7 @@ import {
     Option,
     FormHelperText
   } from '@mui/joy';
+import axios, { AxiosError } from 'axios';
   import { useState, useEffect } from 'react';
   import { useNavigate } from 'react-router-dom';
   
@@ -206,55 +207,48 @@ import {
           setIsLoading(true)
           
           try {
-              const registrationData = {
-                  nis: nis,
-                  nama_lengkap: namaLengkap,
-                  kelas_id: kelasId,
-                  email: email,
-                  password: password,
-                  no_telepon: noTelepon,
-                  confirm_password: confirmPassword
-              }
-              
-              const response = await fetch('http://localhost:8080/api/auth/register', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(registrationData), 
-              })
-              
-              const data: RegisterResponse | ErrorResponse = await response.json()
-              
-              if (response.ok) {
-                  const successData = data as RegisterResponse
-                  setSubmitSuccess(`Registrasi berhasil! Selamat datang ${successData.user.nama_lengkap}`)
-                  
-                  // Reset form
-                  setEmail('')
-                  setPassword('')
-                  setConfirmPassword('')
-                  setNoTelepon('')
-                  setNis('')
-                  setNamaLengkap('')
-                  setKelasId(1)
-                  
-                  // Redirect ke login
-                  setTimeout(() => {
-                      navigate('/login')
-                  }, 2000)
-                  
-              } else {
-                  const errorData = data as ErrorResponse
-                  setSubmitError(errorData.message || 'Gagal mendaftarkan akun')
-              }
-              
-          } catch (error) {
-              console.error('Registration error:', error)
-              setSubmitError('Terjadi kesalahan koneksi. Pastikan server backend berjalan.')
-          } finally {
-              setIsLoading(false)
-          }
+            const registrationData = {
+                nis: nis,
+                nama_lengkap: namaLengkap,
+                kelas_id: kelasId,
+                email: email,
+                password: password,
+                no_telepon: noTelepon,
+                confirm_password: confirmPassword
+            };
+        
+            const response = await axios.post('http://localhost:8080/api/auth/register', registrationData);
+        
+            const data = response.data;
+        
+            if (data.status === 'succes') {
+                setSubmitSuccess(`Registrasi berhasil! ${data.message}`);
+        
+                // Reset form
+                setEmail('');
+                setPassword('');
+                setConfirmPassword('');
+                setNoTelepon('');
+                setNis('');
+                setNamaLengkap('');
+                setKelasId(1);
+        
+                // Redirect ke login
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
+            } else {
+                setSubmitError(data.message || 'Gagal mendaftar');
+            }
+        
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response) {
+                const apiError = error.response.data;
+                setSubmitError(apiError.message || 'Terjadi kesalahan saat mendaftar');
+            } else {
+                setSubmitError('Terjadi kesalahan koneksi. Pastikan server backend berjalan.');
+            }
+        }
       }
   
       return (
@@ -337,6 +331,8 @@ import {
                                       <FormLabel>NIS</FormLabel>
                                       <Input 
                                           type="text"
+                                          name="nis"
+                                          autoComplete="on"
                                           placeholder="Masukkan NIS (8-12 digit)" 
                                           value={nis}
                                           onChange={(e) => setNis(e.target.value)}
@@ -351,6 +347,8 @@ import {
                                       <FormLabel>Nama Lengkap</FormLabel>
                                       <Input 
                                           type="text"
+                                            name="nama_lengkap"
+                                            autoComplete="on"
                                           placeholder="Masukkan nama lengkap" 
                                           value={namaLengkap}
                                           onChange={(e) => setNamaLengkap(e.target.value)}
@@ -382,6 +380,7 @@ import {
                                       <FormLabel>Email</FormLabel>
                                       <Input 
                                           type="email"
+                                          name='email'
                                           placeholder="Masukkan email" 
                                           value={email}
                                           onChange={(e) => setEmail(e.target.value)}
@@ -396,6 +395,7 @@ import {
                                       <FormLabel>Nomor Telepon</FormLabel>
                                       <Input 
                                           type="tel"
+                                          name='no_telepon'
                                           placeholder="08123456789" 
                                           value={noTelepon}
                                           onChange={(e) => setNoTelepon(e.target.value)}
@@ -410,6 +410,7 @@ import {
                                       <FormLabel>Password</FormLabel>
                                       <Input
                                           type="password"
+                                          name='password'
                                           placeholder="Masukkan password" 
                                           value={password}
                                           onChange={(e) => setPassword(e.target.value)}
@@ -424,6 +425,7 @@ import {
                                       <FormLabel>Konfirmasi Password</FormLabel>
                                       <Input
                                           type="password"
+                                          name='confirm_password'
                                           placeholder="Ulangi password" 
                                           value={confirmPassword}
                                           onChange={(e) => setConfirmPassword(e.target.value)}
