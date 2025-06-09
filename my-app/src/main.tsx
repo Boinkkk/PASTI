@@ -13,6 +13,7 @@ import Kelas from './pages/Kelas.tsx'
 import { AuthProvider } from './components/Middleware.tsx'
 import ProtectedRoute from './components/ProtectedRoute.tsx'
 import LoginGuru from './pages/LoginGuru.tsx'
+import RegisterGuru from './pages/RegisterGuru.tsx'
 import GuruDashboard from './pages/GuruDashboard.tsx'
 import GuruJadwal from './pages/GuruJadwal.tsx'
 import GuruSiswa from './pages/GuruSiswa.tsx'
@@ -88,6 +89,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requireAuth={false}>
         <Register/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/register-guru', 
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <RegisterGuru/>
       </ProtectedRoute>
     )
   },

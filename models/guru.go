@@ -2,6 +2,21 @@ package models
 
 import "time"
 
+// LoginGuru model untuk request login guru
+type LoginGuru struct {
+    NIP      string `json:"nip" binding:"required"`
+    Password string `json:"password" binding:"required"`
+}
+
+// RegisterGuru model untuk request registrasi guru
+type RegisterGuru struct {
+    NIP             string `json:"nip" binding:"required"`
+    NamaLengkap     string `json:"nama_lengkap" binding:"required"`
+    Email           string `json:"email" binding:"required,email"`
+    Password        string `json:"password" binding:"required,min=6"`
+    ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=Password"`
+}
+
 // Guru model
 type Guru struct {
     GuruID       int       `gorm:"column:guru_id;primaryKey;autoIncrement" json:"guru_id"`

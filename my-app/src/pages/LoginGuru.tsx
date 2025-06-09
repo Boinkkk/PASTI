@@ -17,6 +17,7 @@ import {
   School as SchoolIcon
 } from '@mui/icons-material';
 import { useAuth } from '../components/Middleware';
+import { loginGuru } from '../services/api';
 
 const LoginGuru: React.FC = () => {
   const navigate = useNavigate();
@@ -35,35 +36,25 @@ const LoginGuru: React.FC = () => {
       [name]: value
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    try {      const response = await fetch('http://localhost:8080/api/v1/login-guru', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nip: formData.nip,
-          password: formData.password,
-        }),
+    try {
+      const result = await loginGuru({
+        nip: formData.nip,
+        password: formData.password,
       });
 
-      const result = await response.json();      if (response.ok) {
-        // Use AuthContext login method
-        login(result.token, result.user);
-        
-        // Redirect to guru dashboard
-        navigate('/guru/dashboard');
-      } else {
-        setError(result.message || 'Login gagal');
-      }
+      // Use AuthContext login method
+      login(result.data.token, result.data.user);
+      
+      // Redirect to guru dashboard
+      navigate('/guru/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      setError('Terjadi kesalahan saat login');
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat login');
     } finally {
       setLoading(false);
     }
@@ -156,9 +147,16 @@ const LoginGuru: React.FC = () => {
             >
               Login sebagai Siswa
             </Link>
-            
-            <Typography level="body-sm" sx={{ color: 'text.secondary', mt: 2 }}>
+              <Typography level="body-sm" sx={{ color: 'text.secondary', mt: 2 }}>
               Belum punya akun?{' '}
+              <Link
+                component="button"
+                onClick={() => navigate('/register-guru')}
+                sx={{ textDecoration: 'none' }}
+              >
+                Daftar Guru
+              </Link>
+              {' | '}
               <Link
                 component="button"
                 onClick={() => navigate('/register')}

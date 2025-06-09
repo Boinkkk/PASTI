@@ -14,11 +14,11 @@ func main() {
 
 	r := mux.NewRouter()
 	router := r.PathPrefix("/api").Subrouter()
-
 	// Tambahkan routes
 	routes.AuthRoutes(router)
 	routes.SiswaRoutes(router)
 	routes.AbsensiRoute(router)
+	routes.GuruRoutes(router)
 
 	// Bungkus dengan CORS middleware
 	log.Println("Server Running On port 8080")

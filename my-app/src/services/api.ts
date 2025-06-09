@@ -1,5 +1,3 @@
-// API service for handling backend calls
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 // Interface for backend response
 interface BackendCourseData {
@@ -228,3 +226,155 @@ export const fetchDaftarKelas = async () => {
 
   return response.data
 }
+
+// Guru related interfaces and functions
+export interface GuruProfile {
+  guru_id: number;
+  nip: string;
+  nama_lengkap: string;
+  email: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LoginGuruRequest {
+  nip: string;
+  password: string;
+}
+
+export interface LoginGuruResponse {
+  status: string;
+  message: string;
+  data: {
+    token: string;
+    user: GuruProfile;
+  };
+}
+
+// Interface for guru registration
+export interface RegisterGuruRequest {
+  nip: string;
+  nama_lengkap: string;
+  email: string;
+  password: string;
+  confirm_password: string;
+}
+
+export interface RegisterGuruResponse {
+  status: string;
+  message: string;
+  data?: any;
+}
+
+// Function to login guru
+export const loginGuru = async (credentials: LoginGuruRequest): Promise<LoginGuruResponse> => {
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login-guru', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Login guru gagal');
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error during guru login:', error);
+    throw error;
+  }
+};
+
+// Function to register guru
+export const registerGuru = async (guruData: RegisterGuruRequest): Promise<RegisterGuruResponse> => {
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/register-guru', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(guruData),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Registrasi guru gagal');
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error during guru registration:', error);
+    throw error;
+  }
+};
+
+// Function to get guru profile
+export const fetchGuruProfile = async (): Promise<GuruProfile> => {
+  const token = localStorage.getItem("token");
+  
+  if (!token) throw new Error("Invalid Token");
+
+  try {
+    const response = await fetch("http://localhost:8080/api/guru/profile", {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.status === "succes" || result.message.includes("berhasil")) {
+      return result.data;
+    } else {
+      throw new Error('API returned unsuccessful response');
+    }
+  } catch (error) {
+    console.error('Error fetching guru profile:', error);
+    throw error;
+  }
+};
+
+// Function to get all siswa (for guru)
+export const fetchAllSiswa = async () => {
+  const token = localStorage.getItem("token");
+  
+  if (!token) throw new Error("Invalid Token");
+
+  try {
+    const response = await fetch("http://localhost:8080/api/guru/siswa", {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.status === "succes" || result.message.includes("berhasil")) {
+      return result.data;
+    } else {
+      throw new Error('API returned unsuccessful response');
+    }
+  } catch (error) {
+    console.error('Error fetching all siswa:', error);
+    throw error;
+  }
+};
