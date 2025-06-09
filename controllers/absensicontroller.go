@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func GetDaftarPelajaranPerKelas(w http.ResponseWriter, r *http.Request) {
@@ -136,4 +138,72 @@ func GetDaftarPertemuanPerPelajaran(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helpers.Response(w, 200, "Daftar Pertemuan Per Pelajaran", response)
+}
+
+func AbsenPertemuan(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	tokenAbsen := vars["token"]
+
+	log.Println("Token Absen:", tokenAbsen)
+
+	if tokenAbsen == "" {
+		helpers.Response(w, 400, "Token Absen tidak invalid pada URL", nil)
+		return
+	}
+
+	siswaInfo := r.Context().Value("siswainfo")
+	if siswaInfo == nil {
+		helpers.Response(w, 401, "Unauthorized: no siswa info in context", nil)
+		return
+	}
+
+	siswa, ok := siswaInfo.(*helpers.MyCustomClaims)
+
+	if !ok {
+		helpers.Response(w, 401, "Unauthorized: invalid siswa info format", nil)
+		return
+	}
+
+	var pertemuan models.RequestAbsensi
+
+	if err := config.DB.Raw("SELECT * FROM pertemuan WHERE token_absen = ?", tokenAbsen).Scan(&pertemuan).Error; err != nil {
+		helpers.Response(w, 500, "Gagal mengambil data pertemuan", nil)
+		return
+	}
+
+	if pertemuan.ID == 0 {
+		helpers.Response(w, 404, "Pertemuan tidak ditemukan", nil)
+		return
+	}
+
+	var existingAbsensi models.Absensi
+	err := config.DB.Raw(`
+		SELECT * FROM absensi 
+		WHERE id_pertemuan = ? AND id_siswa = ?
+	`, pertemuan.ID, siswa.ID).Scan(&existingAbsensi).Error
+
+	if err != nil {
+		helpers.Response(w, 500, "Gagal mengecek kehadiran", nil)
+		return
+	}
+
+	if existingAbsensi.IDAbsensi != 0 {
+		helpers.Response(w, 400, "Anda sudah absen pada pertemuan ini", nil)
+		return
+	}
+
+	newAbsensi := models.Absensi{
+		IDPertemuan: pertemuan.ID,
+		IDSiswa: siswa.ID,
+		Status: "Hadir",
+		WaktuAbsen: time.Now(),
+		Keterangan: "Hadir",
+	}
+
+	if err := config.DB.Create(&newAbsensi).Error; err != nil {
+		helpers.Response(w, 500, "Gagal menyimpan absensi", nil)
+		return
+	}
+
+	helpers.Response(w, 200, "Absen berhasil", newAbsensi)
 }

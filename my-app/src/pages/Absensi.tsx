@@ -10,11 +10,12 @@ import {
 import { 
   Home as HomeIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import CardAbsensi from '../components/CardAbsensi';
 import { fetchDaftarKelas } from '../services/api';
 import type { CourseData } from '../services/api';
+import AbsensiToken from './AbsensiToken';
 
 // Remove the local interface since we're importing it from api.ts
 // interface CourseData {
@@ -31,12 +32,19 @@ import type { CourseData } from '../services/api';
 // }
 
 const Absensi: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   const [daftarAbsensi, setDaftarAbsensi] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [coursesData, setCoursesData] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // If there's a token parameter, render AbsensiToken component instead
+  if (token) {
+    return <AbsensiToken />;
+  }
 
   // Fetch data on component mount
   useEffect(() => {

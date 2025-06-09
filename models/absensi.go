@@ -69,6 +69,15 @@ type ResponsePertemuan struct {
 	Pertemuan []PertemuanItem `json:"pertemuan"`
 }
 
+type RequestAbsensi struct {
+    ID           int   `json:"id" gorm:"column:id_pertemuan"`
+    TokenAbsen   string `json:"token_absen"`
+    IDJadwal     int   `json:"id_jadwal"`
+    PertemuanKe  int    `json:"pertemuan_ke"`
+    Tanggal      time.Time `json:"tanggal"`
+    Materi       string `json:"materi"`
+}
+
 
 
 

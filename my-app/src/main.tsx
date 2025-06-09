@@ -1,4 +1,4 @@
-import React, { StrictMode } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import Login from './pages/Login.tsx'
@@ -10,10 +10,8 @@ import Register from './pages/Register.tsx'
 import Dashboard from './pages/Dashboard.tsx'
 import Absensi from './pages/Absensi.tsx'
 import Kelas from './pages/Kelas.tsx'
-import AbsensiToken from './pages/AbsensiToken.tsx'
 import { AuthProvider } from './components/Middleware.tsx'
 import ProtectedRoute from './components/ProtectedRoute.tsx'
-import Testing from './pages/Testing.tsx'
 import LoginGuru from './pages/LoginGuru.tsx'
 import GuruDashboard from './pages/GuruDashboard.tsx'
 import GuruJadwal from './pages/GuruJadwal.tsx'
@@ -109,15 +107,6 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     )
   },
-  
-  {
-    path: '/testing', 
-    element: (
-      <ProtectedRoute>
-        <Testing/>
-      </ProtectedRoute>
-    )
-  },
   {
     path: '/absensi/kelas/:mata_pelajaran', 
     element: (
@@ -131,14 +120,6 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <KelasTest/>
-      </ProtectedRoute>
-    )
-  },
-  {
-    path: '/absensi/token', 
-    element: (
-      <ProtectedRoute>
-        <AbsensiToken/>
       </ProtectedRoute>
     )
   },
