@@ -29,8 +29,8 @@ import {
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../components/Middleware';
-import { getCourseInfoByJadwalID, getDetailAbsensiByJadwalID } from '../services/api';
-import type { DetailAbsensiData, CourseInfo } from '../services/api';
+import { getCourseInfoByJadwalID, getDetailAbsensiByJadwalID } from '../services/api/courseApi';
+import type { DetailAbsensiData, CourseInfo } from '../services/types';
 
 // Dummy data for when API fails
 const DUMMY_COURSE_INFO: CourseInfo = {

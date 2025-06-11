@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/joy';
 import Sidebar from '../components/Sidebar';
-import { fetchSiswaProfile } from '../services/api';
+import { fetchSiswaProfile } from '../services/api/siswaApi';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 function Dashboard() {

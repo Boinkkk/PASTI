@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // Absensi model
 type Absensi struct {
@@ -76,6 +78,15 @@ type RequestAbsensi struct {
     PertemuanKe  int    `json:"pertemuan_ke"`
     Tanggal      time.Time `json:"tanggal"`
     Materi       string `json:"materi"`
+}
+
+type ResponseAbsensiSiswaPertemuan struct {
+	SiswaID      int       `json:"siswa_id"`
+	NIS 		string    `json:"nis"`
+	NamaLengkap string    `json:"nama_lengkap"`
+	NoTelepon   string    `json:"no_telepon"`
+	WaktuAbsen  *time.Time `json:"waktu_absen"`
+	StatusKehadiran string    `json:"status_kehadiran"`
 }
 
 

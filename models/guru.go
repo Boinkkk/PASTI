@@ -30,6 +30,29 @@ type Guru struct {
     KelasWaliKelas  []Kelas           `gorm:"-" json:"kelas_wali,omitempty"`
 }
 
+type JadwalGuru struct {
+	JadwalID   int       `json:"jadwal_id"`	
+	NamaMapel string    `json:"nama_mapel"`
+	NamaKelas string    `json:"nama_kelas"`
+	Hari       string    `json:"hari"`
+	GuruID     int       `json:"guru_id"`
+	WaktuMulai   string    `json:"waktu_mulai"`
+	WaktuSelesai string    `json:"waktu_selesai"`
+	Ruang      string    `json:"ruang"`
+
+}
+
+type ResponseAbsensiSiswa struct {
+    IDPertemuan int       `json:"id_pertemuan"`
+    PertemuanKe int       `json:"pertemuan_ke"`
+    Materi string    `json:"materi"`
+    Tanggal string    `json:"tanggal"`
+    TokenAbsen string    `json:"token_absen"`
+    IsActive bool      `json:"is_active"`
+    TotalHadir int       `json:"total_hadir"`
+    TotalSiswa int       `json:"total_siswa"`
+}
+
 // TableName method untuk menentukan nama tabel yang benar
 func (Guru) TableName() string {
     return "guru"

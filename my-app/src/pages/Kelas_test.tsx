@@ -26,7 +26,7 @@ import {
   LocalHospital as LocalHospitalIcon,
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
-import type { DetailAbsensiData, CourseInfo } from '../services/api';
+import type { DetailAbsensiData, CourseInfo } from '../services/types';
 
 // Dummy data for when API fails
 const DUMMY_COURSE_INFO: CourseInfo = {

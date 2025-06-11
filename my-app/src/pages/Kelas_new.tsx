@@ -25,7 +25,8 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { AuthContext } from '../components/Middleware';
-import { getDetailAbsensiByJadwalID, getCourseInfoByJadwalID, DetailAbsensiData, CourseInfo } from '../services/api';
+import { getDetailAbsensiByJadwalID, getCourseInfoByJadwalID } from '../services/api/courseApi';
+import type { DetailAbsensiData, CourseInfo } from '../services/types';
 
 interface AttendanceRecord {
   id: number;

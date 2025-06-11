@@ -166,13 +166,13 @@ func AbsenPertemuan(w http.ResponseWriter, r *http.Request) {
 
 	var pertemuan models.RequestAbsensi
 
-	if err := config.DB.Raw("SELECT * FROM pertemuan WHERE token_absen = ?", tokenAbsen).Scan(&pertemuan).Error; err != nil {
+	if err := config.DB.Raw("SELECT * FROM pertemuan WHERE token_absen = ? AND is_active = true", tokenAbsen).Scan(&pertemuan).Error; err != nil {
 		helpers.Response(w, 500, "Gagal mengambil data pertemuan", nil)
 		return
 	}
 
 	if pertemuan.ID == 0 {
-		helpers.Response(w, 404, "Pertemuan tidak ditemukan", nil)
+		helpers.Response(w, 404, "Absen tidak ditemukan", nil)
 		return
 	}
 

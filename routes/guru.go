@@ -12,9 +12,17 @@ func GuruRoutes(r *mux.Router) {
 
 	// Semua route guru memerlukan autentikasi
 	router.Use(middleware.AuthGuru)
-
 	// Profile routes
 	router.HandleFunc("/profile", controllers.GetGuruProfile).Methods("GET")
+	router.HandleFunc("/jadwalMengajar", controllers.GetDaftarMengajar).Methods("GET")
+	router.HandleFunc("/pertemuan", controllers.GetAbsensiSiswaPertemuan).Methods("GET")
+	router.HandleFunc("/absensi", controllers.GetDetailAbsensiSiswa).Methods("GET")
+	// Pertemuan management routes
+	router.HandleFunc("/pertemuan/{id}/status", controllers.UpdateStatusPertemuan).Methods("PUT")
+	
+	// Absensi management routes
+	router.HandleFunc("/absensi/{id}/status", controllers.UpdateStatusAbsensi).Methods("PUT")
+	router.HandleFunc("/absensi/manual", controllers.CreateManualAbsensi).Methods("POST")
 
 	// Siswa management routes
 	router.HandleFunc("/siswa", controllers.GetAllSiswa).Methods("GET")

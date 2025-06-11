@@ -13,8 +13,8 @@ import {
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import CardAbsensi from '../components/CardAbsensi';
-import { fetchDaftarKelas } from '../services/api';
-import type { CourseData } from '../services/api';
+import { fetchDaftarKelas } from '../services/api/siswaApi';
+import type { CourseData } from '../services/types';
 import AbsensiToken from './AbsensiToken';
 
 // Remove the local interface since we're importing it from api.ts

@@ -4,7 +4,7 @@ import { Button, FormControl, Alert, Typography } from '@mui/joy';
 import FormLabel from '@mui/joy/FormLabel';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerGuru } from '../services/api';
+import { registerGuru } from '../services/api/authApi';
 
 // Local interface for guru registration request
 interface RegisterGuruRequest {

@@ -1,0 +1,83 @@
+[33mcommit 9018a85b6a5df01014ec1636098ca4e242669e95[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Tue Jun 10 05:48:18 2025 +0700
+
+    Add feature login for GURU
+
+[33mcommit a7d4896834379fa3ffd32af157148784721fb5da[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Tue Jun 10 05:07:26 2025 +0700
+
+    add absensi feature by link
+
+[33mcommit d66764a7a8c48c9fbad3e87de0d1626a936b6cc3[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Mon Jun 9 19:30:44 2025 +0700
+
+    Add Feature Deatail Pertemuan
+
+[33mcommit ddd2c935c895370ef011450b1870f4dd7da709b8[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Mon Jun 9 15:02:55 2025 +0700
+
+    Add controller for Absensi
+
+[33mcommit 0c3975960330ed0996a78318f282c6e5494dd24e[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Mon Jun 9 14:01:19 2025 +0700
+
+    Add Logout Button
+
+[33mcommit 6e3791ca8ed1c15212e1ee4a7122a898734ee292[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Mon Jun 9 13:03:04 2025 +0700
+
+    Fix registration bug
+
+[33mcommit 250f9aea94a796260b74fa8fd3c3394dc9a9a0cc[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Sun Jun 8 03:33:42 2025 +0700
+
+    Fix bug login
+
+[33mcommit 8d2bec44b0db13537f1b78bf95d9f95e50235ae0[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Sat Jun 7 17:41:55 2025 +0700
+
+    Make middleware
+
+[33mcommit 84ce2f6fd88f7e8241084a6cdab4fb7a73740714[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Sat Jun 7 17:10:34 2025 +0700
+
+    Make Login API
+
+[33mcommit 6fa7735762954bb7da8e552ef1ab2466e6ffcc93[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Sat Jun 7 14:40:31 2025 +0700
+
+    Add Registration Feature
+
+[33mcommit 2fd7306f3d8b2bad2a055557ba9f0806506cd82e[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Sat Jun 7 13:24:37 2025 +0700
+
+    Make Models Struct
+
+[33mcommit d6d381d50717627f55665642aa6d392b129e55a2[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Sat Jun 7 12:42:16 2025 +0700
+
+    make database migration
+
+[33mcommit a0106759b310cc3b44a078e7dd98f5ae448dd9b9[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Mon Jun 2 07:08:02 2025 +0700
+
+    setup
+
+[33mcommit ae62d72cfa5c2ea7549c185d244bdae7b13510ab[m[33m ([m[1;32mM[m[33m)[m
+Author: Boink <ivanroisussalam1234@gmail.com>
+Date:   Mon Jun 2 05:43:39 2025 +0700
+
+    first Commit

@@ -3,16 +3,29 @@ import {
   Box, Typography, Button, Card, CardContent, Table, Sheet, Chip,
   Modal, ModalDialog, ModalClose, Input, Textarea, CircularProgress,
   IconButton, Tooltip, Select, Option, Tabs, TabList, Tab, TabPanel, 
-  Grid, FormControl, FormLabel, Alert, Breadcrumbs, Link
+  Grid, FormControl, FormLabel, Alert, Breadcrumbs, Link,
+  Switch
 } from '@mui/joy';
 import {
   People as PeopleIcon, Add as AddIcon, Refresh as RefreshIcon,
   ContentCopy as ContentCopyIcon, Stop as StopIcon, Check as CheckIcon, 
   Close as CloseIcon, Search as SearchIcon, FilterList as FilterIcon,
-  Home as HomeIcon, PlayArrow as PlayArrowIcon
+  Home as HomeIcon, PlayArrow as PlayArrowIcon,
+  Check,
+  Close,
+  QrCode as QrCodeIcon
 } from '@mui/icons-material';
+import { QRCodeCanvas } from 'qrcode.react';
 import SidebarGuru from '../components/SidebarGuru';
 import { useAuth } from '../components/Middleware';
+import { 
+  fetchAbsensiPertemuanSiswa, 
+  fetchDetailAbsensi, 
+  fetchGuruJadwal, 
+  updateStatusPertemuan,
+  updateAbsensiStatus as updateAbsensiStatusAPI,
+  createManualAbsensi as createManualAbsensiAPI
+} from '../services/api/guruApi';
 
 // Types
 interface JadwalKelas {
@@ -31,7 +44,7 @@ interface PertemuanData {
   materi: string;
   tanggal: string;
   token_absen: string;
-  status_pertemuan: string;
+  is_active: boolean;
   waktu_mulai_absen: string;
   waktu_selesai_absen: string;
   total_hadir: number;
@@ -48,7 +61,7 @@ interface AbsensiSiswa {
 }
 
 const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-const STATUS_KEHADIRAN = ['Hadir', 'Izin', 'Sakit', 'Alpha'];
+const STATUS_KEHADIRAN = ['Hadir', 'Alpha', 'Sakit'];
 
 // Dummy data for demonstration
 const DUMMY_JADWAL: JadwalKelas[] = [
@@ -88,7 +101,7 @@ const DUMMY_PERTEMUAN: PertemuanData[] = [
     materi: 'Pengenalan Limit Fungsi',
     tanggal: '2024-01-15',
     token_absen: '123456',
-    status_pertemuan: 'Selesai',
+    is_active: false,
     waktu_mulai_absen: '07:30:00',
     waktu_selesai_absen: '08:30:00',
     total_hadir: 28,
@@ -100,7 +113,7 @@ const DUMMY_PERTEMUAN: PertemuanData[] = [
     materi: 'Sifat-sifat Limit',
     tanggal: '2024-01-22',
     token_absen: '789012',
-    status_pertemuan: 'Aktif',
+    is_active: false,
     waktu_mulai_absen: '07:30:00',
     waktu_selesai_absen: '08:30:00',
     total_hadir: 25,
@@ -145,7 +158,6 @@ const DUMMY_SISWA: AbsensiSiswa[] = [
 
 const GuruAbsensi: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -158,6 +170,7 @@ const GuruAbsensi: React.FC = () => {
   const [siswaList, setSiswaList] = useState<AbsensiSiswa[]>([]);
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+  const [showQRCodeModal, setShowQRCodeModal] = useState<boolean>(false);
   
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterHari, setFilterHari] = useState<string>('all');
@@ -169,13 +182,30 @@ const GuruAbsensi: React.FC = () => {
   const [formDuration, setFormDuration] = useState<number>(60);
   const [formTanggal, setFormTanggal] = useState<string>(new Date().toISOString().split('T')[0]);
   
+  
   // Load dummy data when component mounts
   useEffect(() => {
-    const loadData = () => {
+    const loadData = async () => {
+      const JadwalGuruResponse = await fetchGuruJadwal();
+      if (!JadwalGuruResponse) {
+        setError('Gagal memuat jadwal mengajar. Silakan coba lagi.');
+        setLoading(false);
+        return;
+      }
+
+      setJadwalList(JadwalGuruResponse.data);
+
+      const pertemuanResponse = await fetchAbsensiPertemuanSiswa(JadwalGuruResponse.data[0].jadwal_id);
+
+      setPertemuanList(pertemuanResponse.data || []);
+
+      setLoading(false);
+
+
       setTimeout(() => {
-        setJadwalList(DUMMY_JADWAL);
-        setSelectedJadwal(DUMMY_JADWAL[0]);
-        setPertemuanList(DUMMY_PERTEMUAN);
+        setJadwalList(JadwalGuruResponse.data);
+        setSelectedJadwal(JadwalGuruResponse.data[0]);
+        setPertemuanList(pertemuanResponse.data || []);
         setSiswaList(DUMMY_SISWA);
         setLoading(false);
       }, 1000); // Simulate loading
@@ -191,9 +221,31 @@ const GuruAbsensi: React.FC = () => {
     setShowCreateModal(true);
   };
 
-  const handleViewAbsensi = (pertemuan: PertemuanData) => {
+  const handleViewAbsensi = async (pertemuan: PertemuanData) => {
     setSelectedPertemuan(pertemuan);
+
+    await handleGetDetailAbsensi(pertemuan.id_pertemuan);
     setShowDetailModal(true);
+  };
+
+  const handleJadwalClick = async (jadwal: JadwalKelas) => {
+    setSelectedJadwal(jadwal);
+    console.log(pertemuanList)
+    const pertemuanResponse = await fetchAbsensiPertemuanSiswa(jadwal.jadwal_id);
+
+      setPertemuanList(pertemuanResponse.data || []);
+
+      setLoading(false);
+
+  };
+
+  const handleGetDetailAbsensi = async (pertemuanId: number) => {
+    try {
+      const detailResponse = await fetchDetailAbsensi(pertemuanId);
+      setSiswaList(detailResponse.data || []);
+    } catch (error) {
+      console.error('Error fetching detail absensi:', error);
+    }
   };
 
   const handleCreatePertemuanSubmit = () => {
@@ -205,7 +257,7 @@ const GuruAbsensi: React.FC = () => {
       materi: formMateri,
       tanggal: formTanggal,
       token_absen: Math.floor(100000 + Math.random() * 900000).toString(),
-      status_pertemuan: 'Aktif',
+      is_active: true,
       waktu_mulai_absen: '07:30:00',
       waktu_selesai_absen: '08:30:00',
       total_hadir: 0,
@@ -227,31 +279,65 @@ const GuruAbsensi: React.FC = () => {
     setSuccess('Token berhasil disalin ke clipboard!');
   };
 
-  const updateAbsensiStatus = (absensiId: number, status: string) => {
-    setSiswaList(prevList => 
-      prevList.map(siswa => 
-        siswa.absensi_id === absensiId 
-          ? { ...siswa, status_kehadiran: status as any }
-          : siswa
-      )
-    );
-    setSuccess(`Status kehadiran berhasil diubah menjadi ${status}`);
+  const updateAbsensiStatus = async (absensiId: number, status: string) => {
+    if (!selectedPertemuan) return;
+
+    try {
+      setLoading(true);
+      
+      // Call API to update status
+      await updateAbsensiStatusAPI(absensiId, status);
+      
+      // Update local state
+      setSiswaList(prevList => 
+        prevList.map(siswa => 
+          siswa.absensi_id === absensiId 
+            ? { ...siswa, status_kehadiran: status as any }
+            : siswa
+        )
+      );
+      
+      setSuccess(`Status kehadiran berhasil diubah menjadi ${status}`);
+      
+    } catch (error) {
+      console.error('Error updating absensi status:', error);
+      setError(error instanceof Error ? error.message : 'Gagal mengubah status kehadiran');
+    } finally {
+      setLoading(false);
+    }
   };
   
-  const createManualAbsensi = (siswaId: number, status: string) => {
-    setSiswaList(prevList => 
-      prevList.map(siswa => 
-        siswa.siswa_id === siswaId 
-          ? { 
-              ...siswa, 
-              absensi_id: Date.now(), 
-              status_kehadiran: status as any,
-              waktu_absen: new Date().toISOString()
-            }
-          : siswa
-      )
-    );
-    setSuccess(`Absensi manual berhasil dibuat dengan status ${status}`);
+  const createManualAbsensi = async (siswaId: number, status: string) => {
+    if (!selectedPertemuan) return;
+
+    try {
+      setLoading(true);
+      
+      // Call API to create manual absensi
+      const result = await createManualAbsensiAPI(selectedPertemuan.id_pertemuan, siswaId, status);
+      
+      // Update local state
+      setSiswaList(prevList => 
+        prevList.map(siswa => 
+          siswa.siswa_id === siswaId 
+            ? { 
+                ...siswa, 
+                absensi_id: result.id_absensi, 
+                status_kehadiran: status as any,
+                waktu_absen: result.waktu_absen || new Date().toISOString()
+              }
+            : siswa
+        )
+      );
+      
+      setSuccess(`Absensi manual berhasil dibuat dengan status ${status}`);
+      
+    } catch (error) {
+      console.error('Error creating manual absensi:', error);
+      setError(error instanceof Error ? error.message : 'Gagal membuat absensi manual');
+    } finally {
+      setLoading(false);
+    }
   };
   
   const endPertemuan = (pertemuanId: number) => {
@@ -264,6 +350,48 @@ const GuruAbsensi: React.FC = () => {
     );
     setSuccess('Pertemuan berhasil diakhiri');
     setShowDetailModal(false);
+  };
+  
+  // Function to handle changing pertemuan status (active/inactive)
+  const handleChangeConditionAbsensi = async (isActive: boolean) => {
+    if (!selectedPertemuan) return;
+
+    try {
+      setLoading(true);
+      
+      // Call API to update status
+      await updateStatusPertemuan(selectedPertemuan.id_pertemuan, isActive);
+      
+      // Update local state
+      setSelectedPertemuan(prev => prev ? { ...prev, is_active: isActive } : null);
+      
+      // Update pertemuan list
+      setPertemuanList(prevList => 
+        prevList.map(pertemuan => 
+          pertemuan.id_pertemuan === selectedPertemuan.id_pertemuan 
+            ? { ...pertemuan, is_active: isActive }
+            : pertemuan
+        )
+      );
+      
+      setSuccess(`Absensi berhasil ${isActive ? 'diaktifkan' : 'dinonaktifkan'}`);
+      
+    } catch (error) {
+      console.error('Error updating pertemuan status:', error);
+      setError(error instanceof Error ? error.message : 'Gagal mengubah status absensi');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Function to generate absensi URL from token
+  const generateAbsensiUrl = (token: string): string => {
+    return `http://localhost:8080/api/absensi/${token}`;
+  };
+
+  // Function to show QR Code modal
+  const handleShowQRCode = () => {
+    setShowQRCodeModal(true);
   };
   
   // UI helpers
@@ -449,7 +577,7 @@ const GuruAbsensi: React.FC = () => {
                       filteredJadwal.map((jadwal) => (
                         <tr 
                           key={jadwal.jadwal_id} 
-                          onClick={() => setSelectedJadwal(jadwal)}
+                          onClick={() => handleJadwalClick(jadwal)}
                           style={{ 
                             cursor: 'pointer',
                             backgroundColor: selectedJadwal?.jadwal_id === jadwal.jadwal_id ? 'rgba(25, 118, 210, 0.08)' : undefined 
@@ -523,7 +651,6 @@ const GuruAbsensi: React.FC = () => {
                     {pertemuanList.length > 0 ? (
                       pertemuanList.map((pertemuan) => {
                         const { percentage, color } = getProgressData(pertemuan.total_hadir, pertemuan.total_siswa);
-                        
                         return (
                           <tr 
                             key={pertemuan.id_pertemuan}
@@ -587,18 +714,8 @@ const GuruAbsensi: React.FC = () => {
                               </Box>
                             </td>
                             <td>
-                              <Chip 
-                                color={pertemuan.status_pertemuan === 'Aktif' ? 'success' : 'neutral'}
-                                variant="soft"
-                                size="sm"
-                                startDecorator={
-                                  pertemuan.status_pertemuan === 'Aktif' 
-                                    ? <PlayArrowIcon fontSize="small" /> 
-                                    : null
-                                }
-                              >
-                                {pertemuan.status_pertemuan}
-                              </Chip>
+                              <Chip color={pertemuan.is_active ? 'success' : 'danger'}
+                                size='sm'>{pertemuan.is_active ? 'Aktif' : 'Tidak Aktif'}</Chip>
                             </td>
                           </tr>
                         );
@@ -720,7 +837,7 @@ const GuruAbsensi: React.FC = () => {
         
         {/* Modal: View Absensi Detail */}
         <Modal open={showDetailModal} onClose={() => setShowDetailModal(false)}>
-          <ModalDialog size="lg">
+          <ModalDialog sx={{ maxWidth: '800px', width: '90vw' }}>
             <ModalClose />
             <Box>
               <Typography level="h4" component="h2" sx={{ mb: 2 }}>
@@ -729,20 +846,24 @@ const GuruAbsensi: React.FC = () => {
             
               {selectedPertemuan && (
                 <>
-                  <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    <Box>
-                      <Typography level="body-xs" sx={{ color: 'text.secondary', mb: 0.5 }}>
-                        Mata Pelajaran:
+                  <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      {/* Baris untuk Mata Pelajaran */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{ width: 120, color: 'text.secondary' }}> 
+                        Mata Pelajaran
                       </Typography>
+                      <Typography sx={{ color: 'text.secondary' }}>:</Typography>
                       <Typography level="body-sm" fontWeight="bold">
                         {selectedJadwal?.nama_mapel || '-'}
                       </Typography>
                     </Box>
-                    
-                    <Box>
-                      <Typography level="body-xs" sx={{ color: 'text.secondary', mb: 0.5 }}>
-                        Token:
+
+                    {/* Baris untuk Token */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{ width: 120, color: 'text.secondary' }}>
+                        Token
                       </Typography>
+                      <Typography sx={{ color: 'text.secondary' }}>:</Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Typography level="body-sm" fontWeight="bold" fontFamily="monospace">
                           {selectedPertemuan.token_absen}
@@ -756,27 +877,30 @@ const GuruAbsensi: React.FC = () => {
                         </IconButton>
                       </Box>
                     </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{ width: 120, color: 'text.secondary' }}>
+                        Aktifkan Absensi
+                      </Typography>
+                      <Typography sx={{ color: 'text.secondary' }}>:</Typography>
+                      <Switch
+                        checked={selectedPertemuan.is_active}
+                        onChange={(e) => handleChangeConditionAbsensi(e.target.checked)}
+                        disabled={loading}
+                      />
+                    </Box>
+                    <Chip color="primary"
+                        onClick={handleShowQRCode}
+                        size="lg"
+                        variant="solid">Show QR CODE</Chip>
+
                   </Box>
+                  
                   
                   <Box sx={{ mb: 3 }}>
                     <Typography level="body-sm" fontWeight="bold">
                       Materi: {selectedPertemuan.materi}
                     </Typography>
                   </Box>
-
-                      {selectedPertemuan.status_pertemuan === 'Aktif' && (
-                    <Box sx={{ mb: 3, display: 'flex', gap: 1 }}>
-                        <Button
-                          size="sm"
-                          color="danger"
-                          variant="soft"
-                          startDecorator={<StopIcon />}
-                        onClick={() => endPertemuan(selectedPertemuan.id_pertemuan)}
-                        >
-                          Akhiri Pertemuan
-                        </Button>
-                      </Box>
-                    )}
 
                     {/* Search Student */}
                   <Box sx={{ mb: 2 }}>
@@ -839,6 +963,7 @@ const GuruAbsensi: React.FC = () => {
                                 </Chip>
                               </td>
                               <td>
+                              
                                 {siswa.absensi_id ? (
                                   <Select
                                     size="sm"
@@ -895,6 +1020,40 @@ const GuruAbsensi: React.FC = () => {
                   </Sheet>
                 </>
               )}
+            </Box>
+          </ModalDialog>
+        </Modal>
+        
+        {/* Modal: QR Code Absensi */}
+        <Modal open={showQRCodeModal} onClose={() => setShowQRCodeModal(false)}>
+          <ModalDialog sx={{ maxWidth: '400px', width: '90vw' }}>
+            <ModalClose />
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <Typography level="h4" component="h2" sx={{ mb: 2, textAlign: 'center' }}>
+                QR Code Absensi Pertemuan {selectedPertemuan?.pertemuan_ke}
+              </Typography>
+              
+              {selectedPertemuan && (
+                <QRCodeCanvas 
+                  value={generateAbsensiUrl(selectedPertemuan.token_absen)} 
+                  size={256}
+                  style={{ 
+                    height: 'auto', 
+                    maxWidth: '100%', 
+                    width: '100%',
+                    margin: '0 auto'
+                  }}
+                />
+              )}
+              
+              <Button 
+                variant="solid" 
+                color="primary" 
+                onClick={() => copyToClipboard(generateAbsensiUrl(selectedPertemuan?.token_absen || ''))}
+                fullWidth
+              >
+                Salin URL Absensi
+              </Button>
             </Box>
           </ModalDialog>
         </Modal>

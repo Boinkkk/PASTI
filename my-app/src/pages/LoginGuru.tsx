@@ -17,7 +17,7 @@ import {
   School as SchoolIcon
 } from '@mui/icons-material';
 import { useAuth } from '../components/Middleware';
-import { loginGuru } from '../services/api';
+import { loginGuru } from '../services/api/authApi';
 
 const LoginGuru: React.FC = () => {
   const navigate = useNavigate();
