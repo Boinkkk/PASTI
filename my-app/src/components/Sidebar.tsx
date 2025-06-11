@@ -12,6 +12,7 @@ import {
 import { 
   Dashboard as DashboardIcon,
   EventNote as AbsensiIcon,
+  Assignment as AssignmentIcon,
   Menu as MenuIcon,
   Logout as LogoutIcon
 } from '@mui/icons-material';
@@ -35,6 +36,12 @@ const sidebarItems: SidebarItem[] = [
     label: 'Absensi',
     icon: <AbsensiIcon />,
     path: '/absensi'
+  },
+  {
+    id: 'tugas',
+    label: 'Tugas',
+    icon: <AssignmentIcon />,
+    path: '/tugas'
   }
 ];
 

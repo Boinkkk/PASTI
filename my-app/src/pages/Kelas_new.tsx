@@ -41,7 +41,6 @@ interface AttendanceRecord {
 const Kelas: React.FC = () => {
   const { mata_pelajaran } = useParams<{ mata_pelajaran: string }>();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
   
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [itemsPerPage, setItemsPerPage] = useState(10);

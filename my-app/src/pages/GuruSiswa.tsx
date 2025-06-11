@@ -24,7 +24,7 @@ const GuruSiswa: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterKelas, setFilterKelas] = useState('all');
-  const { user } = useAuth();
+
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
