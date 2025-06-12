@@ -14,12 +14,43 @@ export interface TugasData {
   updated_at: string;
   jadwal_pelajaran?: {
     jadwal_id: number;
-    nama_mapel: string;
-    nama_kelas: string;
+    kelas_id: number;
+    mapel_id: number;
+    guru_id: number;
     hari: string;
-    waktu_mulai: string;
-    waktu_selesai: string;
+    jam_mulai: string;
+    jam_selesai: string;
     ruang: string;
+    created_at: string;
+    updated_at: string;
+    kelas: {
+      kelas_id: number;
+      nama_kelas: string;
+      wali_kelas_id: number | null;
+      id_jurusan: number;
+      created_at: string;
+      updated_at: string;
+      jurusan: {
+        id_jurusan: number;
+        nama_jurusan: string;
+      };
+    };
+    mata_pelajaran: {
+      mapel_id: number;
+      kode_mapel: string;
+      nama_mapel: string;
+      deskripsi: string;
+      created_at: string;
+      updated_at: string;
+    };
+    guru: {
+      guru_id: number;
+      nip: string;
+      nama_lengkap: string;
+      email: string;
+      created_at: string;
+      updated_at: string;
+    };
   };
 }
 

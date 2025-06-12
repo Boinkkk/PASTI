@@ -313,11 +313,11 @@ const GuruJadwal: React.FC = () => {
 
       // Kelas filter
       const kelasMatch = !filters.kelas || 
-        tugas.jadwal_pelajaran?.nama_kelas === filters.kelas;
+        tugas.jadwal_pelajaran?.kelas.nama_kelas === filters.kelas;
 
       // Mata pelajaran filter
       const mapelMatch = !filters.mata_pelajaran || 
-        tugas.jadwal_pelajaran?.nama_mapel === filters.mata_pelajaran;
+        tugas.jadwal_pelajaran?.mata_pelajaran.nama_mapel === filters.mata_pelajaran;
 
       // Tipe tugas filter
       const tipeMatch = !filters.tipe_tugas || 
@@ -358,12 +358,12 @@ const GuruJadwal: React.FC = () => {
             bValue = b.judul_tugas.toLowerCase();
             break;
           case 'kelas':
-            aValue = a.jadwal_pelajaran?.nama_kelas || '';
-            bValue = b.jadwal_pelajaran?.nama_kelas || '';
+            aValue = a.jadwal_pelajaran?.kelas.nama_kelas || '';
+            bValue = b.jadwal_pelajaran?.kelas.nama_kelas || '';
             break;
           case 'mata_pelajaran':
-            aValue = a.jadwal_pelajaran?.nama_mapel || '';
-            bValue = b.jadwal_pelajaran?.nama_mapel || '';
+            aValue = a.jadwal_pelajaran?.mata_pelajaran.nama_mapel || '';
+            bValue = b.jadwal_pelajaran?.mata_pelajaran.nama_mapel || '';
             break;
           case 'deadline':
             aValue = new Date(a.deadline_pengumpulan).getTime();
@@ -406,14 +406,14 @@ const GuruJadwal: React.FC = () => {
   // Get unique values for filter options
   const getUniqueClasses = () => {
     const classes = tugasList
-      .map(tugas => tugas.jadwal_pelajaran?.nama_kelas)
+      .map(tugas => tugas.jadwal_pelajaran?.kelas.nama_kelas)
       .filter((kelas, index, arr) => kelas && arr.indexOf(kelas) === index);
     return classes;
   };
 
   const getUniqueMapel = () => {
     const mapel = tugasList
-      .map(tugas => tugas.jadwal_pelajaran?.nama_mapel)
+      .map(tugas => tugas.jadwal_pelajaran?.mata_pelajaran.nama_mapel)
       .filter((mapel, index, arr) => mapel && arr.indexOf(mapel) === index);
     return mapel;
   };
@@ -570,7 +570,7 @@ const GuruJadwal: React.FC = () => {
                 >
                   <Option value="">Semua Kelas ({tugasList.length})</Option>
                   {getUniqueClasses().map((kelas) => {
-                    const count = tugasList.filter(t => t.jadwal_pelajaran?.nama_kelas === kelas).length;
+                    const count = tugasList.filter(t => t.jadwal_pelajaran?.kelas.nama_kelas === kelas).length;
                     return (
                       <Option key={kelas} value={kelas}>
                         {kelas} ({count})
@@ -589,7 +589,7 @@ const GuruJadwal: React.FC = () => {
                 >
                   <Option value="">Semua Mapel ({tugasList.length})</Option>
                   {getUniqueMapel().map((mapel) => {
-                    const count = tugasList.filter(t => t.jadwal_pelajaran?.nama_mapel === mapel).length;
+                    const count = tugasList.filter(t => t.jadwal_pelajaran?.mata_pelajaran.nama_mapel === mapel).length;
                     return (
                       <Option key={mapel} value={mapel}>
                         {mapel} ({count})
@@ -785,12 +785,12 @@ const GuruJadwal: React.FC = () => {
                             size="sm"
                             variant="soft"
                           >
-                            {tugas.jadwal_pelajaran?.nama_kelas || '-'}
+                            {tugas.jadwal_pelajaran?.kelas.nama_kelas || '-'}
                           </Chip>
                         </td>
                         <td>
                           <Typography level="body-sm" fontWeight="md">
-                            {tugas.jadwal_pelajaran?.nama_mapel || '-'}
+                            {tugas.jadwal_pelajaran?.mata_pelajaran.nama_mapel || '-'}
                           </Typography>
                         </td>
                         <td>
@@ -1091,7 +1091,7 @@ const GuruJadwal: React.FC = () => {
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                       <Chip size="sm" variant="soft" color="primary">
-                        {selectedTugas.jadwal_pelajaran?.nama_mapel} - {selectedTugas.jadwal_pelajaran?.nama_kelas}
+                        {selectedTugas.jadwal_pelajaran?.mata_pelajaran.nama_mapel} - {selectedTugas.jadwal_pelajaran?.kelas.nama_kelas}
                       </Chip>
                       <Chip size="sm" variant="soft" color="neutral">
                         {selectedTugas.tipe_tugas}

@@ -32,14 +32,18 @@ func GetTugasGuru(w http.ResponseWriter, r *http.Request) {
 	var tugasList []models.Tugas
 	
 	// Join dengan jadwal_pelajaran untuk mendapatkan informasi jadwal
-	if err := config.DB.Preload("JadwalPelajaran").
-		Joins("JOIN jadwalpelajaran ON tugas.jadwal_id = jadwalpelajaran.jadwal_id").
-		Where("jadwalpelajaran.guru_id = ?", guru.ID).
-		Order("tugas.created_at DESC").
-		Find(&tugasList).Error; err != nil {
-		helpers.Response(w, 500, "Database error: "+err.Error(), nil)
-		return
-	}
+	if err := config.DB.
+	Preload("JadwalPelajaran").
+	Preload("JadwalPelajaran.Kelas").
+	Preload("JadwalPelajaran.MataPelajaran").
+	Preload("JadwalPelajaran.Guru").
+	Joins("JOIN jadwalpelajaran ON tugas.jadwal_id = jadwalpelajaran.jadwal_id").
+	Where("jadwalpelajaran.guru_id = ?", guru.ID).
+	Order("tugas.created_at DESC").
+	Find(&tugasList).Error; err != nil {
+	helpers.Response(w, 500, "Database error: "+err.Error(), nil)
+	return
+}
 
 	helpers.Response(w, 200, "Tugas berhasil diambil", tugasList)
 }
