@@ -17,7 +17,9 @@ import {
   CircularProgress,
   Grid,
   Divider,
-  Stack
+  Stack,
+  Select,
+  Option
 } from '@mui/joy';
 import {
   Assignment as AssignmentIcon,
@@ -31,7 +33,8 @@ import {
   School as SchoolIcon,
   Book as BookIcon,
   AttachFile as AttachFileIcon,
-  CloudUpload as CloudUploadIcon
+  CloudUpload as CloudUploadIcon,
+  FilterList as FilterIcon
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import {
@@ -54,6 +57,11 @@ const TugasSiswa: React.FC = () => {
   const [catatanInput, setCatatanInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState<string>('Semua');
+  const [kelasFilter, setKelasFilter] = useState<string>('Semua');
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch tugas on component mount
@@ -184,7 +192,6 @@ const TugasSiswa: React.FC = () => {
       minute: '2-digit'
     });
   };
-
   const groupTugasByMapel = (tugasList: TugasSiswaData[]) => {
     const grouped: { [key: string]: TugasSiswaData[] } = {};
     
@@ -197,7 +204,47 @@ const TugasSiswa: React.FC = () => {
     });
     
     return grouped;
-  };  if (loading) {
+  };
+
+  // Filter functions
+  const getFilteredTugas = () => {
+    let filtered = tugas;
+
+    // Filter by status
+    if (statusFilter !== 'Semua') {
+      filtered = filtered.filter(t => t.status_pengumpulan === statusFilter);
+    }
+
+    // Filter by kelas
+    if (kelasFilter !== 'Semua') {
+      filtered = filtered.filter(t => t.jadwal_pelajaran?.nama_kelas === kelasFilter);
+    }
+
+    return filtered;
+  };
+
+  // Get unique status options
+  const getStatusOptions = () => {
+    const uniqueStatus = [...new Set(tugas.map(t => t.status_pengumpulan))];
+    return ['Semua', ...uniqueStatus];
+  };
+  // Get unique kelas options
+  const getKelasOptions = () => {
+    const uniqueKelas = [...new Set(tugas.map(t => t.jadwal_pelajaran?.nama_kelas).filter(Boolean))];
+    return ['Semua', ...uniqueKelas];
+  };
+
+  // Get statistics for display
+  const getStatistics = () => {
+    const filtered = getFilteredTugas();
+    const total = filtered.length;
+    const belumMengerjakan = filtered.filter(t => t.status_pengumpulan === 'Belum Mengerjakan').length;
+    const mengerjakan = filtered.filter(t => t.status_pengumpulan === 'Mengerjakan').length;
+    const terlambat = filtered.filter(t => t.status_pengumpulan === 'Terlambat').length;
+    const dinilai = filtered.filter(t => t.status_pengumpulan === 'Dinilai').length;
+    
+    return { total, belumMengerjakan, mengerjakan, terlambat, dinilai };
+  };if (loading) {
     return (
       <>
         <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
@@ -217,8 +264,7 @@ const TugasSiswa: React.FC = () => {
       </>
     );
   }
-
-  const groupedTugas = groupTugasByMapel(tugas);
+  const groupedTugas = groupTugasByMapel(getFilteredTugas());
 
   return (
     <>
@@ -235,7 +281,138 @@ const TugasSiswa: React.FC = () => {
       >
         <Typography level="h2" sx={{ mb: 3 }}>
           📚 Tugas Saya
-        </Typography>
+        </Typography>        {/* Filter Section */}
+        <Card sx={{ mb: 3, p: 2 }}>
+          <Typography level="title-md" sx={{ mb: 2, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FilterIcon />
+            Filter Tugas
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid xs={12} sm={6} md={3}>
+              <FormControl>
+                <FormLabel sx={{ fontWeight: 'bold', fontSize: '0.875rem' }}>Status Pengerjaan</FormLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(_, value) => setStatusFilter(value as string)}
+                  size="sm"
+                >
+                  {getStatusOptions().map((status) => (
+                    <Option key={status} value={status}>
+                      {status}
+                    </Option>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid xs={12} sm={6} md={3}>
+              <FormControl>
+                <FormLabel sx={{ fontWeight: 'bold', fontSize: '0.875rem' }}>Kelas</FormLabel>
+                <Select
+                  value={kelasFilter}
+                  onChange={(_, value) => setKelasFilter(value as string)}
+                  size="sm"
+                >
+                  {getKelasOptions().map((kelas) => (
+                    <Option key={kelas} value={kelas}>
+                      {kelas}
+                    </Option>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>            <Grid xs={12} sm={12} md={6}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: '100%', flexWrap: 'wrap' }}>
+                <Button
+                  variant="soft"
+                  color="neutral"
+                  size="sm"
+                  onClick={() => {
+                    setStatusFilter('Semua');
+                    setKelasFilter('Semua');
+                  }}
+                >
+                  Reset Filter
+                </Button>
+                <Chip size="sm" variant="soft" color="primary">
+                  {getFilteredTugas().length} tugas ditemukan
+                </Chip>
+              </Box>
+            </Grid>
+          </Grid>
+          
+          {/* Statistics Section */}
+          <Divider sx={{ my: 2 }} />
+          <Typography level="title-sm" sx={{ mb: 1, fontWeight: 'bold' }}>
+            📊 Statistik Status
+          </Typography>
+          <Grid container spacing={1}>
+            {(() => {
+              const stats = getStatistics();
+              return (
+                <>
+                  <Grid xs={6} sm={3}>
+                    <Chip size="sm" variant="soft" color="neutral" sx={{ width: '100%', justifyContent: 'center' }}>
+                      Belum: {stats.belumMengerjakan}
+                    </Chip>
+                  </Grid>
+                  <Grid xs={6} sm={3}>
+                    <Chip size="sm" variant="soft" color="primary" sx={{ width: '100%', justifyContent: 'center' }}>
+                      Mengerjakan: {stats.mengerjakan}
+                    </Chip>
+                  </Grid>
+                  <Grid xs={6} sm={3}>
+                    <Chip size="sm" variant="soft" color="warning" sx={{ width: '100%', justifyContent: 'center' }}>
+                      Terlambat: {stats.terlambat}
+                    </Chip>
+                  </Grid>
+                  <Grid xs={6} sm={3}>
+                    <Chip size="sm" variant="soft" color="success" sx={{ width: '100%', justifyContent: 'center' }}>
+                      Dinilai: {stats.dinilai}
+                    </Chip>
+                  </Grid>
+                </>
+              );            })()}
+          </Grid>
+          
+          {/* Quick Filter Buttons */}
+          <Divider sx={{ my: 2 }} />
+          <Typography level="title-sm" sx={{ mb: 1, fontWeight: 'bold' }}>
+            ⚡ Filter Cepat
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              size="sm"
+              variant={statusFilter === 'Belum Mengerjakan' ? 'solid' : 'soft'}
+              color="neutral"
+              onClick={() => setStatusFilter('Belum Mengerjakan')}
+            >
+              Belum Dikerjakan
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'Mengerjakan' ? 'solid' : 'soft'}
+              color="primary"
+              onClick={() => setStatusFilter('Mengerjakan')}
+            >
+              Sedang Dikerjakan
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'Terlambat' ? 'solid' : 'soft'}
+              color="warning"
+              onClick={() => setStatusFilter('Terlambat')}
+            >
+              Terlambat
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'Dinilai' ? 'solid' : 'soft'}
+              color="success"
+              onClick={() => setStatusFilter('Dinilai')}
+            >
+              Sudah Dinilai
+            </Button>
+          </Box>
+        </Card>
 
         {error && (
           <Alert color="danger" sx={{ mb: 3 }}>

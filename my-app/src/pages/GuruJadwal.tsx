@@ -38,8 +38,10 @@ import {
   createTugas, 
   updateTugas, 
   deleteTugas,
+  fetchPengumpulanByTugas,
   type TugasData,
-  type CreateTugasRequest 
+  type CreateTugasRequest,
+  type PengumpulanTugas 
 } from '../services/api/tugasApi';
 
 // Types
@@ -57,6 +59,7 @@ const GuruJadwal: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -65,6 +68,7 @@ const GuruJadwal: React.FC = () => {
   const [jadwalList, setJadwalList] = useState<JadwalKelas[]>([]);
   const [tugasList, setTugasList] = useState<TugasData[]>([]);
   const [selectedTugas, setSelectedTugas] = useState<TugasData | null>(null);
+  const [pengumpulanList, setPengumpulanList] = useState<PengumpulanTugas[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -198,7 +202,6 @@ const GuruJadwal: React.FC = () => {
       setLoading(false);
     }
   };
-
   const handleDeleteTugas = async (tugasId: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus tugas ini?')) return;
 
@@ -213,6 +216,25 @@ const GuruJadwal: React.FC = () => {
     } catch (error) {
       console.error('Error deleting tugas:', error);
       setError('Gagal menghapus tugas. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewDetail = async (tugas: TugasData) => {
+    try {
+      setLoading(true);
+      setSelectedTugas(tugas);
+      
+      // Fetch pengumpulan tugas
+      const response = await fetchPengumpulanByTugas(tugas.tugas_id);
+      setPengumpulanList(response.data || []);
+      
+      setShowDetailModal(true);
+      
+    } catch (error) {
+      console.error('Error fetching tugas detail:', error);
+      setError('Gagal memuat detail tugas. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }
@@ -442,10 +464,13 @@ const GuruJadwal: React.FC = () => {
                             {tugas.poin_maksimal} poin
                           </Typography>
                         </td>
-                        <td>
-                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <td>                          <Box sx={{ display: 'flex', gap: 0.5 }}>
                             <Tooltip title="Lihat Detail">
-                              <IconButton size="sm" variant="soft">
+                              <IconButton 
+                                size="sm" 
+                                variant="soft"
+                                onClick={() => handleViewDetail(tugas)}
+                              >
                                 <ViewIcon />
                               </IconButton>
                             </Tooltip>
@@ -587,9 +612,7 @@ const GuruJadwal: React.FC = () => {
               </Box>
             </Box>
           </ModalDialog>
-        </Modal>
-
-        {/* Edit Task Modal */}
+        </Modal>        {/* Edit Task Modal */}
         <Modal open={showEditModal} onClose={() => setShowEditModal(false)}>
           <ModalDialog sx={{ maxWidth: '600px', width: '90vw' }}>
             <ModalClose />
@@ -671,6 +694,168 @@ const GuruJadwal: React.FC = () => {
                 </Button>
               </Box>
             </Box>
+          </ModalDialog>
+        </Modal>
+
+        {/* Detail Task Modal with Submissions */}
+        <Modal open={showDetailModal} onClose={() => setShowDetailModal(false)}>
+          <ModalDialog sx={{ maxWidth: '900px', width: '90vw', maxHeight: '80vh' }}>
+            <ModalClose />
+            <Typography level="h4" component="h2" sx={{ mb: 2 }}>
+              Detail Tugas & Pengumpulan
+            </Typography>
+            
+            {selectedTugas && (
+              <Box>
+                {/* Task Info */}
+                <Card variant="soft" sx={{ mb: 3 }}>
+                  <CardContent>
+                    <Typography level="title-lg" sx={{ mb: 1 }}>
+                      {selectedTugas.judul_tugas}
+                    </Typography>
+                    <Typography level="body-md" sx={{ mb: 2, color: 'text.secondary' }}>
+                      {selectedTugas.deskripsi_tugas}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      <Chip size="sm" variant="soft" color="primary">
+                        {selectedTugas.jadwal_pelajaran?.nama_mapel} - {selectedTugas.jadwal_pelajaran?.nama_kelas}
+                      </Chip>
+                      <Chip size="sm" variant="soft" color="neutral">
+                        {selectedTugas.tipe_tugas}
+                      </Chip>
+                      <Chip size="sm" variant="soft" color="warning">
+                        Deadline: {new Date(selectedTugas.deadline_pengumpulan).toLocaleDateString('id-ID')}
+                      </Chip>
+                      <Chip size="sm" variant="soft" color="success">
+                        Poin Maksimal: {selectedTugas.poin_maksimal}
+                      </Chip>
+                    </Box>
+                  </CardContent>
+                </Card>                {/* Submissions List */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography level="title-md">
+                    👥 Daftar Siswa & Status Pengumpulan ({pengumpulanList.length} siswa)
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Chip size="sm" variant="soft" color="success">
+                      Sudah mengumpulkan: {pengumpulanList.filter(p => p.has_submitted).length}
+                    </Chip>
+                    <Chip size="sm" variant="soft" color="neutral">
+                      Belum mengumpulkan: {pengumpulanList.filter(p => !p.has_submitted).length}
+                    </Chip>
+                    <Chip size="sm" variant="soft" color="primary">
+                      Dinilai: {pengumpulanList.filter(p => p.status_pengumpulan === 'Dinilai').length}
+                    </Chip>
+                  </Box>
+                </Box>
+                  {pengumpulanList.length === 0 ? (
+                  <Card sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography level="body-md" color="neutral">
+                      Tidak ada siswa di kelas ini
+                    </Typography>
+                  </Card>
+                ) : (
+                  <Sheet sx={{ maxHeight: '400px', overflow: 'auto', borderRadius: 'md' }}>
+                    <Table hoverRow>
+                      <thead>
+                        <tr>
+                          <th>NIS</th>
+                          <th>Nama Siswa</th>
+                          <th>Status</th>
+                          <th>Tanggal Pengumpulan</th>
+                          <th>Poin</th>
+                          <th>File & Aksi</th>
+                        </tr>
+                      </thead>                      <tbody>
+                        {pengumpulanList.map((siswa) => (
+                          <tr key={siswa.siswa_id}>
+                            <td>
+                              <Typography level="body-sm" fontWeight="md">
+                                {siswa.nis}
+                              </Typography>
+                            </td>
+                            <td>
+                              <Box>
+                                <Typography level="body-md" fontWeight="md">
+                                  {siswa.nama_lengkap}
+                                </Typography>
+                                <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                                  {siswa.email}
+                                </Typography>
+                              </Box>
+                            </td>
+                            <td>
+                              <Chip
+                                size="sm"
+                                color={
+                                  siswa.status_pengumpulan === 'Dinilai' ? 'success' :
+                                  siswa.status_pengumpulan === 'Mengerjakan' ? 'primary' :
+                                  siswa.status_pengumpulan === 'Terlambat' ? 'warning' : 'neutral'
+                                }
+                                variant="soft"
+                              >
+                                {siswa.status_pengumpulan}
+                              </Chip>
+                            </td>
+                            <td>
+                              {siswa.has_submitted && siswa.tanggal_pengumpulan ? (
+                                <Typography level="body-sm">
+                                  {new Date(siswa.tanggal_pengumpulan).toLocaleDateString('id-ID', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </Typography>
+                              ) : (
+                                <Typography level="body-sm" color="neutral">
+                                  Belum mengumpulkan
+                                </Typography>
+                              )}
+                            </td>
+                            <td>
+                              <Typography level="body-sm" fontWeight="md">
+                                {siswa.poin_didapat || 0} / {selectedTugas.poin_maksimal}
+                              </Typography>
+                            </td>
+                            <td>
+                              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                {siswa.has_submitted && siswa.file_jawaban_siswa && (
+                                  <Button
+                                    size="sm"
+                                    variant="outlined"
+                                    onClick={() => window.open(siswa.file_jawaban_siswa, '_blank')}
+                                  >
+                                    Lihat File
+                                  </Button>
+                                )}
+                                {siswa.has_submitted && siswa.catatan_siswa && (
+                                  <Tooltip title={siswa.catatan_siswa}>
+                                    <Button
+                                      size="sm"
+                                      variant="soft"
+                                      color="neutral"
+                                    >
+                                      💬
+                                    </Button>
+                                  </Tooltip>
+                                )}
+                                {!siswa.has_submitted && (
+                                  <Typography level="body-sm" color="neutral" sx={{ fontStyle: 'italic' }}>
+                                    Belum ada file
+                                  </Typography>
+                                )}
+                              </Box>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </Sheet>
+                )}
+              </Box>
+            )}
           </ModalDialog>
         </Modal>
       </Box>

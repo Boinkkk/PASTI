@@ -42,8 +42,8 @@ const sidebarItems: SidebarItem[] = [
     path: '/guru/dashboard'
   },
   {
-    id: 'jadwal',
-    label: 'Jadwal Mengajar',
+    id: 'tugas-siswa',
+    label: 'Tugas Siswa',
     icon: <JadwalIcon />,
     path: '/guru/jadwal'
   },

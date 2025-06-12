@@ -28,12 +28,12 @@ func GuruRoutes(r *mux.Router) {
 
 	// Siswa management routes
 	router.HandleFunc("/siswa", controllers.GetAllSiswa).Methods("GET")
-	
-	// Tugas management routes
+		// Tugas management routes
 	router.HandleFunc("/tugas", controllers.GetTugasGuru).Methods("GET")
 	router.HandleFunc("/tugas/jadwal/{jadwal_id}", controllers.GetTugasByJadwal).Methods("GET")
 	router.HandleFunc("/tugas", controllers.CreateTugas).Methods("POST")
 	router.HandleFunc("/tugas/{tugas_id}", controllers.UpdateTugas).Methods("PUT")
 	router.HandleFunc("/tugas/{tugas_id}", controllers.DeleteTugas).Methods("DELETE")
 	router.HandleFunc("/tugas/{tugas_id}/detail", controllers.GetTugasDetail).Methods("GET")
+	router.HandleFunc("/tugas/{tugas_id}/pengumpulan", controllers.GetPengumpulanByTugas).Methods("GET")
 }

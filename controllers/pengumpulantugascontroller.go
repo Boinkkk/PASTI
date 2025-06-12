@@ -225,3 +225,101 @@ func DeletePengumpulan(w http.ResponseWriter, r *http.Request) {
 
 	helpers.Response(w, 200, "Pengumpulan deleted successfully", nil)
 }
+
+// GetPengumpulanByTugas - Mendapatkan semua pengumpulan tugas berdasarkan tugas_id (untuk guru)
+func GetPengumpulanByTugas(w http.ResponseWriter, r *http.Request) {
+	// Ambil info guru dari context (dari middleware)
+	guruInfo := r.Context().Value("guruinfo")
+	if guruInfo == nil {
+		helpers.Response(w, 401, "Unauthorized: no guru info in context", nil)
+		return
+	}
+
+	guru, ok := guruInfo.(*helpers.GuruCustomClaims)
+	if !ok {
+		helpers.Response(w, 401, "Unauthorized: invalid guru info format", nil)
+		return
+	}
+
+	vars := mux.Vars(r)
+	tugasIDStr := vars["tugas_id"]
+	tugasID, err := strconv.Atoi(tugasIDStr)
+	if err != nil {
+		helpers.Response(w, 400, "Invalid tugas ID", nil)
+		return
+	}
+
+	// Verify bahwa tugas ini milik guru yang sedang login
+	var tugas models.Tugas
+ 	if err := config.DB.Preload("JadwalPelajaran").
+		Joins("JOIN jadwalpelajaran ON tugas.jadwal_id = jadwalpelajaran.jadwal_id").
+		Where("tugas.tugas_id = ? AND jadwalpelajaran.guru_id = ?", tugasID, guru.ID).
+		First(&tugas).Error; err != nil {
+		helpers.Response(w, 404, "Tugas tidak ditemukan atau bukan milik Anda", nil)
+		return
+	}
+
+	// Ambil semua siswa di kelas yang terkait dengan tugas ini
+	var siswaList []models.Siswa
+	if err := config.DB.Where("kelas_id = ?", tugas.JadwalPelajaran.KelasID).
+		Order("nama_lengkap ASC").
+		Find(&siswaList).Error; err != nil {
+		helpers.Response(w, 500, "Failed to fetch siswa list", nil)
+		return
+	}
+
+	// Ambil semua pengumpulan untuk tugas ini
+	var pengumpulanList []models.PengumpulanTugas
+	pengumpulanMap := make(map[int]models.PengumpulanTugas)
+	
+	if err := config.DB.Where("tugas_id = ?", tugasID).Find(&pengumpulanList).Error; err != nil {
+		helpers.Response(w, 500, "Failed to fetch pengumpulan", nil)
+		return
+	}
+
+	// Buat map pengumpulan berdasarkan siswa_id untuk akses cepat
+	for _, p := range pengumpulanList {
+		pengumpulanMap[p.SiswaID] = p
+	}
+
+	// Format response dengan data semua siswa dan status pengumpulan mereka
+	var response []map[string]interface{}
+	for _, siswa := range siswaList {
+		siswaData := map[string]interface{}{
+			"siswa_id":     siswa.SiswaID,
+			"nis":          siswa.NIS,
+			"nama_lengkap": siswa.NamaLengkap,
+			"email":        siswa.Email,
+		}
+
+		// Cek apakah siswa sudah mengumpulkan tugas
+		if pengumpulan, exists := pengumpulanMap[siswa.SiswaID]; exists {
+			siswaData["pengumpulan_id"] = pengumpulan.PengumpulanID
+			siswaData["tugas_id"] = pengumpulan.TugasID
+			siswaData["file_jawaban_siswa"] = pengumpulan.FileJawabanSiswa
+			siswaData["catatan_siswa"] = pengumpulan.CatatanSiswa
+			siswaData["tanggal_pengumpulan"] = pengumpulan.TanggalPengumpulan
+			siswaData["nilai"] = pengumpulan.Nilai
+			siswaData["catatan_guru"] = pengumpulan.CatatanGuru
+			siswaData["status_pengumpulan"] = pengumpulan.StatusPengumpulan
+			siswaData["poin_didapat"] = pengumpulan.PoinDidapat
+			siswaData["has_submitted"] = true
+		} else {
+			// Siswa belum mengumpulkan tugas
+			siswaData["pengumpulan_id"] = nil
+			siswaData["tugas_id"] = tugasID
+			siswaData["file_jawaban_siswa"] = nil
+			siswaData["catatan_siswa"] = nil
+			siswaData["tanggal_pengumpulan"] = nil
+			siswaData["nilai"] = nil
+			siswaData["catatan_guru"] = nil
+			siswaData["status_pengumpulan"] = "Belum Mengerjakan"
+			siswaData["poin_didapat"] = 0
+			siswaData["has_submitted"] = false
+		}
+
+		response = append(response, siswaData)
+	}
+
+	helpers.Response(w, 200, "Data siswa dan pengumpulan tugas berhasil diambil", response)
+}

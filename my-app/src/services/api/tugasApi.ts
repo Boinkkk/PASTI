@@ -42,6 +42,23 @@ export interface UpdateTugasRequest {
   file_tugas_guru?: string;
 }
 
+export interface PengumpulanTugas {
+  pengumpulan_id?: number;
+  tugas_id: number;
+  siswa_id: number;
+  file_jawaban_siswa?: string;
+  catatan_siswa?: string;
+  tanggal_pengumpulan?: string;
+  nilai?: number;
+  catatan_guru?: string;
+  status_pengumpulan: 'Belum Mengerjakan' | 'Mengerjakan' | 'Terlambat' | 'Dinilai';
+  poin_didapat: number;
+  has_submitted: boolean;
+  nis: string;
+  nama_lengkap: string;
+  email: string;
+}
+
 // Fetch all tugas for guru
 export const fetchTugasGuru = async () => {
   try {
@@ -104,6 +121,17 @@ export const fetchTugasDetail = async (tugasId: number) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching tugas detail:', error);
+    throw error;
+  }
+};
+
+// Get pengumpulan tugas by tugas_id
+export const fetchPengumpulanByTugas = async (tugasId: number) => {
+  try {
+    const response = await apiClient.get(`${API_ENDPOINTS.GURU.TUGAS}/${tugasId}/pengumpulan`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching pengumpulan tugas:', error);
     throw error;
   }
 };
