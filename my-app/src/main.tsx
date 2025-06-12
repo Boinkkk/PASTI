@@ -21,6 +21,7 @@ import GuruAbsensi from './pages/GuruAbsensi.tsx'
 import GuruQRGenerator from './pages/GuruQRGenerator.tsx'
 import KelasTest from './pages/Kelas_test.tsx'
 import TugasSiswa from './pages/TugasSiswa.tsx'
+import AbsensiToken from './pages/AbsensiToken.tsx'
 
 const router = createBrowserRouter([
   {
@@ -138,6 +139,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <KelasTest/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/absensi/token',
+    element: (
+      <ProtectedRoute>
+        <AbsensiToken/>
       </ProtectedRoute>
     )
   },

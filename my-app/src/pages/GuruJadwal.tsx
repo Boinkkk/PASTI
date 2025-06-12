@@ -29,7 +29,9 @@ import {
   Delete as DeleteIcon,
   Visibility as ViewIcon,
   AccessTime as TimeIcon,
-  CalendarToday as CalendarIcon
+  CalendarToday as CalendarIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowDownward as ArrowDownIcon
 } from '@mui/icons-material';
 import SidebarGuru from '../components/SidebarGuru';
 import { fetchGuruJadwal } from '../services/api/guruApi';
@@ -69,7 +71,6 @@ const GuruJadwal: React.FC = () => {
   const [tugasList, setTugasList] = useState<TugasData[]>([]);
   const [selectedTugas, setSelectedTugas] = useState<TugasData | null>(null);
   const [pengumpulanList, setPengumpulanList] = useState<PengumpulanTugas[]>([]);
-
   // Form state
   const [formData, setFormData] = useState({
     judul_tugas: '',
@@ -79,6 +80,20 @@ const GuruJadwal: React.FC = () => {
     poin_maksimal: 100,
     tipe_tugas: 'Individu' as 'Individu' | 'Kelompok'
   });
+  // Filter states
+  const [filters, setFilters] = useState({
+    search: '',
+    kelas: '',
+    status: '',
+    tipe_tugas: '',
+    mata_pelajaran: ''
+  });
+
+  // Sorting states
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null);
 
   // Load data when component mounts
   useEffect(() => {
@@ -261,7 +276,6 @@ const GuruJadwal: React.FC = () => {
     if (diffDays <= 7) return `${diffDays} Hari Lagi`;
     return 'Aktif';
   };
-
   const resetForm = () => {
     setFormData({
       judul_tugas: '',
@@ -272,6 +286,139 @@ const GuruJadwal: React.FC = () => {
       tipe_tugas: 'Individu'
     });
   };
+
+  // Filter functions
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      search: '',
+      kelas: '',
+      status: '',
+      tipe_tugas: '',
+      mata_pelajaran: ''
+    });
+  };
+  const getFilteredTugas = () => {
+    let filtered = tugasList.filter(tugas => {
+      // Search filter
+      const searchMatch = !filters.search || 
+        tugas.judul_tugas.toLowerCase().includes(filters.search.toLowerCase()) ||
+        tugas.deskripsi_tugas.toLowerCase().includes(filters.search.toLowerCase());
+
+      // Kelas filter
+      const kelasMatch = !filters.kelas || 
+        tugas.jadwal_pelajaran?.nama_kelas === filters.kelas;
+
+      // Mata pelajaran filter
+      const mapelMatch = !filters.mata_pelajaran || 
+        tugas.jadwal_pelajaran?.nama_mapel === filters.mata_pelajaran;
+
+      // Tipe tugas filter
+      const tipeMatch = !filters.tipe_tugas || 
+        tugas.tipe_tugas === filters.tipe_tugas;
+
+      // Status filter
+      const statusMatch = !filters.status || (() => {
+        const deadline = new Date(tugas.deadline_pengumpulan);
+        const now = new Date();
+        const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 3600 * 24));
+        
+        switch (filters.status) {
+          case 'active':
+            return diffDays > 3;
+          case 'soon':
+            return diffDays >= 0 && diffDays <= 3;
+          case 'expired':
+            return diffDays < 0;
+          case 'today':
+            return diffDays === 0;
+          default:
+            return true;
+        }
+      })();
+
+      return searchMatch && kelasMatch && mapelMatch && tipeMatch && statusMatch;
+    });
+
+    // Apply sorting
+    if (sortConfig) {
+      filtered.sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+
+        switch (sortConfig.key) {
+          case 'judul_tugas':
+            aValue = a.judul_tugas.toLowerCase();
+            bValue = b.judul_tugas.toLowerCase();
+            break;
+          case 'kelas':
+            aValue = a.jadwal_pelajaran?.nama_kelas || '';
+            bValue = b.jadwal_pelajaran?.nama_kelas || '';
+            break;
+          case 'mata_pelajaran':
+            aValue = a.jadwal_pelajaran?.nama_mapel || '';
+            bValue = b.jadwal_pelajaran?.nama_mapel || '';
+            break;
+          case 'deadline':
+            aValue = new Date(a.deadline_pengumpulan).getTime();
+            bValue = new Date(b.deadline_pengumpulan).getTime();
+            break;
+          case 'poin_maksimal':
+            aValue = a.poin_maksimal;
+            bValue = b.poin_maksimal;
+            break;
+          case 'tipe_tugas':
+            aValue = a.tipe_tugas;
+            bValue = b.tipe_tugas;
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filtered;
+  };
+
+  // Sorting function
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Get unique values for filter options
+  const getUniqueClasses = () => {
+    const classes = tugasList
+      .map(tugas => tugas.jadwal_pelajaran?.nama_kelas)
+      .filter((kelas, index, arr) => kelas && arr.indexOf(kelas) === index);
+    return classes;
+  };
+
+  const getUniqueMapel = () => {
+    const mapel = tugasList
+      .map(tugas => tugas.jadwal_pelajaran?.nama_mapel)
+      .filter((mapel, index, arr) => mapel && arr.indexOf(mapel) === index);
+    return mapel;
+  };
+
+  const filteredTugas = getFilteredTugas();
 
   if (loading && tugasList.length === 0) {
     return (
@@ -349,9 +496,7 @@ const GuruJadwal: React.FC = () => {
           >
             Buat Tugas Baru
           </Button>
-        </Box>
-
-        {/* Stats Cards */}
+        </Box>        {/* Stats Cards */}
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2, mb: 3 }}>
           <Card variant="soft" color="primary">
             <CardContent>
@@ -378,31 +523,251 @@ const GuruJadwal: React.FC = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Box>
-
-        {/* Tasks Table */}
+          <Card variant="soft" color="neutral">
+            <CardContent>
+              <Typography level="body-sm" sx={{ color: 'neutral.600' }}>Hasil Filter</Typography>
+              <Typography level="h3">{filteredTugas.length}</Typography>
+            </CardContent>
+          </Card>
+        </Box>        {/* Tasks Table */}
         <Card>
           <CardContent>
-            <Typography level="title-md" sx={{ mb: 2 }}>
-              Daftar Tugas
-            </Typography>
-            
-            <Sheet sx={{ borderRadius: 'md', overflow: 'auto' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography level="title-md">
+                Daftar Tugas ({filteredTugas.length} dari {tugasList.length})
+              </Typography>
+              <Button
+                variant="outlined"
+                size="sm"
+                onClick={resetFilters}
+                disabled={Object.values(filters).every(f => !f)}
+              >
+                Reset Filter
+              </Button>
+            </Box>            {/* Filter Controls */}
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+              gap: 2, 
+              mb: 3,
+              p: 2,
+              bgcolor: 'background.level1',
+              borderRadius: 'md'
+            }}>
+              <FormControl size="sm">
+                <FormLabel>Cari Tugas</FormLabel>
+                <Input
+                  placeholder="Cari judul atau deskripsi..."
+                  value={filters.search}
+                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                />
+              </FormControl>              <FormControl size="sm">
+                <FormLabel>Kelas</FormLabel>
+                <Select
+                  placeholder="Semua Kelas"
+                  value={filters.kelas}
+                  onChange={(_, value) => handleFilterChange('kelas', value || '')}
+                >
+                  <Option value="">Semua Kelas ({tugasList.length})</Option>
+                  {getUniqueClasses().map((kelas) => {
+                    const count = tugasList.filter(t => t.jadwal_pelajaran?.nama_kelas === kelas).length;
+                    return (
+                      <Option key={kelas} value={kelas}>
+                        {kelas} ({count})
+                      </Option>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+
+              <FormControl size="sm">
+                <FormLabel>Mata Pelajaran</FormLabel>
+                <Select
+                  placeholder="Semua Mapel"
+                  value={filters.mata_pelajaran}
+                  onChange={(_, value) => handleFilterChange('mata_pelajaran', value || '')}
+                >
+                  <Option value="">Semua Mapel ({tugasList.length})</Option>
+                  {getUniqueMapel().map((mapel) => {
+                    const count = tugasList.filter(t => t.jadwal_pelajaran?.nama_mapel === mapel).length;
+                    return (
+                      <Option key={mapel} value={mapel}>
+                        {mapel} ({count})
+                      </Option>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+
+              <FormControl size="sm">
+                <FormLabel>Tipe Tugas</FormLabel>
+                <Select
+                  placeholder="Semua Tipe"
+                  value={filters.tipe_tugas}
+                  onChange={(_, value) => handleFilterChange('tipe_tugas', value || '')}
+                >
+                  <Option value="">Semua Tipe ({tugasList.length})</Option>
+                  <Option value="Individu">
+                    Individu ({tugasList.filter(t => t.tipe_tugas === 'Individu').length})
+                  </Option>
+                  <Option value="Kelompok">
+                    Kelompok ({tugasList.filter(t => t.tipe_tugas === 'Kelompok').length})
+                  </Option>
+                </Select>
+              </FormControl>
+
+              <FormControl size="sm">
+                <FormLabel>Status Deadline</FormLabel>
+                <Select
+                  placeholder="Semua Status"
+                  value={filters.status}
+                  onChange={(_, value) => handleFilterChange('status', value || '')}
+                >
+                  <Option value="">Semua Status ({tugasList.length})</Option>
+                  <Option value="active">
+                    Aktif (&gt;3 hari) ({tugasList.filter(t => {
+                      const diffDays = Math.ceil((new Date(t.deadline_pengumpulan).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                      return diffDays > 3;
+                    }).length})
+                  </Option>
+                  <Option value="soon">
+                    Segera Berakhir (&le;3 hari) ({tugasList.filter(t => {
+                      const diffDays = Math.ceil((new Date(t.deadline_pengumpulan).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                      return diffDays >= 0 && diffDays <= 3;
+                    }).length})
+                  </Option>
+                  <Option value="today">
+                    Hari Ini ({tugasList.filter(t => {
+                      const diffDays = Math.ceil((new Date(t.deadline_pengumpulan).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                      return diffDays === 0;
+                    }).length})
+                  </Option>
+                  <Option value="expired">
+                    Sudah Lewat ({tugasList.filter(t => {
+                      const diffDays = Math.ceil((new Date(t.deadline_pengumpulan).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                      return diffDays < 0;
+                    }).length})
+                  </Option>
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Quick Filter Buttons */}
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+              <Chip
+                variant={filters.status === 'today' ? 'solid' : 'outlined'}
+                color="warning"
+                size="sm"
+                onClick={() => handleFilterChange('status', filters.status === 'today' ? '' : 'today')}
+                sx={{ cursor: 'pointer' }}
+              >
+                Deadline Hari Ini
+              </Chip>
+              <Chip
+                variant={filters.status === 'soon' ? 'solid' : 'outlined'}
+                color="danger"
+                size="sm"
+                onClick={() => handleFilterChange('status', filters.status === 'soon' ? '' : 'soon')}
+                sx={{ cursor: 'pointer' }}
+              >
+                Segera Berakhir
+              </Chip>
+              <Chip
+                variant={filters.tipe_tugas === 'Kelompok' ? 'solid' : 'outlined'}
+                color="success"
+                size="sm"
+                onClick={() => handleFilterChange('tipe_tugas', filters.tipe_tugas === 'Kelompok' ? '' : 'Kelompok')}
+                sx={{ cursor: 'pointer' }}
+              >
+                Tugas Kelompok
+              </Chip>
+              <Chip
+                variant={filters.status === 'expired' ? 'solid' : 'outlined'}
+                color="neutral"
+                size="sm"
+                onClick={() => handleFilterChange('status', filters.status === 'expired' ? '' : 'expired')}
+                sx={{ cursor: 'pointer' }}
+              >
+                Sudah Lewat
+              </Chip>
+            </Box>
+              <Sheet sx={{ borderRadius: 'md', overflow: 'auto' }}>
               <Table hoverRow>
                 <thead>
                   <tr>
-                    <th>Judul Tugas</th>
-                    <th>Mata Pelajaran / Kelas</th>
-                    <th>Tipe</th>
-                    <th>Deadline</th>
+                    <th 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('judul_tugas')}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Judul Tugas
+                        {sortConfig?.key === 'judul_tugas' && (
+                          sortConfig.direction === 'asc' ? <ArrowUpIcon fontSize="small" /> : <ArrowDownIcon fontSize="small" />
+                        )}
+                      </Box>
+                    </th>
+                    <th 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('kelas')}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Kelas
+                        {sortConfig?.key === 'kelas' && (
+                          sortConfig.direction === 'asc' ? <ArrowUpIcon fontSize="small" /> : <ArrowDownIcon fontSize="small" />
+                        )}
+                      </Box>
+                    </th>
+                    <th 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('mata_pelajaran')}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Mata Pelajaran
+                        {sortConfig?.key === 'mata_pelajaran' && (
+                          sortConfig.direction === 'asc' ? <ArrowUpIcon fontSize="small" /> : <ArrowDownIcon fontSize="small" />
+                        )}
+                      </Box>
+                    </th>
+                    <th 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('tipe_tugas')}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Tipe
+                        {sortConfig?.key === 'tipe_tugas' && (
+                          sortConfig.direction === 'asc' ? <ArrowUpIcon fontSize="small" /> : <ArrowDownIcon fontSize="small" />
+                        )}
+                      </Box>
+                    </th>
+                    <th 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('deadline')}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Deadline
+                        {sortConfig?.key === 'deadline' && (
+                          sortConfig.direction === 'asc' ? <ArrowUpIcon fontSize="small" /> : <ArrowDownIcon fontSize="small" />
+                        )}
+                      </Box>
+                    </th>
                     <th>Status</th>
-                    <th>Poin</th>
+                    <th 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('poin_maksimal')}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Poin
+                        {sortConfig?.key === 'poin_maksimal' && (
+                          sortConfig.direction === 'asc' ? <ArrowUpIcon fontSize="small" /> : <ArrowDownIcon fontSize="small" />
+                        )}
+                      </Box>
+                    </th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tugasList.length > 0 ? (
-                    tugasList.map((tugas) => (
+                  {filteredTugas.length > 0 ? (
+                    filteredTugas.map((tugas) => (
                       <tr key={tugas.tugas_id}>
                         <td>
                           <Box>
@@ -415,18 +780,22 @@ const GuruJadwal: React.FC = () => {
                           </Box>
                         </td>
                         <td>
-                          <Box>
-                            <Typography level="body-sm" fontWeight="md">
-                              {tugas.jadwal_pelajaran?.nama_mapel || '-'}
-                            </Typography>
-                            <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                              {tugas.jadwal_pelajaran?.nama_kelas || '-'}
-                            </Typography>
-                          </Box>
+                          <Chip
+                            color="primary"
+                            size="sm"
+                            variant="soft"
+                          >
+                            {tugas.jadwal_pelajaran?.nama_kelas || '-'}
+                          </Chip>
+                        </td>
+                        <td>
+                          <Typography level="body-sm" fontWeight="md">
+                            {tugas.jadwal_pelajaran?.nama_mapel || '-'}
+                          </Typography>
                         </td>
                         <td>
                           <Chip
-                            color={tugas.tipe_tugas === 'Kelompok' ? 'primary' : 'neutral'}
+                            color={tugas.tipe_tugas === 'Kelompok' ? 'success' : 'neutral'}
                             size="sm"
                             variant="soft"
                           >
@@ -464,7 +833,8 @@ const GuruJadwal: React.FC = () => {
                             {tugas.poin_maksimal} poin
                           </Typography>
                         </td>
-                        <td>                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <td>
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
                             <Tooltip title="Lihat Detail">
                               <IconButton 
                                 size="sm" 
@@ -500,9 +870,12 @@ const GuruJadwal: React.FC = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '2rem' }}>
                         <Typography level="body-md" sx={{ color: 'text.secondary' }}>
-                          Belum ada tugas yang dibuat
+                          {tugasList.length === 0 
+                            ? 'Belum ada tugas yang dibuat' 
+                            : 'Tidak ada tugas yang sesuai dengan filter'
+                          }
                         </Typography>
                       </td>
                     </tr>

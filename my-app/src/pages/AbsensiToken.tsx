@@ -72,6 +72,7 @@ interface SubmitResponse {
 const AbsensiToken: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token_absensi = searchParams.get('token');
+  
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -83,6 +84,8 @@ const AbsensiToken: React.FC = () => {
   const [processingStep, setProcessingStep] = useState<string>('Memvalidasi token...');
 
   const hasProcessedRef = useRef(false);
+
+  console.log("Token Absensi:", token_absensi);
 
   useEffect(() => {
     if (hasProcessedRef.current) return;
@@ -107,6 +110,10 @@ const AbsensiToken: React.FC = () => {
     try {
       setLoading(true);
       setProcessingStep('Memvalidasi token...');
+
+      console.log("test")
+
+      console.log('Token Absensi:', token_absensi);
 
       const response = await fetch(`http://localhost:8080/api/absensi/${token_absensi}`, {
         method: 'POST',

@@ -386,7 +386,7 @@ const GuruAbsensi: React.FC = () => {
   
   // Function to generate absensi URL from token
   const generateAbsensiUrl = (token: string): string => {
-    return `http://localhost:8080/api/absensi/${token}`;
+    return `http://localhost:5173/absensi/token?token=${token}`;
   };
 
   // Function to show QR Code modal
