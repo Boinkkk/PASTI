@@ -23,6 +23,7 @@ import KelasTest from './pages/Kelas_test.tsx'
 import TugasSiswa from './pages/TugasSiswa.tsx'
 import AbsensiToken from './pages/AbsensiToken.tsx'
 import SiswaProfile from './pages/SiswaProfile.tsx'
+import AdminUploadSiswa from './pages/AdminUploadSiswa.tsx'
 
 const router = createBrowserRouter([
   {
@@ -156,6 +157,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AbsensiToken/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/upload-siswa/99828jsjj872h287shhsda8277sdsalloakksolppaooom188sj1',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <AdminUploadSiswa/>
       </ProtectedRoute>
     )
   },

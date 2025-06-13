@@ -26,6 +26,7 @@ import {
   updateAbsensiStatus as updateAbsensiStatusAPI,
   createManualAbsensi as createManualAbsensiAPI
 } from '../services/api/guruApi';
+import axios from 'axios';
 
 // Types
 interface JadwalKelas {
@@ -54,6 +55,7 @@ interface PertemuanData {
 interface AbsensiSiswa {
   absensi_id: number;
   siswa_id: number;
+  no_telepon?: string;
   nis: string;
   nama_lengkap: string;
   waktu_absen: string | null;
@@ -200,15 +202,6 @@ const GuruAbsensi: React.FC = () => {
       setPertemuanList(pertemuanResponse.data || []);
 
       setLoading(false);
-
-
-      setTimeout(() => {
-        setJadwalList(JadwalGuruResponse.data);
-        setSelectedJadwal(JadwalGuruResponse.data[0]);
-        setPertemuanList(pertemuanResponse.data || []);
-        setSiswaList(DUMMY_SISWA);
-        setLoading(false);
-      }, 1000); // Simulate loading
     };
     
     loadData();
@@ -247,6 +240,52 @@ const GuruAbsensi: React.FC = () => {
       console.error('Error fetching detail absensi:', error);
     }
   };
+
+  const handleSendLink = async () => {
+    try {
+      if (!selectedPertemuan) {
+        setError('Pilih pertemuan terlebih dahulu');
+        return;
+      }
+  
+      const token = selectedPertemuan?.token_absen;
+  
+      if (!token) {
+        setError('Token absensi tidak ditemukan');
+        return;
+      }
+  
+      const absensiUrl = generateAbsensiUrl(token);
+  
+      // Ganti forEach dengan perulangan for...of
+      for (const siswa of siswaList) {
+        if (!siswa.no_telepon) {
+          console.warn(`No telepon tidak tersedia untuk siswa ${siswa.nama_lengkap}`);
+          continue; 
+        }
+  
+        const message = `Halo ${siswa.nama_lengkap},\n\nSilakan klik link berikut untuk melakukan absensi: ${absensiUrl}\n\nTerima kasih!`;
+
+        const responseSendLink = await axios.post('https://api.fonnte.com/send', {
+          target: siswa.no_telepon,
+          message: message
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'zZfEWfejvZfJWdXWw9kz' // Ganti dengan token Anda
+          }
+        });
+  
+        console.log(`Mengirim link absensi ke ${siswa.nama_lengkap} (${siswa.no_telepon})`);
+      }
+  
+      setSuccess('Semua link absensi berhasil dikirim!');
+  
+    } catch (error) {
+      console.error('Error sending link:', error);
+      setError(error instanceof Error ? error.message : 'Gagal mengirim link absensi');
+    }
+  }
 
   const handleCreatePertemuanSubmit = () => {
     if (!selectedJadwal) return;
@@ -892,7 +931,10 @@ const GuruAbsensi: React.FC = () => {
                         onClick={handleShowQRCode}
                         size="lg"
                         variant="solid">Show QR CODE</Chip>
-
+                      <Chip color="success"
+                        onClick={handleSendLink}
+                        size="lg"
+                        variant="solid">Send Absen Link</Chip>
                   </Box>
                   
                   
