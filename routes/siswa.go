@@ -10,9 +10,9 @@ import (
 func SiswaRoutes(r *mux.Router) {
 	router := r.PathPrefix("/users").Subrouter()
 	router.Use(middleware.Auth)
-
 	// Profile endpoints
 	router.HandleFunc("/me", controllers.Me).Methods("GET")
+	router.HandleFunc("/profile", controllers.UpdateSiswaProfile).Methods("PUT")
 	
 	// Tugas endpoints for siswa
 	router.HandleFunc("/tugas", controllers.GetTugasSiswa).Methods("GET")

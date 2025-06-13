@@ -13,6 +13,7 @@ import {
   Dashboard as DashboardIcon,
   EventNote as AbsensiIcon,
   Assignment as AssignmentIcon,
+  Person as ProfileIcon,
   Menu as MenuIcon,
   Logout as LogoutIcon
 } from '@mui/icons-material';
@@ -42,6 +43,12 @@ const sidebarItems: SidebarItem[] = [
     label: 'Tugas',
     icon: <AssignmentIcon />,
     path: '/tugas'
+  },
+  {
+    id: 'profile',
+    label: 'Profil',
+    icon: <ProfileIcon />,
+    path: '/profile'
   }
 ];
 

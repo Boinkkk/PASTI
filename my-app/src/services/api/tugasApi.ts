@@ -166,3 +166,18 @@ export const fetchPengumpulanByTugas = async (tugasId: number) => {
     throw error;
   }
 };
+
+// Update student points for a submission
+export const updateStudentPoints = async (pengumpulanId: number, poinDidapat: number, catatanGuru?: string) => {
+  try {
+    const response = await apiClient.put(`${API_ENDPOINTS.GURU.TUGAS}/pengumpulan/${pengumpulanId}/poin`, {
+      poin_didapat: poinDidapat,
+      catatan_guru: catatanGuru,
+      status_pengumpulan: 'Dinilai'
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating student points:', error);
+    throw error;
+  }
+};

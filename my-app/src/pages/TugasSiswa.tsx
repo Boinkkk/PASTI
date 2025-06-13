@@ -60,7 +60,7 @@ const TugasSiswa: React.FC = () => {
   
   // Filter states
   const [statusFilter, setStatusFilter] = useState<string>('Semua');
-  const [kelasFilter, setKelasFilter] = useState<string>('Semua');
+  const [mapelFilter, setKelasFilter] = useState<string>('Semua');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -196,7 +196,7 @@ const TugasSiswa: React.FC = () => {
     const grouped: { [key: string]: TugasSiswaData[] } = {};
     
     tugasList.forEach(tugas => {
-      const mapel = tugas.jadwal_pelajaran?.nama_mapel || 'Mata Pelajaran Tidak Diketahui';
+      const mapel = "TUGAS KELAS | "  + tugas.jadwal_pelajaran?.kelas.nama_kelas || 'Mata Pelajaran Tidak Diketahui';
       if (!grouped[mapel]) {
         grouped[mapel] = [];
       }
@@ -216,8 +216,8 @@ const TugasSiswa: React.FC = () => {
     }
 
     // Filter by kelas
-    if (kelasFilter !== 'Semua') {
-      filtered = filtered.filter(t => t.jadwal_pelajaran?.nama_kelas === kelasFilter);
+    if (mapelFilter !== 'Semua') {
+      filtered = filtered.filter(t => t.jadwal_pelajaran?.mata_pelajaran?.nama_mapel === mapelFilter);
     }
 
     return filtered;
@@ -230,7 +230,7 @@ const TugasSiswa: React.FC = () => {
   };
   // Get unique kelas options
   const getKelasOptions = () => {
-    const uniqueKelas = [...new Set(tugas.map(t => t.jadwal_pelajaran?.nama_kelas).filter(Boolean))];
+    const uniqueKelas = [...new Set(tugas.map(t => t.jadwal_pelajaran?.mata_pelajaran?.nama_mapel).filter(Boolean))];
     return ['Semua', ...uniqueKelas];
   };
 
@@ -308,7 +308,7 @@ const TugasSiswa: React.FC = () => {
               <FormControl>
                 <FormLabel sx={{ fontWeight: 'bold', fontSize: '0.875rem' }}>Kelas</FormLabel>
                 <Select
-                  value={kelasFilter}
+                  value={mapelFilter}
                   onChange={(_, value) => setKelasFilter(value as string)}
                   size="sm"
                 >
@@ -504,7 +504,7 @@ const TugasSiswa: React.FC = () => {
                               color="neutral"
                               sx={{ fontSize: '0.7rem' }}
                             >
-                              {tugasItem.jadwal_pelajaran?.nama_kelas}
+                              {tugasItem.jadwal_pelajaran?.mata_pelajaran?.nama_mapel || 'Mata Pelajaran Tidak Diketahui'}
                             </Chip>
                             <Chip 
                               size="sm" 
@@ -557,7 +557,7 @@ const TugasSiswa: React.FC = () => {
 
                           {/* Poin Maksimal */}
                           <Box sx={{ 
-                            display: 'flex', 
+                            display: 'flex-col', 
                             justifyContent: 'space-between', 
                             alignItems: 'center', 
                             mb: 3,
@@ -663,7 +663,7 @@ const TugasSiswa: React.FC = () => {
                   {selectedTugas.judul_tugas}
                 </Typography>
                 <Typography level="body-sm" color="neutral" sx={{ mb: 3 }}>
-                  {selectedTugas.jadwal_pelajaran?.nama_mapel} - {selectedTugas.jadwal_pelajaran?.nama_kelas}
+                  {selectedTugas.jadwal_pelajaran?.mata_pelajaran?.nama_mapel || 'Mata Pelajaran Tidak Diketahui'} - {selectedTugas.jadwal_pelajaran?.kelas?.nama_kelas || 'Kelas Tidak Diketahui'}
                 </Typography>
 
                 <Stack spacing={3}>

@@ -35,4 +35,29 @@ export const fetchDaftarKelas = async () => {
   }
 };
 
+// Interface for update profile request
+export interface UpdateProfileRequest {
+  nama_lengkap: string;
+  email: string;
+  no_telepon: string;
+  foto_profil?: string;
+}
+
+// Function to update siswa profile
+export const updateSiswaProfile = async (data: UpdateProfileRequest) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/users/profile`, data, {
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error updating siswa profile:', error);
+    throw error;
+  }
+};
+
 

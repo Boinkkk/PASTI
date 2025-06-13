@@ -6,19 +6,10 @@ export interface TugasSiswaData {
   judul_tugas: string;
   deskripsi_tugas: string;
   file_tugas_guru?: string;
-  tanggal_dibuat: string;
+  tanggal_dibuat?: string;
   deadline_pengumpulan: string;
   poin_maksimal: number;
   tipe_tugas: 'Individu' | 'Kelompok';
-  jadwal_pelajaran?: {
-    jadwal_id: number;
-    nama_mapel: string;
-    nama_kelas: string;
-    hari: string;
-    waktu_mulai: string;
-    waktu_selesai: string;
-    ruang: string;
-  };
   status_pengumpulan: 'Belum Mengerjakan' | 'Mengerjakan' | 'Terlambat' | 'Dinilai';
   file_jawaban_siswa?: string;
   catatan_siswa?: string;
@@ -26,7 +17,53 @@ export interface TugasSiswaData {
   nilai?: number;
   catatan_guru?: string;
   poin_didapat: number;
+
+  jadwal_pelajaran?: {
+    jadwal_id: number;
+    kelas_id: number;
+    mapel_id: number;
+    guru_id: number;
+    hari: string;
+    jam_mulai: string;
+    jam_selesai: string;
+    ruang: string;
+    created_at: string;
+    updated_at: string;
+
+    kelas: {
+      kelas_id: number;
+      nama_kelas: string;
+      wali_kelas_id: number | null;
+      id_jurusan: number;
+      created_at: string;
+      updated_at: string;
+
+      jurusan: {
+        id_jurusan: number;
+        nama_jurusan: string;
+      };
+    };
+
+    mata_pelajaran: {
+      mapel_id: number;
+      kode_mapel: string;
+      nama_mapel: string;
+      deskripsi: string;
+      created_at: string;
+      updated_at: string;
+    };
+
+    guru: {
+      guru_id: number;
+      nip: string;
+      nama_lengkap: string;
+      email: string;
+      created_at: string;
+      updated_at: string;
+    };
+  };
 }
+
 
 export interface SubmitTugasRequest {
   file_jawaban_siswa?: string;

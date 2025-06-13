@@ -323,3 +323,74 @@ func GetPengumpulanByTugas(w http.ResponseWriter, r *http.Request) {
 
 	helpers.Response(w, 200, "Data siswa dan pengumpulan tugas berhasil diambil", response)
 }
+
+// UpdateStudentPoints - Update poin yang didapat siswa oleh guru
+func UpdateStudentPoints(w http.ResponseWriter, r *http.Request) {
+	// Parse pengumpulan_id dari URL parameter
+	vars := mux.Vars(r)
+	pengumpulanIDStr := vars["pengumpulan_id"]
+	pengumpulanID, err := strconv.Atoi(pengumpulanIDStr)
+	if err != nil {
+		helpers.Response(w, 400, "Invalid pengumpulan ID", nil)
+		return
+	}
+
+	// Parse request body
+	var request struct {
+		PoinDidapat        int    `json:"poin_didapat"`
+		CatatanGuru        string `json:"catatan_guru"`
+		StatusPengumpulan  string `json:"status_pengumpulan"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		helpers.Response(w, 400, "Invalid JSON format", nil)
+		return
+	}
+
+	// Ambil pengumpulan tugas
+	var pengumpulan models.PengumpulanTugas
+	result := config.DB.Where("pengumpulan_id = ?", pengumpulanID).First(&pengumpulan)
+	if result.Error != nil {
+		helpers.Response(w, 404, "Pengumpulan tugas not found", nil)
+		return
+	}
+
+	// Ambil info tugas untuk validasi guru
+	var tugas models.Tugas
+	tugas_result := config.DB.
+		Preload("JadwalPelajaran").
+		Where("tugas_id = ?", pengumpulan.TugasID).
+		First(&tugas)
+	
+	if tugas_result.Error != nil {
+		helpers.Response(w, 404, "Tugas not found", nil)
+		return
+	}
+
+	// Validasi guru dari JWT token
+	guru := r.Context().Value("guruinfo").(*helpers.GuruCustomClaims)
+	guruID := guru.ID
+
+	if tugas.JadwalPelajaran.GuruID != guruID {
+		helpers.Response(w, 403, "Access denied - not your class", nil)
+		return
+	}
+
+	// Validasi poin tidak melebihi poin maksimal
+	if request.PoinDidapat > tugas.PoinMaksimal {
+		helpers.Response(w, 400, "Poin melebihi poin maksimal tugas", nil)
+		return
+	}
+
+	// Update pengumpulan tugas
+	pengumpulan.PoinDidapat = request.PoinDidapat
+	pengumpulan.CatatanGuru = request.CatatanGuru
+	pengumpulan.StatusPengumpulan = request.StatusPengumpulan
+
+	if err := config.DB.Save(&pengumpulan).Error; err != nil {
+		helpers.Response(w, 500, "Failed to update points", nil)
+		return
+	}
+
+	helpers.Response(w, 200, "Poin siswa berhasil diupdate", pengumpulan)
+}

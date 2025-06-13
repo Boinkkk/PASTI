@@ -41,6 +41,7 @@ import {
   updateTugas, 
   deleteTugas,
   fetchPengumpulanByTugas,
+  updateStudentPoints,
   type TugasData,
   type CreateTugasRequest,
   type PengumpulanTugas 
@@ -57,21 +58,20 @@ interface JadwalKelas {
   ruang: string;
 }
 
-const GuruJadwal: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const GuruJadwal: React.FC = () => {  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEditPointsModal, setShowEditPointsModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
   // Data states
   const [jadwalList, setJadwalList] = useState<JadwalKelas[]>([]);
   const [tugasList, setTugasList] = useState<TugasData[]>([]);
   const [selectedTugas, setSelectedTugas] = useState<TugasData | null>(null);
   const [pengumpulanList, setPengumpulanList] = useState<PengumpulanTugas[]>([]);
-  // Form state
+  const [selectedPengumpulan, setSelectedPengumpulan] = useState<PengumpulanTugas | null>(null);  // Form state
   const [formData, setFormData] = useState({
     judul_tugas: '',
     deskripsi_tugas: '',
@@ -79,6 +79,12 @@ const GuruJadwal: React.FC = () => {
     deadline_pengumpulan: '',
     poin_maksimal: 100,
     tipe_tugas: 'Individu' as 'Individu' | 'Kelompok'
+  });
+
+  // Points editing form state
+  const [pointsFormData, setPointsFormData] = useState({
+    poin_didapat: 0,
+    catatan_guru: ''
   });
   // Filter states
   const [filters, setFilters] = useState({
@@ -403,21 +409,68 @@ const GuruJadwal: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
+  // Handle edit points
+  const handleEditPoints = (pengumpulan: PengumpulanTugas) => {
+    setSelectedPengumpulan(pengumpulan);
+    setPointsFormData({
+      poin_didapat: pengumpulan.poin_didapat || 0,
+      catatan_guru: pengumpulan.catatan_guru || ''
+    });
+    setShowEditPointsModal(true);
+  };
+  // Handle update points
+  const handleUpdatePoints = async () => {
+    if (!selectedPengumpulan || !selectedPengumpulan.pengumpulan_id) return;
+
+    try {
+      setLoading(true);
+
+      await updateStudentPoints(
+        selectedPengumpulan.pengumpulan_id, 
+        pointsFormData.poin_didapat,
+        pointsFormData.catatan_guru
+      );
+
+      setSuccess('Poin siswa berhasil diperbarui!');
+      setShowEditPointsModal(false);
+      setSelectedPengumpulan(null);
+      
+      // Reload pengumpulan data
+      if (selectedTugas) {
+        const response = await fetchPengumpulanByTugas(selectedTugas.tugas_id);
+        setPengumpulanList(response.data || []);
+      }
+      
+    } catch (error) {
+      console.error('Error updating points:', error);
+      setError('Gagal memperbarui poin. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle points form input change
+  const handlePointsFormChange = (field: string, value: string | number) => {
+    setPointsFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   // Get unique values for filter options
   const getUniqueClasses = () => {
     const classes = tugasList
-      .map(tugas => tugas.jadwal_pelajaran?.kelas.nama_kelas)
+      .map(tugas => tugas.jadwal_pelajaran?.kelas?.nama_kelas)
       .filter((kelas, index, arr) => kelas && arr.indexOf(kelas) === index);
     return classes;
   };
 
   const getUniqueMapel = () => {
     const mapel = tugasList
-      .map(tugas => tugas.jadwal_pelajaran?.mata_pelajaran.nama_mapel)
+      .map(tugas => tugas.jadwal_pelajaran?.mata_pelajaran?.nama_mapel)
       .filter((mapel, index, arr) => mapel && arr.indexOf(mapel) === index);
     return mapel;
   };
-
   const filteredTugas = getFilteredTugas();
 
   if (loading && tugasList.length === 0) {
@@ -1186,11 +1239,23 @@ const GuruJadwal: React.FC = () => {
                                   Belum mengumpulkan
                                 </Typography>
                               )}
-                            </td>
-                            <td>
-                              <Typography level="body-sm" fontWeight="md">
-                                {siswa.poin_didapat || 0} / {selectedTugas.poin_maksimal}
-                              </Typography>
+                            </td>                            <td>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography level="body-sm" fontWeight="md">
+                                  {siswa.poin_didapat || 0} / {selectedTugas.poin_maksimal}
+                                </Typography>
+                                {siswa.has_submitted && (
+                                  <Button
+                                    size="sm"
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={() => handleEditPoints(siswa)}
+                                    sx={{ minWidth: 'auto', px: 1 }}
+                                  >
+                                    ✏️
+                                  </Button>
+                                )}
+                              </Box>
                             </td>
                             <td>
                               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -1227,6 +1292,89 @@ const GuruJadwal: React.FC = () => {
                     </Table>
                   </Sheet>
                 )}
+              </Box>
+            )}
+          </ModalDialog>
+        </Modal>
+
+        {/* Edit Points Modal */}
+        <Modal open={showEditPointsModal} onClose={() => setShowEditPointsModal(false)}>
+          <ModalDialog sx={{ maxWidth: '500px', width: '90vw' }}>
+            <ModalClose />
+            <Typography level="h4" component="h2" sx={{ mb: 2 }}>
+              Edit Poin Siswa
+            </Typography>
+            
+            {selectedPengumpulan && (
+              <Box>
+                {/* Student Info */}
+                <Card variant="soft" sx={{ mb: 3 }}>
+                  <CardContent>
+                    <Typography level="title-md" sx={{ mb: 1 }}>
+                      {selectedPengumpulan.nama_lengkap}
+                    </Typography>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                      NIS: {selectedPengumpulan.nis} • Email: {selectedPengumpulan.email}
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                {/* Points Form */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <FormControl>
+                    <FormLabel>Poin Didapat (Maksimal: {selectedTugas?.poin_maksimal})</FormLabel>
+                    <Input
+                      type="number"
+                      value={pointsFormData.poin_didapat?.toString() ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty string so user can clear the input
+                        if (value === "") {
+                          handlePointsFormChange('poin_didapat', value);
+                        } else if (/^\d+$/.test(value)) {
+                          const numericValue = Number(value);
+                          const max = selectedTugas?.poin_maksimal ?? 100;
+                          if (numericValue <= max) {
+                            handlePointsFormChange('poin_didapat', numericValue);
+                          }
+                        }
+                      }}
+                      slotProps={{
+                        input: {
+                          min: 0,
+                          max: selectedTugas?.poin_maksimal ?? 100
+                        }
+                      }}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel>Catatan Guru (Opsional)</FormLabel>
+                    <Textarea
+                      placeholder="Berikan feedback kepada siswa..."
+                      minRows={3}
+                      value={pointsFormData.catatan_guru}
+                      onChange={(e) => handlePointsFormChange('catatan_guru', e.target.value)}
+                    />
+                  </FormControl>
+
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setShowEditPointsModal(false)}
+                      disabled={loading}
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      onClick={handleUpdatePoints}
+                      loading={loading}
+                      variant="solid"
+                    >
+                      Simpan Poin
+                    </Button>
+                  </Box>
+                </Box>
               </Box>
             )}
           </ModalDialog>

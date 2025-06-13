@@ -22,6 +22,7 @@ import GuruQRGenerator from './pages/GuruQRGenerator.tsx'
 import KelasTest from './pages/Kelas_test.tsx'
 import TugasSiswa from './pages/TugasSiswa.tsx'
 import AbsensiToken from './pages/AbsensiToken.tsx'
+import SiswaProfile from './pages/SiswaProfile.tsx'
 
 const router = createBrowserRouter([
   {
@@ -123,6 +124,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <TugasSiswa/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/profile',
+    element: (
+      <ProtectedRoute>
+        <SiswaProfile/>
       </ProtectedRoute>
     )
   },
