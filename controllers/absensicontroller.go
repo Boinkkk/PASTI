@@ -102,7 +102,7 @@ func GetDaftarPertemuanPerPelajaran(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cek jika data kosong
+	
 	if len(results) == 0 {
 		helpers.Response(w, 404, "Data tidak ditemukan", nil)
 		return

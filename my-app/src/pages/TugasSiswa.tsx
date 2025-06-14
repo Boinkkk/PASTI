@@ -185,6 +185,7 @@ const TugasSiswa: React.FC = () => {
 
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString('id-ID', {
+      timeZone: 'UTC',
       year: 'numeric',
       month: 'long',
       day: 'numeric',

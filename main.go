@@ -3,32 +3,42 @@ package main
 import (
 	"Pasti/config"
 	"Pasti/controllers"
+	"Pasti/cron"
 	"Pasti/routes"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+
 	config.ConnectDB()
+
+	cron.StartCronJobs()
 
 	r := mux.NewRouter()
 	
-	// Route untuk upload file
+	
 	r.HandleFunc("/api/upload/tugas", controllers.UploadFileHandler).Methods("POST")
 	
-	// Serve static files (uploaded files)
+	
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads/"))))
 	
 	router := r.PathPrefix("/api").Subrouter()
-	// Tambahkan routes
+	
 	routes.AuthRoutes(router)
 	routes.SiswaRoutes(router)
 	routes.AbsensiRoute(router)
 	routes.GuruRoutes(router)
 
-	// Bungkus dengan CORS middleware
+	
 	log.Println("Server Running On port 8080")
 	log.Fatal(http.ListenAndServe(":8080", enableCORS(r)))
 }

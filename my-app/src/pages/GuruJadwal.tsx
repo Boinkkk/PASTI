@@ -859,13 +859,16 @@ const GuruJadwal: React.FC = () => {  const [sidebarOpen, setSidebarOpen] = useS
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <CalendarIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                             <Typography level="body-sm">
-                              {new Date(tugas.deadline_pengumpulan).toLocaleDateString('id-ID')}
+                              {new Date(tugas.deadline_pengumpulan).toLocaleDateString('id-ID', {
+                                timeZone: 'UTC',
+                              })}
                             </Typography>
                           </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <TimeIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                             <Typography level="body-sm">
                               {new Date(tugas.deadline_pengumpulan).toLocaleTimeString('id-ID', {
+                                timeZone: 'UTC',
                                 hour: '2-digit',
                                 minute: '2-digit'
                               })}
