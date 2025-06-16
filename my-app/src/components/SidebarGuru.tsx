@@ -53,30 +53,30 @@ const sidebarItems: SidebarItem[] = [
     icon: <AbsensiIcon />,
     path: '/guru/absensi'
   },
-  {
-    id: 'qr-generator',
-    label: 'QR Generator',
-    icon: <QrCodeIcon />,
-    path: '/guru/qr-generator'
-  },
-  {
-    id: 'siswa',
-    label: 'Data Siswa',
-    icon: <SiswaIcon />,
-    path: '/guru/siswa'
-  },
-  {
-    id: 'laporan',
-    label: 'Laporan',
-    icon: <LaporanIcon />,
-    path: '/guru/laporan'
-  },
-  {
-    id: 'pengaturan',
-    label: 'Pengaturan',
-    icon: <SettingsIcon />,
-    path: '/guru/pengaturan'
-  }
+  // {
+  //   id: 'qr-generator',
+  //   label: 'QR Generator',
+  //   icon: <QrCodeIcon />,
+  //   path: '/guru/qr-generator'
+  // },
+  // {
+  //   id: 'siswa',
+  //   label: 'Data Siswa',
+  //   icon: <SiswaIcon />,
+  //   path: '/guru/siswa'
+  // },
+  // {
+  //   id: 'laporan',
+  //   label: 'Laporan',
+  //   icon: <LaporanIcon />,
+  //   path: '/guru/laporan'
+  // },
+  // {
+  //   id: 'pengaturan',
+  //   label: 'Pengaturan',
+  //   icon: <SettingsIcon />,
+  //   path: '/guru/pengaturan'
+  // }
 ];
 
 interface SidebarGuruProps {

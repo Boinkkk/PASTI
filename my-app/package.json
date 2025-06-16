@@ -17,6 +17,8 @@
     "@tailwindcss/vite": "^4.1.8",
     "@types/qrcode.react": "^3.0.0",
     "axios": "^1.9.0",
+    "framer-motion": "^12.18.1",
+    "motion": "^12.18.1",
     "papaparse": "^5.5.3",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
