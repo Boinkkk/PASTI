@@ -31,11 +31,11 @@ func main() {
 	r.HandleFunc("/uploads/tugas/{filename}", controllers.ServeProtectedFile).Methods("GET")
 	
 	router := r.PathPrefix("/api").Subrouter()
-	
-	routes.AuthRoutes(router)
+		routes.AuthRoutes(router)
 	routes.SiswaRoutes(router)
 	routes.AbsensiRoute(router)
 	routes.GuruRoutes(router)
+	routes.AdminRoutes(router)
 
 	
 	log.Println("Server Running On port 8080")

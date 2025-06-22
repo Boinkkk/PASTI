@@ -24,7 +24,10 @@ import TugasSiswa from './pages/TugasSiswa.tsx'
 import AbsensiToken from './pages/AbsensiToken.tsx'
 import SiswaProfile from './pages/SiswaProfile.tsx'
 import GuruProfile from './pages/GuruProfile.tsx'
-import AdminUploadSiswa from './pages/AdminUploadSiswa.tsx'
+import LoginAdmin from './pages/LoginAdmin.tsx'
+import AdminUploadSiswa from './pages/AdminUploadSiswa_new.tsx'
+import AdminUploadGuru from './pages/AdminUploadGuru.tsx'
+import AdminViewSiswa from './pages/AdminViewSiswa.tsx'
 
 const router = createBrowserRouter([
   {
@@ -46,6 +49,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requireAuth={false}>
         <LoginGuru/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/login', 
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <LoginAdmin/>
       </ProtectedRoute>
     )
   },
@@ -170,10 +181,26 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/admin/upload-siswa/99828jsjj872h287shhsda8277sdsalloakksolppaooom188sj1',
+    path: '/admin/upload-siswa',
     element: (
       <ProtectedRoute requireAuth={false}>
         <AdminUploadSiswa/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/upload-guru',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <AdminUploadGuru/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/siswa',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <AdminViewSiswa/>
       </ProtectedRoute>
     )
   },

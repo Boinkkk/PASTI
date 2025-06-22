@@ -89,3 +89,43 @@ func AuthUniversal(next http.Handler) http.Handler {
 		}
 	})
 }
+
+// AuthAdmin middleware untuk autentikasi admin
+func AuthAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		accessToken := r.Header.Get("Authorization")
+
+		log.Printf("🔍 AuthAdmin middleware:")
+		log.Printf("   - URL: %s", r.URL.Path)
+		log.Printf("   - Token present: %t", accessToken != "")
+
+		if accessToken == "" {
+			log.Printf("❌ No authorization token")
+			helpers.Response(w, 401, "unauthorized", nil)
+			return
+		}
+		adminClaims, err := helpers.ValidateTokenAdmin(accessToken)
+
+		if err != nil {
+			log.Printf("❌ Admin token validation failed: %v", err)
+			helpers.Response(w, 401, err.Error(), nil)
+			return
+		}
+
+		admin, ok := adminClaims.(*helpers.AdminCustomClaims)
+		if !ok {
+			log.Printf("❌ Invalid admin token type")
+			helpers.Response(w, 401, "invalid admin token", nil)
+			return
+		}
+
+		log.Printf("✅ Authenticated as ADMIN: %s", admin.Username)
+		
+		// Set headers for the controller to use
+		r.Header.Set("X-Username", admin.Username)
+		r.Header.Set("X-Role", "admin")
+		
+		ctx := context.WithValue(r.Context(), "admininfo", admin)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

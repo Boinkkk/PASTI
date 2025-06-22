@@ -37,6 +37,14 @@ type GuruCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+// Custom claims untuk admin
+type AdminCustomClaims struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+
+	jwt.RegisteredClaims
+}
+
 func CreateToken(siswa *models.Siswa) (string, error) {
 	claims := MyCustomClaims{
 		siswa.SiswaID,
@@ -85,6 +93,25 @@ func CreateTokenGuru(guru *models.Guru) (string, error) {
 	return ss, err
 }
 
+// CreateTokenAdmin membuat token JWT untuk admin
+func CreateTokenAdmin(admin *models.Admin) (string, error) {
+	claims := AdminCustomClaims{
+		admin.Username,
+		"admin", // Role sebagai admin
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString(mySigningKey)
+	fmt.Println(ss, err)
+
+	return ss, err
+}
+
 func ValidateToken(tokenString string)(any, error) {
 
 	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -116,6 +143,25 @@ func ValidateTokenGuru(tokenString string) (any, error) {
 	}
 
 	claims, ok := token.Claims.(*GuruCustomClaims)
+
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("unauthorized")
+	}
+
+	return claims, nil
+}
+
+// ValidateTokenAdmin memvalidasi token JWT untuk admin
+func ValidateTokenAdmin(tokenString string) (any, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &AdminCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("Boinkk"), nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("unauthorized")
+	}
+
+	claims, ok := token.Claims.(*AdminCustomClaims)
 
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("unauthorized")
