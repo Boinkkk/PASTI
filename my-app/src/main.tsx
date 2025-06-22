@@ -27,7 +27,9 @@ import GuruProfile from './pages/GuruProfile.tsx'
 import LoginAdmin from './pages/LoginAdmin.tsx'
 import AdminUploadSiswa from './pages/AdminUploadSiswa_new.tsx'
 import AdminUploadGuru from './pages/AdminUploadGuru.tsx'
+import AdminUploadJadwal from './pages/AdminUploadJadwal.tsx'
 import AdminViewSiswa from './pages/AdminViewSiswa.tsx'
+import AdminViewGuru from './pages/AdminViewGuru.tsx'
 
 const router = createBrowserRouter([
   {
@@ -197,10 +199,26 @@ const router = createBrowserRouter([
     )
   },
   {
+    path: '/admin/upload-jadwal',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <AdminUploadJadwal/>
+      </ProtectedRoute>
+    )
+  },
+  {
     path: '/admin/siswa',
     element: (
       <ProtectedRoute requireAuth={false}>
         <AdminViewSiswa/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/guru',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <AdminViewGuru/>
       </ProtectedRoute>
     )
   },

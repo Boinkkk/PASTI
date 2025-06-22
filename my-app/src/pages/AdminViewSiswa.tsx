@@ -34,6 +34,8 @@ interface EditSiswaData {
   nama: string;
   kelas_id: number;
   no_telepon: string;
+  email: string;
+  password?: string;
 }
 
 interface KelasOption {
@@ -56,10 +58,11 @@ const AdminViewSiswa: React.FC = () => {
   const [itemsPerPage] = useState(50);
   
   // Edit state
-  const [editMode, setEditMode] = useState<{[key: number]: boolean}>({});
-  const [editData, setEditData] = useState<{[key: number]: EditSiswaData}>({});
+  const [editMode, setEditMode] = useState<{[key: number]: boolean}>({});  const [editData, setEditData] = useState<{[key: number]: EditSiswaData}>({});
   const [kelasList, setKelasList] = useState<KelasOption[]>([]);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [passwordModal, setPasswordModal] = useState<{open: boolean, siswaId: number | null}>({open: false, siswaId: null});
+  const [newPassword, setNewPassword] = useState('');
   // Check admin authentication
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -141,14 +144,12 @@ const AdminViewSiswa: React.FC = () => {
       setLoading(false);
     }
   };
-
   const fetchKelasList = async () => {
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) return;
 
-      // Assuming there's an endpoint to get kelas list
-      const response = await axios.get('http://localhost:8080/api/kelas', {
+      const response = await axios.get('http://localhost:8080/api/admin/kelas', {
         headers: {
           'Authorization': token,
         }
@@ -161,7 +162,6 @@ const AdminViewSiswa: React.FC = () => {
       console.error('Failed to fetch kelas list:', error);
     }
   };
-
   const startEdit = (siswa: SiswaData) => {
     setEditMode(prev => ({ ...prev, [siswa.siswa_id]: true }));
     setEditData(prev => ({
@@ -171,7 +171,9 @@ const AdminViewSiswa: React.FC = () => {
         nis: siswa.nis,
         nama: siswa.nama,
         kelas_id: siswa.kelas_id,
-        no_telepon: siswa.no_telepon || ''
+        no_telepon: siswa.no_telepon || '',
+        email: siswa.email || '',
+        password: '' // Start with empty password
       }
     }));
   };
@@ -233,9 +235,58 @@ const AdminViewSiswa: React.FC = () => {
       setUpdatingId(null);
     }
   };
-
   const goToPage = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const openPasswordModal = (siswaId: number) => {
+    setPasswordModal({open: true, siswaId});
+    setNewPassword('');
+  };
+
+  const closePasswordModal = () => {
+    setPasswordModal({open: false, siswaId: null});
+    setNewPassword('');
+  };
+
+  const updatePassword = async () => {
+    if (!passwordModal.siswaId || !newPassword.trim()) return;
+    
+    setUpdatingId(passwordModal.siswaId);
+    
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        navigate('/admin/login');
+        return;
+      }
+
+      const response = await axios.put(`http://localhost:8080/api/admin/siswa/${passwordModal.siswaId}/password`, 
+        { password: newPassword }, 
+        {
+          headers: {
+            'Authorization': token,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.status === 'success') {
+        setMessage('Password siswa berhasil diupdate');
+        setMessageType('success');
+        closePasswordModal();
+      } else {
+        setMessage(response.data.message || 'Gagal mengupdate password');
+        setMessageType('danger');
+      }
+      
+    } catch (error: any) {
+      console.error('Update password error:', error);
+      setMessage(error.response?.data?.message || 'Terjadi kesalahan saat mengupdate password');
+      setMessageType('danger');
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   return (
@@ -253,9 +304,7 @@ const AdminViewSiswa: React.FC = () => {
             <LogoutIcon />
           </IconButton>
         </Box>
-      </Box>
-
-      {/* Navigation */}
+      </Box>      {/* Navigation */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
         <Button 
           variant="outlined" 
@@ -270,10 +319,22 @@ const AdminViewSiswa: React.FC = () => {
           Upload Guru
         </Button>
         <Button 
+          variant="outlined" 
+          onClick={() => navigate('/admin/upload-jadwal')}
+        >
+          Upload Jadwal
+        </Button>
+        <Button 
           variant="solid" 
           color="primary"
         >
           Lihat Data Siswa
+        </Button>
+        <Button 
+          variant="outlined" 
+          onClick={() => navigate('/admin/guru')}
+        >
+          Lihat Data Guru
         </Button>
       </Box>
 
@@ -350,16 +411,16 @@ const AdminViewSiswa: React.FC = () => {
               {siswaList.length === 0 ? 'Belum ada data siswa' : 'Tidak ada siswa yang sesuai dengan pencarian'}
             </Typography>
           ) : (
-            <Box sx={{ overflow: 'auto' }}>
-              <Table sx={{ minWidth: 800 }}>
+            <Box sx={{ overflow: 'auto' }}>              <Table sx={{ minWidth: 1000 }}>
                 <thead>
                   <tr>
                     <th style={{ width: '5%' }}>No</th>
-                    <th style={{ width: '15%' }}>NIS</th>
-                    <th style={{ width: '25%' }}>Nama</th>
-                    <th style={{ width: '15%' }}>Kelas</th>
-                    <th style={{ width: '20%' }}>No. Telepon</th>
-                    <th style={{ width: '20%' }}>Aksi</th>
+                    <th style={{ width: '12%' }}>NIS</th>
+                    <th style={{ width: '20%' }}>Nama</th>
+                    <th style={{ width: '12%' }}>Kelas</th>
+                    <th style={{ width: '15%' }}>No. Telepon</th>
+                    <th style={{ width: '20%' }}>Email</th>
+                    <th style={{ width: '16%' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -421,8 +482,7 @@ const AdminViewSiswa: React.FC = () => {
                             </Chip>
                           )}
                         </td>
-                        
-                        {/* No Telepon */}
+                          {/* No Telepon */}
                         <td>
                           {isEditing ? (
                             <Input
@@ -436,9 +496,23 @@ const AdminViewSiswa: React.FC = () => {
                           )}
                         </td>
                         
-                        {/* Actions */}
+                        {/* Email */}
                         <td>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
+                          {isEditing ? (
+                            <Input
+                              size="sm"
+                              type="email"
+                              value={editData[siswa.siswa_id]?.email || ''}
+                              onChange={(e) => updateEditData(siswa.siswa_id, 'email', e.target.value)}
+                              disabled={isUpdating}
+                            />
+                          ) : (
+                            siswa.email || 'N/A'
+                          )}
+                        </td>
+                          {/* Actions */}
+                        <td>
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                             {isEditing ? (
                               <>
                                 <IconButton 
@@ -462,14 +536,26 @@ const AdminViewSiswa: React.FC = () => {
                                 </IconButton>
                               </>
                             ) : (
-                              <IconButton 
-                                size="sm"
-                                color="primary"
-                                variant="soft"
-                                onClick={() => startEdit(siswa)}
-                              >
-                                <EditIcon />
-                              </IconButton>
+                              <>
+                                <IconButton 
+                                  size="sm"
+                                  color="primary"
+                                  variant="soft"
+                                  onClick={() => startEdit(siswa)}
+                                  title="Edit Data"
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                                <Button 
+                                  size="sm"
+                                  color="warning"
+                                  variant="soft"
+                                  onClick={() => openPasswordModal(siswa.siswa_id)}
+                                  title="Ubah Password"
+                                >
+                                  Pass
+                                </Button>
+                              </>
                             )}
                           </Box>
                         </td>
@@ -481,9 +567,7 @@ const AdminViewSiswa: React.FC = () => {
             </Box>
           )}
         </CardContent>
-      </Card>
-
-      {/* Refresh Button */}
+      </Card>      {/* Refresh Button */}
       <Box sx={{ mt: 3, textAlign: 'center' }}>
         <Button 
           onClick={fetchSiswaData}
@@ -493,6 +577,48 @@ const AdminViewSiswa: React.FC = () => {
           Refresh Data
         </Button>
       </Box>
+
+      {/* Password Modal */}
+      <Modal open={passwordModal.open} onClose={closePasswordModal}>
+        <ModalDialog>
+          <Typography level="h4" sx={{ mb: 2 }}>
+            Ubah Password Siswa
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          
+          <Stack spacing={2}>
+            <FormControl>
+              <FormLabel>Password Baru</FormLabel>
+              <Input
+                type="password"
+                placeholder="Masukkan password baru..."
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={updatingId === passwordModal.siswaId}
+              />
+            </FormControl>
+            
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              <Button 
+                variant="plain" 
+                color="neutral"
+                onClick={closePasswordModal}
+                disabled={updatingId === passwordModal.siswaId}
+              >
+                Batal
+              </Button>
+              <Button 
+                color="primary"
+                onClick={updatePassword}
+                disabled={!newPassword.trim() || updatingId === passwordModal.siswaId}
+                loading={updatingId === passwordModal.siswaId}
+              >
+                Simpan
+              </Button>
+            </Box>
+          </Stack>
+        </ModalDialog>
+      </Modal>
     </Box>
   );
 };
