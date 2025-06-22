@@ -1266,8 +1266,9 @@ const GuruJadwal: React.FC = () => {  const [sidebarOpen, setSidebarOpen] = useS
                                     size="sm"
                                     variant="outlined"
                                     onClick={() => {
-                                      // Akses file langsung melalui backend tanpa auth
-                                      const fileUrl = `http://localhost:8080${siswa.file_jawaban_siswa}`;
+                                      // Akses file langsung melalui backend dengan base URL dinamis
+                                      const baseUrl = window.location.protocol + '//' + window.location.hostname + ':8080';
+                                      const fileUrl = `${baseUrl}${siswa.file_jawaban_siswa}`;
                                       window.open(fileUrl, '_blank');
                                     }}
                                   >

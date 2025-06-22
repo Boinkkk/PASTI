@@ -47,10 +47,17 @@ func enableCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Izinkan dari frontend (React bisa di port 5173 atau 5174)
 		origin := r.Header.Get("Origin")
-		if origin == "http://localhost:5173" || origin == "http://localhost:5174" {
+		allowedOrigins := map[string]bool{
+			"http://localhost:5173": true,
+			"http://localhost:5174": true,
+			"http://170.205.30.35/":    true,
+			"http://yourdomain.com": true, // jika kamu pakai domain
+		}
+
+		if allowedOrigins[origin] {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 		} else {
-			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+			w.Header().Set("Access-Control-Allow-Origin", "*") // atau bisa ditolak
 		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")

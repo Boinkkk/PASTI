@@ -14,8 +14,13 @@ import {
   KeyboardArrowLeft as PrevIcon,
   KeyboardArrowRight as NextIcon
 } from '@mui/icons-material';
-import axios from 'axios';
 import AdminLayout from '../components/AdminLayout';
+import { 
+  fetchAllSiswa, 
+  updateSiswa, 
+  updateSiswaPassword,
+  fetchAllKelas
+} from '../services/api/adminApi';
 
 interface SiswaData {
   siswa_id: number;
@@ -99,7 +104,6 @@ const AdminViewSiswa: React.FC = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentSiswa = filteredSiswa.slice(startIndex, endIndex);
-
   const fetchSiswaData = async () => {
     setLoading(true);
     setMessage('');
@@ -111,42 +115,37 @@ const AdminViewSiswa: React.FC = () => {
         return;
       }
 
-      const response = await axios.get('http://localhost:8080/api/admin/siswa', {
-        headers: {
-          'Authorization': token
-        }
-      });
+      const response = await fetchAllSiswa();
 
-      if (response.data.status === 'success') {
-        setSiswaList(response.data.data || []);
-        setMessage(`Berhasil memuat ${response.data.data?.length || 0} data siswa`);
+      if (response.status === 'success') {
+        setSiswaList(response.data || []);
+        setMessage(`Berhasil memuat ${response.data?.length || 0} data siswa`);
         setMessageType('success');
       } else {
-        setMessage(response.data.message || 'Gagal memuat data siswa');
+        setMessage(response.message || 'Gagal memuat data siswa');
         setMessageType('danger');
       }
     } catch (error: any) {
       console.error('Fetch siswa error:', error);
-      setMessage(error.response?.data?.message || 'Terjadi kesalahan saat memuat data');
-      setMessageType('danger');
+      if (error.message?.includes('Invalid Admin Token')) {
+        navigate('/admin/login');
+      } else {
+        setMessage(error.message || 'Terjadi kesalahan saat memuat data');
+        setMessageType('danger');
+      }
     } finally {
       setLoading(false);
     }
   };
-
   const fetchKelasData = async () => {
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) return;
 
-      const response = await axios.get('http://localhost:8080/api/admin/kelas', {
-        headers: {
-          'Authorization': token
-        }
-      });
+      const response = await fetchAllKelas();
 
-      if (response.data.status === 'success') {
-        setKelasList(response.data.data || []);
+      if (response.status === 'success') {
+        setKelasList(response.data || []);
       }
     } catch (error) {
       console.error('Fetch kelas error:', error);
@@ -175,8 +174,7 @@ const AdminViewSiswa: React.FC = () => {
     const newEditData = {...editData};
     delete newEditData[siswaId];
     setEditData(newEditData);
-  };
-  const updateSiswa = async (siswaId: number) => {
+  };  const saveEdit = async (siswaId: number) => {
     const data = editData[siswaId];
     if (!data) return;
 
@@ -198,26 +196,21 @@ const AdminViewSiswa: React.FC = () => {
         email: data.email
       };
 
-      const response = await axios.put(`http://localhost:8080/api/admin/siswa/${siswaId}`, updatePayload, {
-        headers: {
-          'Authorization': token,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await updateSiswa(siswaId, updatePayload);
 
-      if (response.data.status === 'success') {
+      if (response.status === 'success') {
         setMessage('Data siswa berhasil diupdate');
         setMessageType('success');
         cancelEdit(siswaId);
         fetchSiswaData(); // Refresh data
       } else {
-        setMessage(response.data.message || 'Gagal mengupdate data siswa');
+        setMessage(response.message || 'Gagal mengupdate data siswa');
         setMessageType('danger');
       }
       
     } catch (error: any) {
       console.error('Update siswa error:', error);
-      setMessage(error.response?.data?.message || 'Terjadi kesalahan saat mengupdate data');
+      setMessage(error.message || 'Terjadi kesalahan saat mengupdate data');
       setMessageType('danger');
     } finally {
       setUpdatingId(null);
@@ -237,7 +230,6 @@ const AdminViewSiswa: React.FC = () => {
     setPasswordModal({open: false, siswaId: null});
     setNewPassword('');
   };
-
   const updatePassword = async () => {
     if (!passwordModal.siswaId || !newPassword.trim()) return;
     
@@ -250,28 +242,20 @@ const AdminViewSiswa: React.FC = () => {
         return;
       }
 
-      const response = await axios.put(`http://localhost:8080/api/admin/siswa/${passwordModal.siswaId}/password`, 
-        { password: newPassword }, 
-        {
-          headers: {
-            'Authorization': token,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await updateSiswaPassword(passwordModal.siswaId, newPassword);
 
-      if (response.data.status === 'success') {
+      if (response.status === 'success') {
         setMessage('Password siswa berhasil diupdate');
         setMessageType('success');
         closePasswordModal();
       } else {
-        setMessage(response.data.message || 'Gagal mengupdate password');
+        setMessage(response.message || 'Gagal mengupdate password');
         setMessageType('danger');
       }
       
     } catch (error: any) {
       console.error('Update password error:', error);
-      setMessage(error.response?.data?.message || 'Terjadi kesalahan saat mengupdate password');
+      setMessage(error.message || 'Terjadi kesalahan saat mengupdate password');
       setMessageType('danger');
     } finally {
       setUpdatingId(null);
@@ -468,12 +452,11 @@ const AdminViewSiswa: React.FC = () => {
                         </td>
                         <td>
                           <Box sx={{ display: 'flex', gap: 1 }}>
-                            {editMode[siswa.siswa_id] ? (
-                              <>
+                            {editMode[siswa.siswa_id] ? (                              <>
                                 <IconButton
                                   size="sm"
                                   color="success"
-                                  onClick={() => updateSiswa(siswa.siswa_id)}
+                                  onClick={() => saveEdit(siswa.siswa_id)}
                                   disabled={updatingId === siswa.siswa_id}
                                   loading={updatingId === siswa.siswa_id}
                                 >

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from "axios";
 import { motion, AnimatePresence } from 'framer-motion'
 import StableInput from '../components/StableInput'
+import { loginSiswa } from '../services/api/authApi'
 import { 
   Box, 
   Typography, 
@@ -98,7 +98,6 @@ function Login() {
   const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value)
   }, [])
-
   const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -112,24 +111,25 @@ function Login() {
     setSuccess(null)
 
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
+      const response = await loginSiswa({
         email,
         password
       })
 
       console.log(response)
 
-      const token = response.data.data
+      const token = response.data
       localStorage.setItem("token", token)
       
-      setSuccess(response.data.message)
+      setSuccess(response.message)
       
       setTimeout(() => {
         navigate('/dashboard')
       }, 1000)
 
-    } catch (err) {
-      setError("Wrong Password And Email")    } finally {
+    } catch (err: any) {
+      setError(err.message || "Login gagal, silakan coba lagi")
+    } finally {
       setLoading(false)
     }
   }, [email, password, navigate])

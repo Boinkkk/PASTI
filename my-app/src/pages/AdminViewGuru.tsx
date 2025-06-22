@@ -14,8 +14,12 @@ import {
   KeyboardArrowLeft as PrevIcon,
   KeyboardArrowRight as NextIcon
 } from '@mui/icons-material';
-import axios from 'axios';
 import AdminLayout from '../components/AdminLayout';
+import { 
+  fetchAllGuru, 
+  updateGuru, 
+  updateGuruPassword
+} from '../services/api/adminApi';
 
 interface GuruData {
   guru_id: number;
@@ -86,7 +90,6 @@ const AdminViewGuru: React.FC = () => {
   const totalPages = Math.ceil(filteredGuru.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;  const endIndex = startIndex + itemsPerPage;
   const currentGuru = filteredGuru.slice(startIndex, endIndex);
-
   const fetchGuruData = async () => {
     setLoading(true);
     setMessage('');
@@ -98,28 +101,24 @@ const AdminViewGuru: React.FC = () => {
         return;
       }
 
-      const response = await axios.get('http://localhost:8080/api/admin/guru', {
-        headers: {
-          'Authorization': token,
-        }
-      });
+      const response = await fetchAllGuru();
 
-      if (response.data.status === 'success') {
-        setGuruList(response.data.data);
-        setFilteredGuru(response.data.data);
-        setMessage(`Berhasil memuat ${response.data.data.length} data guru`);
+      if (response.status === 'success') {
+        setGuruList(response.data);
+        setFilteredGuru(response.data);
+        setMessage(`Berhasil memuat ${response.data.length} data guru`);
         setMessageType('success');
       } else {
-        setMessage(response.data.message || 'Gagal memuat data guru');
+        setMessage(response.message || 'Gagal memuat data guru');
         setMessageType('danger');
       }
       
     } catch (error: any) {
       console.error('Fetch error:', error);
-      if (error.response?.status === 401) {
+      if (error.message?.includes('Invalid Admin Token')) {
         navigate('/admin/login');
       } else {
-        setMessage(error.response?.data?.message || 'Terjadi kesalahan saat memuat data');
+        setMessage(error.message || 'Terjadi kesalahan saat memuat data');
         setMessageType('danger');
       }
     } finally {
@@ -157,7 +156,6 @@ const AdminViewGuru: React.FC = () => {
       }
     }));
   };
-
   const saveEdit = async (guruId: number) => {
     const data = editData[guruId];
     if (!data) return;
@@ -171,26 +169,21 @@ const AdminViewGuru: React.FC = () => {
         return;
       }
 
-      const response = await axios.put(`http://localhost:8080/api/admin/guru/${guruId}`, data, {
-        headers: {
-          'Authorization': token,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await updateGuru(guruId, data);
 
-      if (response.data.status === 'success') {
+      if (response.status === 'success') {
         setMessage('Data guru berhasil diupdate');
         setMessageType('success');
         cancelEdit(guruId);
         fetchGuruData(); // Refresh data
       } else {
-        setMessage(response.data.message || 'Gagal mengupdate data guru');
+        setMessage(response.message || 'Gagal mengupdate data guru');
         setMessageType('danger');
       }
       
     } catch (error: any) {
       console.error('Update error:', error);
-      setMessage(error.response?.data?.message || 'Terjadi kesalahan saat mengupdate data');
+      setMessage(error.message || 'Terjadi kesalahan saat mengupdate data');
       setMessageType('danger');
     } finally {
       setUpdatingId(null);
@@ -210,7 +203,6 @@ const AdminViewGuru: React.FC = () => {
     setPasswordModal({open: false, guruId: null});
     setNewPassword('');
   };
-
   const updatePassword = async () => {
     if (!passwordModal.guruId || !newPassword.trim()) return;
     
@@ -223,28 +215,20 @@ const AdminViewGuru: React.FC = () => {
         return;
       }
 
-      const response = await axios.put(`http://localhost:8080/api/admin/guru/${passwordModal.guruId}/password`, 
-        { password: newPassword }, 
-        {
-          headers: {
-            'Authorization': token,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await updateGuruPassword(passwordModal.guruId, newPassword);
 
-      if (response.data.status === 'success') {
+      if (response.status === 'success') {
         setMessage('Password guru berhasil diupdate');
         setMessageType('success');
         closePasswordModal();
       } else {
-        setMessage(response.data.message || 'Gagal mengupdate password');
+        setMessage(response.message || 'Gagal mengupdate password');
         setMessageType('danger');
       }
       
     } catch (error: any) {
       console.error('Update password error:', error);
-      setMessage(error.response?.data?.message || 'Terjadi kesalahan saat mengupdate password');
+      setMessage(error.message || 'Terjadi kesalahan saat mengupdate password');
       setMessageType('danger');
     } finally {
       setUpdatingId(null);

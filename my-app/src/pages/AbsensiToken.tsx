@@ -106,8 +106,7 @@ const AbsensiToken: React.FC = () => {
     autoProcessAttendance();
   }, [token_absensi, token]);
 
-  const autoProcessAttendance = async () => {
-    try {
+  const autoProcessAttendance = async () => {    try {
       setLoading(true);
       setProcessingStep('Memvalidasi token...');
 
@@ -115,7 +114,10 @@ const AbsensiToken: React.FC = () => {
 
       console.log('Token Absensi:', token_absensi);
 
-      const response = await fetch(`http://localhost:8080/api/absensi/${token_absensi}`, {
+      // Use dynamic base URL instead of hardcoded localhost
+      const baseUrl = `${window.location.protocol}//${window.location.hostname}:80`;
+      
+      const response = await fetch(`${baseUrl}/api/absensi/${token_absensi}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
