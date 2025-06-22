@@ -53,7 +53,13 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = token;
     }
-    config.headers['Content-Type'] = 'application/json';
+    
+    // JANGAN set Content-Type untuk FormData (file uploads)
+    // Browser akan otomatis set multipart/form-data dengan boundary
+    if (!(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     return config;
   },
   (error) => {

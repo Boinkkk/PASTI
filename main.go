@@ -4,6 +4,7 @@ import (
 	"Pasti/config"
 	"Pasti/controllers"
 	"Pasti/cron"
+	"Pasti/middleware"
 	"Pasti/routes"
 	"log"
 	"net/http"
@@ -22,14 +23,12 @@ func main() {
 	config.ConnectDB()
 
 	cron.StartCronJobs()
-
 	r := mux.NewRouter()
+		// Upload endpoint - dengan authentication middleware  
+	r.Handle("/api/upload/tugas", middleware.AuthUniversal(http.HandlerFunc(controllers.UploadFileHandler))).Methods("POST")
 	
-	
-	r.HandleFunc("/api/upload/tugas", controllers.UploadFileHandler).Methods("POST")
-	
-	
-	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads/"))))
+	// File serving - TANPA authentication untuk akses publik
+	r.HandleFunc("/uploads/tugas/{filename}", controllers.ServeProtectedFile).Methods("GET")
 	
 	router := r.PathPrefix("/api").Subrouter()
 	

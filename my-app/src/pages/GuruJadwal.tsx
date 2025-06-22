@@ -1261,12 +1261,15 @@ const GuruJadwal: React.FC = () => {  const [sidebarOpen, setSidebarOpen] = useS
                               </Box>
                             </td>
                             <td>
-                              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                {siswa.has_submitted && siswa.file_jawaban_siswa && (
+                              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>                                {siswa.has_submitted && siswa.file_jawaban_siswa && (
                                   <Button
                                     size="sm"
                                     variant="outlined"
-                                    onClick={() => window.open(siswa.file_jawaban_siswa, '_blank')}
+                                    onClick={() => {
+                                      // Akses file langsung melalui backend tanpa auth
+                                      const fileUrl = `http://localhost:8080${siswa.file_jawaban_siswa}`;
+                                      window.open(fileUrl, '_blank');
+                                    }}
                                   >
                                     Lihat File
                                   </Button>

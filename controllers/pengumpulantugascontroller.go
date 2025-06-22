@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -92,16 +93,23 @@ func SubmitTugas(w http.ResponseWriter, r *http.Request) {
 		helpers.Response(w, 400, "Invalid tugas ID", nil)
 		return
 	}
-
 	var request struct {
 		FileJawabanSiswa string `json:"file_jawaban_siswa"`
 		CatatanSiswa     string `json:"catatan_siswa"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		log.Printf("❌ Failed to decode JSON: %v", err)
 		helpers.Response(w, 400, "Invalid JSON format", nil)
 		return
 	}
+
+	// Debug logging
+	log.Printf("🔍 SubmitTugas received data:")
+	log.Printf("   - siswa_id: %d", siswaID)
+	log.Printf("   - tugas_id: %d", tugasID)
+	log.Printf("   - file_jawaban_siswa: '%s'", request.FileJawabanSiswa)
+	log.Printf("   - catatan_siswa: '%s'", request.CatatanSiswa)
 
 	// Cek apakah tugas ada dan siswa berhak mengaksesnya
 	var tugas models.Tugas
@@ -126,9 +134,9 @@ func SubmitTugas(w http.ResponseWriter, r *http.Request) {
 	// Cek apakah sudah ada pengumpulan sebelumnya
 	var pengumpulan models.PengumpulanTugas
 	existingResult := config.DB.Where("tugas_id = ? AND siswa_id = ?", tugasID, siswaID).First(&pengumpulan)
-
 	if existingResult.Error != nil {
 		// Buat pengumpulan baru
+		log.Printf("📝 Creating new pengumpulan tugas...")
 		pengumpulan = models.PengumpulanTugas{
 			TugasID:               tugasID,
 			SiswaID:               siswaID,
@@ -140,20 +148,28 @@ func SubmitTugas(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := config.DB.Create(&pengumpulan).Error; err != nil {
+			log.Printf("❌ Failed to create pengumpulan: %v", err)
 			helpers.Response(w, 500, "Failed to submit tugas", nil)
 			return
 		}
+		log.Printf("✅ New pengumpulan created with file: '%s'", request.FileJawabanSiswa)
 	} else {
 		// Update pengumpulan yang sudah ada
+		log.Printf("📝 Updating existing pengumpulan...")
+		log.Printf("   - Old file: '%s'", pengumpulan.FileJawabanSiswa)
+		log.Printf("   - New file: '%s'", request.FileJawabanSiswa)
+		
 		pengumpulan.FileJawabanSiswa = request.FileJawabanSiswa
 		pengumpulan.CatatanSiswa = request.CatatanSiswa
 		pengumpulan.TanggalPengumpulan = now
 		pengumpulan.StatusPengumpulan = status
 
 		if err := config.DB.Save(&pengumpulan).Error; err != nil {
+			log.Printf("❌ Failed to update pengumpulan: %v", err)
 			helpers.Response(w, 500, "Failed to update tugas submission", nil)
 			return
 		}
+		log.Printf("✅ Pengumpulan updated with file: '%s'", request.FileJawabanSiswa)
 	}
 
 	helpers.Response(w, 200, "Tugas submitted successfully", pengumpulan)

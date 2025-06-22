@@ -138,16 +138,20 @@ export const deletePengumpulan = async (tugasId: number) => {
 // Upload file function
 export const uploadFile = async (file: File): Promise<{ url: string }> => {
   try {
+    console.log('🔍 Frontend - Uploading file:', file.name);
+    
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await apiClient.post('/upload/tugas', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // JANGAN set Content-Type manual untuk multipart/form-data!
+    // Browser akan otomatis set dengan boundary yang benar
+    const response = await apiClient.post('/upload/tugas', formData);
 
-    return response.data;
+    console.log('🔍 Frontend - Upload response:', response.data);
+    console.log('   - URL:', response.data.data?.url);
+    console.log('   - Filename:', response.data.data?.filename);
+
+    return response.data.data || response.data;
   } catch (error) {
     console.error('Error uploading file:', error);
     throw error;

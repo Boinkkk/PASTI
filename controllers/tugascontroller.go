@@ -366,6 +366,5 @@ func GetTugasDetail(w http.ResponseWriter, r *http.Request) {
 		// "submissions": submissions,
 		"total_submissions": 0, // Update when submissions are implemented
 	}
-
 	helpers.Response(w, 200, "Detail tugas berhasil diambil", response)
 }

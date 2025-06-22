@@ -86,25 +86,32 @@ const TugasSiswa: React.FC = () => {
 
     try {
       setSubmitting(true);
-      
-      // Jika ada file yang dipilih, upload terlebih dahulu
+        // Jika ada file yang dipilih, upload terlebih dahulu
       let fileUrl = fileInput;
       if (selectedFile) {
         try {
           // Upload file ke server
+          console.log('🔍 Frontend - Uploading file:', selectedFile.name);
           const uploadResponse = await uploadFile(selectedFile);
+          console.log('🔍 Frontend - Upload response:', uploadResponse);
+          
+          // Ambil URL dari response
           fileUrl = uploadResponse.url;
+          console.log('🔍 Frontend - Final fileUrl:', fileUrl);
         } catch (uploadError) {
           console.error('Error uploading file:', uploadError);
           // Fallback: gunakan nama file sebagai placeholder jika upload gagal
           fileUrl = selectedFile.name;
         }
-      }
-
-      const submitData: SubmitTugasRequest = {
+      }const submitData: SubmitTugasRequest = {
         file_jawaban_siswa: fileUrl,
         catatan_siswa: catatanInput
       };
+
+      console.log('🔍 Frontend - Submitting tugas with data:', submitData);
+      console.log('   - fileUrl from upload:', fileUrl);
+      console.log('   - selectedFile name:', selectedFile?.name);
+      console.log('   - fileInput value:', fileInput);
 
       await submitTugas(selectedTugas.tugas_id, submitData);
       
@@ -613,15 +620,17 @@ const TugasSiswa: React.FC = () => {
                                   Hapus
                                 </Button>
                               </>
-                            )}
-
-                            {tugasItem.file_tugas_guru && (
+                            )}                            {tugasItem.file_tugas_guru && (
                               <Button
                                 size="sm"
                                 variant="outlined"
                                 color="neutral"
                                 startDecorator={<DownloadIcon />}
-                                onClick={() => window.open(tugasItem.file_tugas_guru, '_blank')}
+                                onClick={() => {
+                                  // Akses file langsung melalui backend tanpa auth
+                                  const fileUrl = `http://localhost:8080${tugasItem.file_tugas_guru}`;
+                                  window.open(fileUrl, '_blank');
+                                }}
                                 sx={{ width: '100%', mt: 1 }}
                               >
                                 File Guru
