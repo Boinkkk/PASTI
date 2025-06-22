@@ -53,7 +53,7 @@ interface PertemuanData {
 }
 
 interface AbsensiSiswa {
-  absensi_id: number;
+  absensi_id: number | null;
   siswa_id: number;
   no_telepon?: string;
   nis: string;
@@ -63,7 +63,7 @@ interface AbsensiSiswa {
 }
 
 const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-const STATUS_KEHADIRAN = ['Hadir', 'Alpha', 'Sakit'];
+const STATUS_KEHADIRAN = ['Hadir', 'Alpha', 'Sakit', 'Izin'];
 
 // Dummy data for demonstration
 const DUMMY_JADWAL: JadwalKelas[] = [
@@ -123,40 +123,40 @@ const DUMMY_PERTEMUAN: PertemuanData[] = [
   }
 ];
 
-const DUMMY_SISWA: AbsensiSiswa[] = [
-  {
-    absensi_id: 1,
-    siswa_id: 1,
-    nis: '202201001',
-    nama_lengkap: 'Ahmad Rizky Pratama',
-    waktu_absen: '2024-01-22T07:35:00',
-    status_kehadiran: 'Hadir'
-  },
-  {
-    absensi_id: 2,
-    siswa_id: 2,
-    nis: '202201002',
-    nama_lengkap: 'Siti Nurhaliza',
-    waktu_absen: '2024-01-22T07:36:00',
-    status_kehadiran: 'Hadir'
-  },
-  {
-    absensi_id: 0,
-    siswa_id: 3,
-    nis: '202201003',
-    nama_lengkap: 'Budi Santoso',
-    waktu_absen: null,
-    status_kehadiran: null
-  },
-  {
-    absensi_id: 3,
-    siswa_id: 4,
-    nis: '202201004',
-    nama_lengkap: 'Rina Wulandari',
-    waktu_absen: null,
-    status_kehadiran: 'Sakit'
-  }
-];
+// const DUMMY_SISWA: AbsensiSiswa[] = [
+//   {
+//     absensi_id: 1,
+//     siswa_id: 1,
+//     nis: '202201001',
+//     nama_lengkap: 'Ahmad Rizky Pratama',
+//     waktu_absen: '2024-01-22T07:35:00',
+//     status_kehadiran: 'Hadir'
+//   },
+//   {
+//     absensi_id: 2,
+//     siswa_id: 2,
+//     nis: '202201002',
+//     nama_lengkap: 'Siti Nurhaliza',
+//     waktu_absen: '2024-01-22T07:36:00',
+//     status_kehadiran: 'Hadir'
+//   },
+//   {
+//     absensi_id: 0,
+//     siswa_id: 3,
+//     nis: '202201003',
+//     nama_lengkap: 'Budi Santoso',
+//     waktu_absen: null,
+//     status_kehadiran: null
+//   },
+//   {
+//     absensi_id: 3,
+//     siswa_id: 4,
+//     nis: '202201004',
+//     nama_lengkap: 'Rina Wulandari',
+//     waktu_absen: null,
+//     status_kehadiran: 'Sakit'
+//   }
+// ];
 
 const GuruAbsensi: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -355,7 +355,7 @@ const GuruAbsensi: React.FC = () => {
       // Call API to create manual absensi
       const result = await createManualAbsensiAPI(selectedPertemuan.id_pertemuan, siswaId, status);
       
-      // Update local state
+      // Update local state - result akan berisi id_absensi baik untuk create maupun update
       setSiswaList(prevList => 
         prevList.map(siswa => 
           siswa.siswa_id === siswaId 
@@ -369,7 +369,7 @@ const GuruAbsensi: React.FC = () => {
         )
       );
       
-      setSuccess(`Absensi manual berhasil dibuat dengan status ${status}`);
+      setSuccess(`Status kehadiran berhasil diubah menjadi ${status}`);
       
     } catch (error) {
       console.error('Error creating manual absensi:', error);
@@ -462,6 +462,8 @@ const GuruAbsensi: React.FC = () => {
     const matchHari = filterHari === 'all' || jadwal.hari === filterHari;
     return matchSearch && matchHari;
   });
+
+  console.log("siswa list ", siswaList);
 
   if (loading) {
     return (
@@ -1006,13 +1008,19 @@ const GuruAbsensi: React.FC = () => {
                               </td>
                               <td>
                               
-                                {siswa.absensi_id ? (
+                                {siswa.status_kehadiran ? (
                                   <Select
                                     size="sm"
                                     value={siswa.status_kehadiran || ''}
                                     onChange={(_, val) => {
-                                      if (val && siswa.absensi_id) {
-                                        updateAbsensiStatus(siswa.absensi_id, val as string);
+                                      if (val) {
+                                        if (siswa.absensi_id && siswa.absensi_id > 0) {
+                                          // Update existing absensi
+                                          updateAbsensiStatus(siswa.absensi_id, val as string);
+                                        } else {
+                                          // Create new absensi (siswa sudah punya status tapi belum ada absensi_id)
+                                          createManualAbsensi(siswa.siswa_id, val as string);
+                                        }
                                       }
                                     }}
                                     sx={{ minWidth: 100 }}

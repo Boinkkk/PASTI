@@ -37,10 +37,8 @@ export const fetchDaftarKelas = async () => {
 
 // Interface for update profile request
 export interface UpdateProfileRequest {
-  nama_lengkap: string;
-  email: string;
   no_telepon: string;
-  foto_profil?: string;
+  password?: string;
 }
 
 // Function to update siswa profile

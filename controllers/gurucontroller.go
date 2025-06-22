@@ -175,7 +175,7 @@ func UpdateStatusAbsensi(w http.ResponseWriter, r *http.Request) {
 	var absensi models.Absensi
 	err := config.DB.
 		Joins("JOIN pertemuan p ON absensi.id_pertemuan = p.id_pertemuan").
-		Joins("JOIN jadwal_pelajaran jp ON p.id_jadwal = jp.jadwal_id").
+		Joins("JOIN jadwalpelajaran jp ON p.id_jadwal = jp.jadwal_id").
 		Where("absensi.id_absensi = ? AND jp.guru_id = ?", absensiID, guru.ID).
 		First(&absensi).Error
 	
@@ -250,7 +250,7 @@ func CreateManualAbsensi(w http.ResponseWriter, r *http.Request) {
 	// Verify that the pertemuan belongs to the guru
 	var pertemuan models.Pertemuan
 	err := config.DB.
-		Joins("JOIN jadwal_pelajaran jp ON pertemuan.id_jadwal = jp.jadwal_id").
+		Joins("JOIN jadwalpelajaran jp ON pertemuan.id_jadwal = jp.jadwal_id").
 		Where("pertemuan.id_pertemuan = ? AND jp.guru_id = ?", request.IDPertemuan, guru.ID).
 		First(&pertemuan).Error
 	
@@ -258,12 +258,26 @@ func CreateManualAbsensi(w http.ResponseWriter, r *http.Request) {
 		helpers.Response(w, 404, "Pertemuan tidak ditemukan atau Anda tidak memiliki akses", nil)
 		return
 	}
-
 	// Check if absensi already exists
 	var existingAbsensi models.Absensi
 	err = config.DB.Where("id_pertemuan = ? AND id_siswa = ?", request.IDPertemuan, request.IDSiswa).First(&existingAbsensi).Error
 	if err == nil {
-		helpers.Response(w, 409, "Absensi untuk siswa ini sudah ada", nil)
+		// Absensi sudah ada, update statusnya
+		existingAbsensi.Status = request.StatusKehadiran
+		existingAbsensi.WaktuAbsen = time.Now() // Update waktu jika diperlukan
+		
+		if err := config.DB.Save(&existingAbsensi).Error; err != nil {
+			helpers.Response(w, 500, "Gagal memperbarui absensi", nil)
+			return
+		}
+		
+		helpers.Response(w, 200, "Absensi berhasil diperbarui", map[string]interface{}{
+			"id_absensi":   existingAbsensi.IDAbsensi,
+			"id_pertemuan": existingAbsensi.IDPertemuan,
+			"id_siswa":     existingAbsensi.IDSiswa,
+			"status":       existingAbsensi.Status,
+			"waktu_absen":  existingAbsensi.WaktuAbsen,
+		})
 		return
 	}
 	// Create new absensi
@@ -286,6 +300,53 @@ func CreateManualAbsensi(w http.ResponseWriter, r *http.Request) {
 		"status":       newAbsensi.Status,
 		"waktu_absen":  newAbsensi.WaktuAbsen,
 	})
+}
+
+// UpdateGuruPassword memperbarui password guru
+func UpdateGuruPassword(w http.ResponseWriter, r *http.Request) {
+	// Ambil info guru dari context (dari middleware)
+	guruInfo := r.Context().Value("guruinfo")
+	if guruInfo == nil {
+		helpers.Response(w, 401, "Unauthorized: no guru info in context", nil)
+		return
+	}
+
+	guru, ok := guruInfo.(*helpers.GuruCustomClaims)
+	if !ok {
+		helpers.Response(w, 401, "Unauthorized: invalid guru info format", nil)
+		return
+	}
+
+	// Parse request body
+	var request struct {
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		helpers.Response(w, 400, "Invalid request body", nil)
+		return
+	}
+
+	// Validasi password
+	if len(request.Password) < 6 {
+		helpers.Response(w, 400, "Password minimal 6 karakter", nil)
+		return
+	}
+
+	// Hash password baru
+	hashedPassword, err := helpers.HassPassword(request.Password)
+	if err != nil {
+		helpers.Response(w, 500, "Gagal mengenkripsi password", nil)
+		return
+	}
+
+	// Update password di database
+	if err := config.DB.Model(&models.Guru{}).Where("guru_id = ?", guru.ID).Update("password_hash", hashedPassword).Error; err != nil {
+		helpers.Response(w, 500, "Gagal memperbarui password", nil)
+		return
+	}
+
+	helpers.Response(w, 200, "Password berhasil diperbarui", nil)
 }
 
 

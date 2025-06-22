@@ -58,8 +58,7 @@ const sidebarItems: SidebarItem[] = [
   //   label: 'QR Generator',
   //   icon: <QrCodeIcon />,
   //   path: '/guru/qr-generator'
-  // },
-  // {
+  // },  // {
   //   id: 'siswa',
   //   label: 'Data Siswa',
   //   icon: <SiswaIcon />,
@@ -71,12 +70,12 @@ const sidebarItems: SidebarItem[] = [
   //   icon: <LaporanIcon />,
   //   path: '/guru/laporan'
   // },
-  // {
-  //   id: 'pengaturan',
-  //   label: 'Pengaturan',
-  //   icon: <SettingsIcon />,
-  //   path: '/guru/pengaturan'
-  // }
+  {
+    id: 'profile',
+    label: 'Profil',
+    icon: <SettingsIcon />,
+    path: '/guru/profile'
+  }
 ];
 
 interface SidebarGuruProps {

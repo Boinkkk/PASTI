@@ -173,7 +173,8 @@ export const createManualAbsensi = async (idPertemuan: number, idSiswa: number, 
             { headers: getAuthHeaders() }
         );
 
-        if (response.status !== 201) {
+        // Accept both 200 (update existing) and 201 (create new) as success
+        if (response.status !== 200 && response.status !== 201) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
@@ -186,6 +187,32 @@ export const createManualAbsensi = async (idPertemuan: number, idSiswa: number, 
         }
     } catch (error) {
         console.error('Error creating manual absensi:', error);
+        throw error;
+    }
+};
+
+// Function to update guru password
+export const updateGuruPassword = async (password: string) => {
+    try {
+        const response = await axios.put(
+            `${API_BASE_URL}/guru/profile/password`,
+            { password },
+            { headers: getAuthHeaders() }
+        );
+
+        if (response.status !== 200) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = response.data;
+        
+        if (result.status === "succes" || result.message.includes("berhasil")) {
+            return result.data;
+        } else {
+            throw new Error(result.message || 'Gagal mengubah password');
+        }
+    } catch (error) {
+        console.error('Error updating guru password:', error);
         throw error;
     }
 };

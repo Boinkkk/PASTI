@@ -21,8 +21,7 @@ import {
   Cancel as CancelIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  School as SchoolIcon,
-  CameraAlt as CameraIcon
+  School as SchoolIcon
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import { fetchSiswaProfile, updateSiswaProfile, type UpdateProfileRequest } from '../services/api/siswaApi';
@@ -52,13 +51,11 @@ const SiswaProfile: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
   // Form state
   const [formData, setFormData] = useState({
-    nama_lengkap: '',
-    email: '',
     no_telepon: '',
-    foto_profil: ''
+    password: '',
+    confirm_password: ''
   });
 
   // Load profile data when component mounts
@@ -69,14 +66,12 @@ const SiswaProfile: React.FC = () => {
   const loadProfileData = async () => {
     try {
       setLoading(true);
-      const response = await fetchSiswaProfile();
-      if (response?.data) {
+      const response = await fetchSiswaProfile();      if (response?.data) {
         setProfileData(response.data);
         setFormData({
-          nama_lengkap: response.data.nama_lengkap || '',
-          email: response.data.email || '',
           no_telepon: response.data.no_telepon || '',
-          foto_profil: response.data.foto_profil || ''
+          password: '',
+          confirm_password: ''
         });
       }
     } catch (error) {
@@ -93,26 +88,41 @@ const SiswaProfile: React.FC = () => {
       [field]: value
     }));
   };
-
   const handleUpdateProfile = async () => {
-    if (!formData.nama_lengkap || !formData.email) {
-      setError('Nama lengkap dan email tidak boleh kosong!');
-      return;
+    // Validasi password jika diisi
+    if (formData.password) {
+      if (formData.password.length < 6) {
+        setError('Password minimal 6 karakter!');
+        return;
+      }
+      if (formData.password !== formData.confirm_password) {
+        setError('Konfirmasi password tidak sesuai!');
+        return;
+      }
     }
 
     try {
       setLoading(true);
       
       const updateData: UpdateProfileRequest = {
-        nama_lengkap: formData.nama_lengkap,
-        email: formData.email,
-        no_telepon: formData.no_telepon,
-        foto_profil: formData.foto_profil
+        no_telepon: formData.no_telepon
       };
+
+      // Tambahkan password jika diisi
+      if (formData.password) {
+        updateData.password = formData.password;
+      }
 
       await updateSiswaProfile(updateData);
       setSuccess('Profil berhasil diperbarui!');
       setIsEditing(false);
+      
+      // Reset password fields
+      setFormData(prev => ({
+        ...prev,
+        password: '',
+        confirm_password: ''
+      }));
       
       // Reload profile data
       await loadProfileData();
@@ -124,15 +134,13 @@ const SiswaProfile: React.FC = () => {
       setLoading(false);
     }
   };
-
   const handleCancelEdit = () => {
     setIsEditing(false);
     if (profileData) {
       setFormData({
-        nama_lengkap: profileData.nama_lengkap || '',
-        email: profileData.email || '',
         no_telepon: profileData.no_telepon || '',
-        foto_profil: profileData.foto_profil || ''
+        password: '',
+        confirm_password: ''
       });
     }
     setError(null);
@@ -308,39 +316,21 @@ const SiswaProfile: React.FC = () => {
 
                 <Divider sx={{ mb: 3 }} />
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  {/* Nama Lengkap */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>                  {/* Nama Lengkap - Read only */}
                   <FormControl>
                     <FormLabel>Nama Lengkap</FormLabel>
-                    {isEditing ? (
-                      <Input
-                        value={formData.nama_lengkap}
-                        onChange={(e) => handleInputChange('nama_lengkap', e.target.value)}
-                        placeholder="Masukkan nama lengkap"
-                      />
-                    ) : (
-                      <Typography level="body-md" sx={{ p: 1.5, bgcolor: 'background.level1', borderRadius: 'sm' }}>
-                        {profileData.nama_lengkap}
-                      </Typography>
-                    )}
-                  </FormControl>                  {/* Email */}
+                    <Typography level="body-md" sx={{ p: 1.5, bgcolor: 'background.level2', borderRadius: 'sm', color: 'text.secondary' }}>
+                      {profileData.nama_lengkap} (Tidak dapat diubah)
+                    </Typography>
+                  </FormControl>                  {/* Email - Read only */}
                   <FormControl>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <EmailIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                       <FormLabel>Email</FormLabel>
                     </Box>
-                    {isEditing ? (
-                      <Input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="Masukkan email"
-                      />
-                    ) : (
-                      <Typography level="body-md" sx={{ p: 1.5, bgcolor: 'background.level1', borderRadius: 'sm' }}>
-                        {profileData.email}
-                      </Typography>
-                    )}
+                    <Typography level="body-md" sx={{ p: 1.5, bgcolor: 'background.level2', borderRadius: 'sm', color: 'text.secondary' }}>
+                      {profileData.email} (Tidak dapat diubah)
+                    </Typography>
                   </FormControl>
 
                   {/* No Telepon */}
@@ -360,21 +350,29 @@ const SiswaProfile: React.FC = () => {
                         {profileData.no_telepon || 'Belum diisi'}
                       </Typography>
                     )}
-                  </FormControl>
-
-                  {/* Foto Profil URL */}
+                  </FormControl>                  {/* Password - Hanya saat editing */}
                   {isEditing && (
-                    <FormControl>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <CameraIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                        <FormLabel>URL Foto Profil</FormLabel>
-                      </Box>
-                      <Input
-                        value={formData.foto_profil}
-                        onChange={(e) => handleInputChange('foto_profil', e.target.value)}
-                        placeholder="Masukkan URL foto profil (opsional)"
-                      />
-                    </FormControl>
+                    <>
+                      <FormControl>
+                        <FormLabel>Password Baru (Opsional)</FormLabel>
+                        <Input
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => handleInputChange('password', e.target.value)}
+                          placeholder="Masukkan password baru (minimal 6 karakter)"
+                        />
+                      </FormControl>
+
+                      <FormControl>
+                        <FormLabel>Konfirmasi Password Baru</FormLabel>
+                        <Input
+                          type="password"
+                          value={formData.confirm_password}
+                          onChange={(e) => handleInputChange('confirm_password', e.target.value)}
+                          placeholder="Ulangi password baru"
+                        />
+                      </FormControl>
+                    </>
                   )}
 
                   {/* Read-only fields */}

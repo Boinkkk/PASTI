@@ -39,36 +39,14 @@ func UpdateSiswaProfile(w http.ResponseWriter, r *http.Request) {
 	// Ambil siswa_id dari JWT token
 	siswa := r.Context().Value("siswainfo").(*helpers.MyCustomClaims)
 	siswaID := siswa.ID
-
 	// Parse request body
 	var request struct {
-		NamaLengkap string `json:"nama_lengkap"`
-		Email       string `json:"email"`
-		NoTelepon   string `json:"no_telepon"`
-		FotoProfil  string `json:"foto_profil"`
+		NoTelepon string `json:"no_telepon"`
+		Password  string `json:"password,omitempty"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		helpers.Response(w, 400, "Invalid JSON format", nil)
-		return
-	}
-
-	// Validasi input
-	if request.NamaLengkap == "" {
-		helpers.Response(w, 400, "Nama lengkap tidak boleh kosong", nil)
-		return
-	}
-
-	if request.Email == "" {
-		helpers.Response(w, 400, "Email tidak boleh kosong", nil)
-		return
-	}
-
-	// Cek apakah email sudah digunakan oleh siswa lain
-	var existingSiswa models.Siswa
-	result := config.DB.Where("email = ? AND siswa_id != ?", request.Email, siswaID).First(&existingSiswa)
-	if result.Error == nil {
-		helpers.Response(w, 400, "Email sudah digunakan oleh siswa lain", nil)
 		return
 	}
 
@@ -79,11 +57,22 @@ func UpdateSiswaProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update data siswa
-	currentSiswa.NamaLengkap = request.NamaLengkap
-	currentSiswa.Email = request.Email
+	// Update nomor telepon
 	currentSiswa.NoTelepon = request.NoTelepon
-	currentSiswa.FotoProfil = request.FotoProfil
+	// Update password jika diisi
+	if request.Password != "" {
+		if len(request.Password) < 6 {
+			helpers.Response(w, 400, "Password minimal 6 karakter", nil)
+			return
+		}
+		
+		hashedPassword, err := helpers.HassPassword(request.Password)
+		if err != nil {
+			helpers.Response(w, 500, "Gagal mengenkripsi password", nil)
+			return
+		}
+		currentSiswa.PasswordHash = hashedPassword
+	}
 
 	if err := config.DB.Save(&currentSiswa).Error; err != nil {
 		helpers.Response(w, 500, "Gagal mengupdate profil", nil)
