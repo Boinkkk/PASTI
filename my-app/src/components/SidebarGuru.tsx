@@ -35,12 +35,12 @@ interface SidebarItem {
 }
 
 const sidebarItems: SidebarItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: <DashboardIcon />,
-    path: '/guru/dashboard'
-  },
+  // {
+  //   id: 'dashboard',
+  //   label: 'Dashboard',
+  //   icon: <DashboardIcon />,
+  //   path: '/guru/dashboard'
+  // },
   {
     id: 'tugas-siswa',
     label: 'Tugas Siswa',

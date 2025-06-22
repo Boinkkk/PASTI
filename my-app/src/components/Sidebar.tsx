@@ -26,12 +26,12 @@ interface SidebarItem {
 }
 
 const sidebarItems: SidebarItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: <DashboardIcon />,
-    path: '/dashboard'
-  },
+  // {
+  //   id: 'dashboard',
+  //   label: 'Dashboard',
+  //   icon: <DashboardIcon />,
+  //   path: '/dashboard'
+  // },
   {
     id: 'absensi',
     label: 'Absensi',

@@ -60,13 +60,18 @@ func (ns *NotifikasiService) RunNotificationCron() {
 }
 
 func (ns *NotifikasiService) sendDeadlineReminders(duration time.Duration, jenisNotifikasi string) {
-    targetDate := time.Now().Add(duration)
+    // targetDate := time.Now().Add(duration)
+    now := time.Now()
+    targetTime := now.Add(duration)
     // startTime := targetTime.Add(-30 * time.Minute) // Buffer 30 menit
     // endTime := targetTime.Add(30 * time.Minute)
 
 	// testing perpose
-	startTime := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 0, 0, 0, 0, targetDate.Location())
-    endTime := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 23, 59, 59, 0, targetDate.Location())
+	// startTime := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 0, 0, 0, 0, targetDate.Location())
+    // endTime := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 23, 59, 59, 0, targetDate.Location())
+
+    startTime := now
+    endTime := targetTime
     var tugasList []TugasWithSiswa
     query := `
         SELECT DISTINCT
@@ -194,8 +199,7 @@ func (ns *NotifikasiService) generateReminderMessage(tugas TugasWithSiswa, jenis
         timeMsg = "2 jam lagi"
     }
     
-    location, _ := time.LoadLocation("Asia/Jakarta")
-    deadline := tugas.DeadlinePengumpulan.In(location)
+    deadline := tugas.DeadlinePengumpulan
     
     message := fmt.Sprintf(`🔔 *REMINDER TUGAS* 🔔
 
@@ -225,8 +229,7 @@ Akses Tugas Disini yaa!:
 }
 
 func (ns *NotifikasiService) generateOverdueMessage(tugas TugasWithSiswa) string {
-    location, _ := time.LoadLocation("Asia/Jakarta")
-    deadline := tugas.DeadlinePengumpulan.In(location)
+    deadline := tugas.DeadlinePengumpulan
     
     message := fmt.Sprintf(`⚠️ *TUGAS TERLAMBAT* ⚠️
 

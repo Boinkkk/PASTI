@@ -464,6 +464,7 @@ const GuruAbsensi: React.FC = () => {
   });
 
   console.log("siswa list ", siswaList);
+  console.log("pertemuan list ", pertemuanList);
 
   if (loading) {
     return (
@@ -555,7 +556,7 @@ const GuruAbsensi: React.FC = () => {
         <Tabs value={tabValue} onChange={(_, val) => setTabValue(val as number)}>
           <TabList sx={{ mb: 2 }}>
             <Tab>Jadwal & Pertemuan</Tab>
-            <Tab>Rekap Absensi</Tab>
+            
           </TabList>
           
           <TabPanel value={0} sx={{ p: 0 }}>
@@ -684,14 +685,13 @@ const GuruAbsensi: React.FC = () => {
                       <th style={{ width: '15%' }}>Tanggal</th>
                       <th style={{ width: '32%' }}>Materi</th>
                       <th style={{ width: '15%' }}>Token</th>
-                      <th style={{ width: '15%' }}>Kehadiran</th>
                       <th style={{ width: '15%' }}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pertemuanList.length > 0 ? (
                       pertemuanList.map((pertemuan) => {
-                        const { percentage, color } = getProgressData(pertemuan.total_hadir, pertemuan.total_siswa);
+                        
                         return (
                           <tr 
                             key={pertemuan.id_pertemuan}
@@ -739,21 +739,7 @@ const GuruAbsensi: React.FC = () => {
                                 </IconButton>
                               </Box>
                             </td>
-                            <td>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography level="body-sm">
-                                  {pertemuan.total_hadir}/{pertemuan.total_siswa}
-                                </Typography>
-                                <Chip 
-                                  size="sm" 
-                                  variant="soft" 
-                                  color={color}
-                                  sx={{ fontSize: 10 }}
-                                >
-                                  {percentage}%
-                                </Chip>
-                              </Box>
-                            </td>
+                            
                             <td>
                               <Chip color={pertemuan.is_active ? 'success' : 'danger'}
                                 size='sm'>{pertemuan.is_active ? 'Aktif' : 'Tidak Aktif'}</Chip>
@@ -929,6 +915,37 @@ const GuruAbsensi: React.FC = () => {
                         disabled={loading}
                       />
                     </Box>
+                    
+                    {/* Baris untuk Total Kehadiran */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{ width: 120, color: 'text.secondary' }}>
+                        Total Kehadiran
+                      </Typography>
+                      <Typography sx={{ color: 'text.secondary' }}>:</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography level="body-sm" fontWeight="bold">
+                          {siswaList.filter(siswa => siswa.status_kehadiran === 'Hadir').length} / {siswaList.length}
+                        </Typography>
+                        <Chip 
+                          size="sm" 
+                          variant="soft" 
+                          color={(() => {
+                            const totalHadir = siswaList.filter(siswa => siswa.status_kehadiran === 'Hadir').length;
+                            const totalSiswa = siswaList.length;
+                            const percentage = totalSiswa > 0 ? (totalHadir / totalSiswa) * 100 : 0;
+                            if (percentage >= 80) return 'success';
+                            if (percentage >= 60) return 'primary';
+                            if (percentage >= 40) return 'warning';
+                            return 'danger';
+                          })()}
+                        >
+                          {siswaList.length > 0 
+                            ? Math.round((siswaList.filter(siswa => siswa.status_kehadiran === 'Hadir').length / siswaList.length) * 100)
+                            : 0}%
+                        </Chip>
+                      </Box>
+                    </Box>
+                    
                     <Chip color="primary"
                         onClick={handleShowQRCode}
                         size="lg"

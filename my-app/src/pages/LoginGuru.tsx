@@ -143,27 +143,17 @@ const LoginGuru: React.FC = () => {
             <Link
               component="button"
               onClick={() => navigate('/login')}
-              sx={{ textDecoration: 'none' }}
+              sx={{ 
+                textDecoration: 'none',
+                display: 'block',
+                textAlign: 'center',
+                width: '100%'
+              }}
             >
               Login sebagai Siswa
             </Link>
               <Typography level="body-sm" sx={{ color: 'text.secondary', mt: 2 }}>
-              Belum punya akun?{' '}
-              <Link
-                component="button"
-                onClick={() => navigate('/register-guru')}
-                sx={{ textDecoration: 'none' }}
-              >
-                Daftar Guru
-              </Link>
-              {' | '}
-              <Link
-                component="button"
-                onClick={() => navigate('/register')}
-                sx={{ textDecoration: 'none' }}
-              >
-                Daftar Siswa
-              </Link>
+              Semangat Mengajar Masa Depan Bangsa!
             </Typography>
           </Box>
         </CardContent>

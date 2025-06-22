@@ -256,7 +256,7 @@ const SiswaProfile: React.FC = () => {
                     {profileData.kelas?.nama_kelas || 'Kelas tidak tersedia'}
                   </Chip>
                   
-                  <Chip
+                  {/* <Chip
                     color={getDisciplineColor(profileData.tingkat_disiplin) as any}
                     variant="soft"
                   >
@@ -268,7 +268,7 @@ const SiswaProfile: React.FC = () => {
                     variant="soft"
                   >
                     Poin: {profileData.poin_motivasi}
-                  </Chip>
+                  </Chip> */}
                 </Box>
 
                 {!isEditing && (

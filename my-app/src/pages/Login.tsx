@@ -402,22 +402,7 @@ function Login() {
                 </Typography>
                 
                 <Typography level="body-xs" color="neutral">
-                  Belum punya akun?{' '}
-                  <Typography 
-                    component="button"
-                    level="body-xs" 
-                    sx={{ 
-                      color: 'primary.500', 
-                      textDecoration: 'none',
-                      border: 'none',
-                      background: 'none',
-                      cursor: 'pointer',
-                      '&:hover': { textDecoration: 'underline' }
-                    }}
-                    onClick={() => navigate('/register')}
-                  >
-                    Daftar disini
-                  </Typography>
+                  Jika Lupa password, silakan hubungi admin sekolah.
                 </Typography>
               </Stack>
             </motion.div></Stack>
