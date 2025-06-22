@@ -6,13 +6,13 @@ import {
   Select, Option
 } from '@mui/joy';
 import { 
-  Logout as LogoutIcon, 
   Upload as UploadIcon,
   Schedule as ScheduleIcon,
   Add as AddIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
 import axios from 'axios';
+import AdminLayout from '../components/AdminLayout';
 
 interface KelasOption {
   kelas_id: number;
@@ -81,15 +81,8 @@ const AdminUploadJadwal: React.FC = () => {
       return;
     }
     
-    setAdminUsername(username);
-    fetchOptionsData();
+    setAdminUsername(username);    fetchOptionsData();
   }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUsername');
-    navigate('/admin/login');
-  };
 
   const fetchOptionsData = async () => {
     try {
@@ -256,57 +249,13 @@ const AdminUploadJadwal: React.FC = () => {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography level="h2" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+    <AdminLayout adminUsername={adminUsername}>
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Typography level="h2" sx={{ color: '#1976d2', fontWeight: 'bold', mb: 3 }}>
           Upload Jadwal Pelajaran
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography level="body-md">
-            Admin: <strong>{adminUsername}</strong>
-          </Typography>
-          <IconButton color="danger" onClick={handleLogout}>
-            <LogoutIcon />
-          </IconButton>
-        </Box>
-      </Box>
-
-      {/* Navigation */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/upload-siswa')}
-        >
-          Upload Siswa
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/upload-guru')}
-        >
-          Upload Guru
-        </Button>
-        <Button 
-          variant="solid" 
-          color="primary"
-        >
-          Upload Jadwal
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/siswa')}
-        >
-          Lihat Data Siswa
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/guru')}
-        >
-          Lihat Data Guru
-        </Button>
-      </Box>
 
       {/* Method Selection */}
       <Card variant="outlined" sx={{ mb: 3 }}>
@@ -527,11 +476,11 @@ const AdminUploadJadwal: React.FC = () => {
                   Upload CSV
                 </Button>
               </Box>
-            </Stack>
-          </CardContent>
+            </Stack>          </CardContent>
         </Card>
       )}
-    </Box>
+      </Box>
+    </AdminLayout>
   );
 };
 

@@ -65,6 +65,76 @@ func GetAllSiswa(w http.ResponseWriter, r *http.Request) {
 	helpers.Response(w, 200, "Daftar siswa berhasil diambil", siswaList)
 }
 
+// UpdatePertemuan mengupdate materi dan tanggal pertemuan
+func UpdatePertemuan(w http.ResponseWriter, r *http.Request) {
+	// Set header untuk JSON response
+	w.Header().Set("Content-Type", "application/json")
+	// Get guru info from context
+	guruInfo := r.Context().Value("guruinfo")
+	if guruInfo == nil {
+		helpers.Response(w, 401, "Unauthorized: no guru info in context", nil)
+		return
+	}
+
+	guru, ok := guruInfo.(*helpers.GuruCustomClaims)
+	if !ok {
+		helpers.Response(w, 401, "Unauthorized: invalid guru info format", nil)
+		return
+	}
+
+	// Parse JSON body
+	var request struct {
+		Materi  string `json:"materi"`
+		Tanggal string `json:"tanggal"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		helpers.Response(w, 400, "Format JSON tidak valid", nil)
+		return
+	}
+
+	// Get pertemuan ID from URL path using mux
+	vars := mux.Vars(r)
+	pertemuanID := vars["id"]
+	if pertemuanID == "" {
+		helpers.Response(w, 400, "ID pertemuan diperlukan", nil)
+		return
+	}
+
+	// Validate required fields
+	if request.Materi == "" || request.Tanggal == "" {
+		helpers.Response(w, 400, "Materi dan tanggal diperlukan", nil)
+		return
+	}	// Verify that the pertemuan belongs to the guru
+	var pertemuan models.Pertemuan
+	err := config.DB.
+		Joins("JOIN jadwalpelajaran jp ON pertemuan.id_jadwal = jp.jadwal_id").
+		Where("pertemuan.id_pertemuan = ? AND jp.guru_id = ?", pertemuanID, guru.ID).
+		First(&pertemuan).Error
+
+	if err != nil {
+		helpers.Response(w, 404, "Pertemuan tidak ditemukan atau Anda tidak memiliki akses", nil)
+		return
+	}
+
+	// Update pertemuan
+	err = config.DB.Model(&pertemuan).Updates(map[string]interface{}{
+		"materi":  request.Materi,
+		"tanggal": request.Tanggal,
+	}).Error
+
+	if err != nil {
+		helpers.Response(w, 500, "Gagal mengupdate pertemuan", nil)
+		return
+	}
+
+	// Get updated pertemuan data
+	config.DB.First(&pertemuan, pertemuanID)
+	helpers.Response(w, 200, "Pertemuan berhasil diupdate", map[string]interface{}{
+		"pertemuan": pertemuan,
+	})
+}
+
 // UpdateStatusPertemuan mengubah status aktif/tidak aktif pertemuan
 func UpdateStatusPertemuan(w http.ResponseWriter, r *http.Request) {
 	// Get guru info from middleware

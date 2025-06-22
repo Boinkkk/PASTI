@@ -13,7 +13,8 @@ import {
   Home as HomeIcon, PlayArrow as PlayArrowIcon,
   Check,
   Close,
-  QrCode as QrCodeIcon
+  QrCode as QrCodeIcon,
+  Edit as EditIcon
 } from '@mui/icons-material';
 import { QRCodeCanvas } from 'qrcode.react';
 import SidebarGuru from '../components/SidebarGuru';
@@ -24,7 +25,8 @@ import {
   fetchGuruJadwal, 
   updateStatusPertemuan,
   updateAbsensiStatus as updateAbsensiStatusAPI,
-  createManualAbsensi as createManualAbsensiAPI
+  createManualAbsensi as createManualAbsensiAPI,
+  updatePertemuan
 } from '../services/api/guruApi';
 import axios from 'axios';
 
@@ -173,6 +175,7 @@ const GuruAbsensi: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
   const [showQRCodeModal, setShowQRCodeModal] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterHari, setFilterHari] = useState<string>('all');
@@ -183,6 +186,11 @@ const GuruAbsensi: React.FC = () => {
   const [formMateri, setFormMateri] = useState<string>('');
   const [formDuration, setFormDuration] = useState<number>(60);
   const [formTanggal, setFormTanggal] = useState<string>(new Date().toISOString().split('T')[0]);
+  
+  // Edit form values
+  const [editFormMateri, setEditFormMateri] = useState<string>('');
+  const [editFormTanggal, setEditFormTanggal] = useState<string>('');
+  const [pertemuanToEdit, setPertemuanToEdit] = useState<PertemuanData | null>(null);
   
   
   // Load dummy data when component mounts
@@ -311,6 +319,60 @@ const GuruAbsensi: React.FC = () => {
     setFormPertemuanKe(1);
     setFormMateri('');
     setFormDuration(60);
+  };
+
+  const handleEditPertemuan = (pertemuan: PertemuanData) => {
+    setPertemuanToEdit(pertemuan);
+    setEditFormMateri(pertemuan.materi);
+    setEditFormTanggal(pertemuan.tanggal);
+    setShowEditModal(true);
+  };
+
+  const handleEditPertemuanSubmit = async () => {
+    if (!pertemuanToEdit) return;
+
+    try {
+      setLoading(true);
+      
+      // Call API to update pertemuan
+      await updatePertemuan(pertemuanToEdit.id_pertemuan, editFormMateri, editFormTanggal);
+      
+      // Update local state after successful API call
+      const updatedPertemuanList = pertemuanList.map(pertemuan => 
+        pertemuan.id_pertemuan === pertemuanToEdit.id_pertemuan
+          ? {
+              ...pertemuan,
+              materi: editFormMateri,
+              tanggal: editFormTanggal
+            }
+          : pertemuan
+      );
+
+      setPertemuanList(updatedPertemuanList);
+      
+      // Update selectedPertemuan if it's the same as the edited one
+      if (selectedPertemuan?.id_pertemuan === pertemuanToEdit.id_pertemuan) {
+        setSelectedPertemuan({
+          ...selectedPertemuan,
+          materi: editFormMateri,
+          tanggal: editFormTanggal
+        });
+      }
+
+      setSuccess('Pertemuan berhasil diperbarui!');
+      setShowEditModal(false);
+      
+      // Reset form
+      setPertemuanToEdit(null);
+      setEditFormMateri('');
+      setEditFormTanggal('');
+      
+    } catch (error) {
+      console.error('Error updating pertemuan:', error);
+      setError('Gagal memperbarui pertemuan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -682,10 +744,11 @@ const GuruAbsensi: React.FC = () => {
                   <thead>
                     <tr>
                       <th style={{ width: '8%' }}>Pertemuan</th>
-                      <th style={{ width: '15%' }}>Tanggal</th>
-                      <th style={{ width: '32%' }}>Materi</th>
-                      <th style={{ width: '15%' }}>Token</th>
-                      <th style={{ width: '15%' }}>Status</th>
+                      <th style={{ width: '12%' }}>Tanggal</th>
+                      <th style={{ width: '30%' }}>Materi</th>
+                      <th style={{ width: '12%' }}>Token</th>
+                      <th style={{ width: '12%' }}>Status</th>
+                      <th style={{ width: '15%' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -693,11 +756,7 @@ const GuruAbsensi: React.FC = () => {
                       pertemuanList.map((pertemuan) => {
                         
                         return (
-                          <tr 
-                            key={pertemuan.id_pertemuan}
-                            onClick={() => handleViewAbsensi(pertemuan)}
-                            style={{ cursor: 'pointer' }}
-                          >
+                          <tr key={pertemuan.id_pertemuan}>
                             <td>
                               <Typography level="body-sm" sx={{ fontWeight: 'medium' }}>
                                 {pertemuan.pertemuan_ke}
@@ -743,6 +802,30 @@ const GuruAbsensi: React.FC = () => {
                             <td>
                               <Chip color={pertemuan.is_active ? 'success' : 'danger'}
                                 size='sm'>{pertemuan.is_active ? 'Aktif' : 'Tidak Aktif'}</Chip>
+                            </td>
+                            <td>
+                              <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Button
+                                  size="sm"
+                                  variant="outlined"
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditPertemuan(pertemuan);
+                                  }}
+                                  startDecorator={<EditIcon />}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="solid"
+                                  color="primary"
+                                  onClick={() => handleViewAbsensi(pertemuan)}
+                                >
+                                  Detail
+                                </Button>
+                              </Box>
                             </td>
                           </tr>
                         );
@@ -1121,6 +1204,75 @@ const GuruAbsensi: React.FC = () => {
               >
                 Salin URL Absensi
               </Button>
+            </Box>
+          </ModalDialog>
+        </Modal>
+        
+        {/* Modal: Edit Pertemuan */}
+        <Modal open={showEditModal} onClose={() => setShowEditModal(false)}>
+          <ModalDialog>
+            <ModalClose />
+            <Box>
+              <Typography level="h4" component="h2" sx={{ mb: 2 }}>
+                Edit Pertemuan {pertemuanToEdit?.pertemuan_ke}
+              </Typography>
+            
+              {pertemuanToEdit && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box>
+                    <Typography level="body-sm" fontWeight="bold">
+                      Mata Pelajaran: {selectedJadwal?.nama_mapel}
+                    </Typography>
+                    <Typography level="body-sm" fontWeight="bold">
+                      Kelas: {selectedJadwal?.nama_kelas}
+                    </Typography>
+                    <Typography level="body-sm" fontWeight="bold">
+                      Pertemuan ke: {pertemuanToEdit.pertemuan_ke}
+                    </Typography>
+                  </Box>
+                  
+                  <FormControl>
+                    <FormLabel>Tanggal</FormLabel>
+                    <Input
+                      type="date"
+                      value={editFormTanggal}
+                      onChange={e => setEditFormTanggal(e.target.value)}
+                      required
+                    />
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel>Materi</FormLabel>
+                    <Textarea
+                      placeholder="Masukkan materi yang akan diajarkan"
+                      value={editFormMateri}
+                      onChange={e => setEditFormMateri(e.target.value)}
+                      minRows={2}
+                      maxRows={4}
+                      required
+                    />
+                  </FormControl>
+                  
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+                    <Button 
+                      variant="outlined" 
+                      color="neutral" 
+                      onClick={() => setShowEditModal(false)}
+                    >
+                      Batal
+                    </Button>
+                    <Button 
+                      variant="solid" 
+                      color="primary" 
+                      onClick={handleEditPertemuanSubmit}
+                      disabled={!editFormMateri || !editFormTanggal || loading}
+                      loading={loading}
+                    >
+                      Simpan Perubahan
+                    </Button>
+                  </Box>
+                </Box>
+              )}
             </Box>
           </ModalDialog>
         </Modal>

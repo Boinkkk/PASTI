@@ -6,7 +6,6 @@ import {
   Divider
 } from '@mui/joy';
 import { 
-  Logout as LogoutIcon, 
   School as SchoolIcon, 
   Search as SearchIcon,
   Edit as EditIcon,
@@ -16,6 +15,7 @@ import {
   KeyboardArrowRight as NextIcon
 } from '@mui/icons-material';
 import axios from 'axios';
+import AdminLayout from '../components/AdminLayout';
 
 interface GuruData {
   guru_id: number;
@@ -84,15 +84,8 @@ const AdminViewGuru: React.FC = () => {
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredGuru.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;  const endIndex = startIndex + itemsPerPage;
   const currentGuru = filteredGuru.slice(startIndex, endIndex);
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUsername');
-    navigate('/admin/login');
-  };
 
   const fetchGuruData = async () => {
     setLoading(true);
@@ -257,71 +250,29 @@ const AdminViewGuru: React.FC = () => {
       setUpdatingId(null);
     }
   };
-
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography level="h2" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+    <AdminLayout adminUsername={adminUsername}>
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Typography level="h2" sx={{ color: '#1976d2', fontWeight: 'bold', mb: 3 }}>
           Data Guru
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography level="body-md">
-            Admin: <strong>{adminUsername}</strong>
-          </Typography>
-          <IconButton color="danger" onClick={handleLogout}>
-            <LogoutIcon />
-          </IconButton>
-        </Box>
-      </Box>      {/* Navigation */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/upload-siswa')}
-        >
-          Upload Siswa
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/upload-guru')}
-        >
-          Upload Guru
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/upload-jadwal')}
-        >
-          Upload Jadwal
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/siswa')}
-        >
-          Lihat Data Siswa
-        </Button>
-        <Button 
-          variant="solid" 
-          color="primary"
-        >
-          Lihat Data Guru
-        </Button>
-      </Box>
 
-      {/* Search */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <FormControl>
-            <FormLabel>Cari Guru</FormLabel>
-            <Input
-              placeholder="Cari berdasarkan nama, NIP, atau email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              startDecorator={<SearchIcon />}
-              size="lg"
-            />
-          </FormControl>
-        </CardContent>
-      </Card>
+        {/* Search */}
+        <Card variant="outlined" sx={{ mb: 3 }}>
+          <CardContent>
+            <FormControl>
+              <FormLabel>Cari Guru</FormLabel>
+              <Input
+                placeholder="Cari berdasarkan nama, NIP, atau email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                startDecorator={<SearchIcon />}
+                size="lg"
+              />
+            </FormControl>
+          </CardContent>
+        </Card>
 
       {/* Message Alert */}
       {message && (
@@ -545,8 +496,7 @@ const AdminViewGuru: React.FC = () => {
               </Button>
               <Button 
                 color="primary"
-                onClick={updatePassword}
-                disabled={!newPassword.trim() || updatingId === passwordModal.guruId}
+                onClick={updatePassword}                disabled={!newPassword.trim() || updatingId === passwordModal.guruId}
                 loading={updatingId === passwordModal.guruId}
               >
                 Simpan
@@ -555,7 +505,8 @@ const AdminViewGuru: React.FC = () => {
           </Stack>
         </ModalDialog>
       </Modal>
-    </Box>
+      </Box>
+    </AdminLayout>
   );
 };
 

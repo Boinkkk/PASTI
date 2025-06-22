@@ -18,8 +18,8 @@ func GuruRoutes(r *mux.Router) {
 	router.HandleFunc("/jadwalMengajar", controllers.GetDaftarMengajar).Methods("GET")
 	router.HandleFunc("/pertemuan", controllers.GetAbsensiSiswaPertemuan).Methods("GET")
 	router.HandleFunc("/absensi", controllers.GetDetailAbsensiSiswa).Methods("GET")
-	
-	// Pertemuan management routes
+		// Pertemuan management routes
+	router.HandleFunc("/pertemuan/{id}", controllers.UpdatePertemuan).Methods("PUT")
 	router.HandleFunc("/pertemuan/{id}/status", controllers.UpdateStatusPertemuan).Methods("PUT")
 	
 	// Absensi management routes

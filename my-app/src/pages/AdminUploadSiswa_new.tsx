@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import Papa from 'papaparse';
 import { 
   Box, Card, CardContent, Typography, Button, Alert, Table, 
-  FormControl, FormLabel, IconButton 
+  FormControl, FormLabel 
 } from '@mui/joy';
-import { Logout as LogoutIcon, Upload as UploadIcon } from '@mui/icons-material';
+import { Upload as UploadIcon } from '@mui/icons-material';
 import axios from 'axios';
+import AdminLayout from '../components/AdminLayout';
 
 interface SiswaRegister {
   nis: string;
@@ -36,14 +37,7 @@ const AdminUploadSiswa: React.FC = () => {
       return;
     }
     
-    setAdminUsername(username);
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUsername');
-    navigate('/admin/login');
-  };
+    setAdminUsername(username);  }, [navigate]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -156,47 +150,13 @@ const AdminUploadSiswa: React.FC = () => {
     }
     setUploading(false);
   };
-
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-      {/* Header with logout */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography level="h2" sx={{ mb: 1 }}>
-            📚 Upload Data Siswa (Admin)
-          </Typography>
-          <Typography level="body-md" sx={{ color: 'text.secondary' }}>
-            Welcome, {adminUsername}
-          </Typography>
-        </Box>        <Button
-          variant="outlined"
-          color="danger"
-          startDecorator={<LogoutIcon />}
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
-      </Box>      {/* Navigation */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button 
-          variant="solid" 
-          color="primary"
-        >
-          Upload Siswa
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/upload-guru')}
-        >
-          Upload Guru
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/siswa')}
-        >
-          Lihat Data Siswa
-        </Button>
-      </Box>
+    <AdminLayout adminUsername={adminUsername}>
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Typography level="h2" sx={{ color: '#1976d2', fontWeight: 'bold', mb: 3 }}>
+          Upload Data Siswa
+        </Typography>
 
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
@@ -279,10 +239,10 @@ const AdminUploadSiswa: React.FC = () => {
                 Menampilkan 10 dari {csvData.length} data
               </Typography>
             )}
-          </CardContent>
-        </Card>
+          </CardContent>        </Card>
       )}
-    </Box>
+      </Box>
+    </AdminLayout>
   );
 };
 

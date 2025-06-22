@@ -216,3 +216,29 @@ export const updateGuruPassword = async (password: string) => {
         throw error;
     }
 };
+
+// Function to update pertemuan (materi and tanggal)
+export const updatePertemuan = async (pertemuanId: number, materi: string, tanggal: string) => {
+    try {
+        const response = await axios.put(
+            `${API_BASE_URL}/guru/pertemuan/${pertemuanId}`,
+            { materi, tanggal },
+            { headers: getAuthHeaders() }
+        );
+
+        if (response.status !== 200) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = response.data;
+        
+        if (result.status === "succes" || result.message.includes("berhasil")) {
+            return result.data;
+        } else {
+            throw new Error(result.message || 'Gagal mengupdate pertemuan');
+        }
+    } catch (error) {
+        console.error('Error updating pertemuan:', error);
+        throw error;
+    }
+};

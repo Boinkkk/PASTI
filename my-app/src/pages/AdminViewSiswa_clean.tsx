@@ -20,10 +20,10 @@ import AdminLayout from '../components/AdminLayout';
 interface SiswaData {
   siswa_id: number;
   nis: string;
-  nama: string; // Backend returns 'nama', not 'nama_lengkap'
+  nama_lengkap: string;
   email: string;
   kelas_id: number;
-  kelas: string; // Backend returns 'kelas', not 'kelas_nama'
+  kelas_nama: string;
   no_telepon: string;
   created_at: string;
 }
@@ -31,7 +31,7 @@ interface SiswaData {
 interface EditSiswaData {
   siswa_id: number;
   nis: string;
-  nama_lengkap: string; // Keep this as nama_lengkap for the edit form
+  nama_lengkap: string;
   kelas_id: number;
   no_telepon: string;
   email: string;
@@ -82,12 +82,13 @@ const AdminViewSiswa: React.FC = () => {
   // Filter siswa based on search term
   useEffect(() => {
     if (searchTerm.trim() === '') {
-      setFilteredSiswa(siswaList);    } else {
+      setFilteredSiswa(siswaList);
+    } else {
       const filtered = siswaList.filter(siswa => 
-        siswa.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        siswa.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
         siswa.nis.toLowerCase().includes(searchTerm.toLowerCase()) ||
         siswa.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        siswa.kelas.toLowerCase().includes(searchTerm.toLowerCase())
+        siswa.kelas_nama.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredSiswa(filtered);
     }
@@ -156,10 +157,11 @@ const AdminViewSiswa: React.FC = () => {
   const startEdit = (siswa: SiswaData) => {
     setEditMode({...editMode, [siswa.siswa_id]: true});
     setEditData({
-      ...editData,      [siswa.siswa_id]: {
+      ...editData,
+      [siswa.siswa_id]: {
         siswa_id: siswa.siswa_id,
         nis: siswa.nis,
-        nama_lengkap: siswa.nama, // Map from 'nama' to 'nama_lengkap'
+        nama_lengkap: siswa.nama_lengkap,
         kelas_id: siswa.kelas_id,
         no_telepon: siswa.no_telepon,
         email: siswa.email
@@ -176,6 +178,7 @@ const AdminViewSiswa: React.FC = () => {
     delete newEditData[siswaId];
     setEditData(newEditData);
   };
+
   const updateSiswa = async (siswaId: number) => {
     const data = editData[siswaId];
     if (!data) return;
@@ -189,16 +192,7 @@ const AdminViewSiswa: React.FC = () => {
         return;
       }
 
-      // Map data to match backend expectations
-      const updatePayload = {
-        nis: data.nis,
-        nama: data.nama_lengkap, // Backend expects 'nama', frontend has 'nama_lengkap'
-        kelas_id: data.kelas_id,
-        no_telepon: data.no_telepon,
-        email: data.email
-      };
-
-      const response = await axios.put(`http://localhost:8080/api/admin/siswa/${siswaId}`, updatePayload, {
+      const response = await axios.put(`http://localhost:8080/api/admin/siswa/${siswaId}`, data, {
         headers: {
           'Authorization': token,
           'Content-Type': 'application/json'
@@ -406,8 +400,9 @@ const AdminViewSiswa: React.FC = () => {
                                 }
                               })}
                               size="sm"
-                            />                          ) : (
-                            siswa.nama
+                            />
+                          ) : (
+                            siswa.nama_lengkap
                           )}
                         </td>
                         <td>
@@ -428,8 +423,9 @@ const AdminViewSiswa: React.FC = () => {
                                   {kelas.nama_kelas}
                                 </Option>
                               ))}
-                            </Select>                          ) : (
-                            siswa.kelas
+                            </Select>
+                          ) : (
+                            siswa.kelas_nama
                           )}
                         </td>
                         <td>

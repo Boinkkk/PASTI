@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Box, Card, CardContent, Typography, Button, Alert, 
-  FormControl, FormLabel, IconButton 
+  FormControl, FormLabel 
 } from '@mui/joy';
-import { Logout as LogoutIcon, Upload as UploadIcon, Download as DownloadIcon } from '@mui/icons-material';
+import { Upload as UploadIcon, Download as DownloadIcon } from '@mui/icons-material';
 import axios from 'axios';
+import AdminLayout from '../components/AdminLayout';
 
 interface GuruUploadResponse {
   filename: string;
@@ -34,14 +35,7 @@ const AdminUploadGuru: React.FC = () => {
       return;
     }
     
-    setAdminUsername(username);
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUsername');
-    navigate('/admin/login');
-  };
+    setAdminUsername(username);  }, [navigate]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -127,53 +121,23 @@ const AdminUploadGuru: React.FC = () => {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography level="h2" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+    <AdminLayout adminUsername={adminUsername}>
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Typography level="h2" sx={{ color: '#1976d2', fontWeight: 'bold', mb: 3 }}>
           Upload Data Guru
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography level="body-md">
-            Admin: <strong>{adminUsername}</strong>
-          </Typography>
-          <IconButton color="danger" onClick={handleLogout}>
-            <LogoutIcon />
-          </IconButton>
-        </Box>
-      </Box>      {/* Navigation */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/upload-siswa')}
-        >
-          Upload Siswa
-        </Button>
-        <Button 
-          variant="solid" 
-          color="primary"
-        >
-          Upload Guru
-        </Button>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/admin/siswa')}
-        >
-          Lihat Data Siswa
-        </Button>
-      </Box>
 
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography level="h4" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <UploadIcon />
-            Upload File CSV Guru
-          </Typography>
-          
-          <FormControl sx={{ mb: 2 }}>
-            <FormLabel>Pilih File CSV</FormLabel>
+        <Card variant="outlined" sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography level="h4" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <UploadIcon />
+              Upload File CSV Guru
+            </Typography>
+            
+            <FormControl sx={{ mb: 2 }}>
+              <FormLabel>Pilih File CSV</FormLabel>
             <input
               id="csv-file-input"
               type="file"
@@ -292,10 +256,10 @@ const AdminUploadGuru: React.FC = () => {
               <li><strong>Upload file</strong> menggunakan form di atas</li>
               <li><strong>Periksa hasil</strong> upload untuk memastikan semua data berhasil diproses</li>
             </ol>
-          </Typography>
-        </CardContent>
+          </Typography>        </CardContent>
       </Card>
-    </Box>
+      </Box>
+    </AdminLayout>
   );
 };
 
