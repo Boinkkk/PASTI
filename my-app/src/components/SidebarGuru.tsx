@@ -8,20 +8,15 @@ import {
   ListItemContent,
   Typography,
   Sheet,
-  Divider,
   Avatar,
   Chip
 } from '@mui/joy';
 import { 
-  Dashboard as DashboardIcon,
   EventNote as AbsensiIcon,
   Schedule as JadwalIcon,
-  Assessment as LaporanIcon,
-  People as SiswaIcon,
   Settings as SettingsIcon,
   Menu as MenuIcon,
   School as SchoolIcon,
-  QrCode2 as QrCodeIcon,
   Logout as LogoutIcon
 } from '@mui/icons-material';
 import { useAuth } from './Middleware';

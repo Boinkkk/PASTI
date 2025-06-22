@@ -1,17 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../components/Middleware'
 
 
-interface Siswa {
-    siswa_id: number;
-    nis: string;
-    nama_lengkap: string;
-    kelas_id: number;
-    email?: string;
-    poin_motivasi?: number;
-    tingkat_disiplin?: string;
-    foto_profil?: string;
-  }
 
 const Testing: React.FC = () => {
     const {user} = useAuth(); 

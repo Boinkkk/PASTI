@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Box, 
@@ -10,7 +10,6 @@ import {
   Sheet
 } from '@mui/joy';
 import { 
-  Dashboard as DashboardIcon,
   EventNote as AbsensiIcon,
   Assignment as AssignmentIcon,
   Person as ProfileIcon,

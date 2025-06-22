@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Button, Card, CardContent, Table, Sheet, Chip,
+  Box, Typography, Button, Card, Table, Sheet, Chip,
   Modal, ModalDialog, ModalClose, Input, Textarea, CircularProgress,
   IconButton, Tooltip, Select, Option, Tabs, TabList, Tab, TabPanel, 
   Grid, FormControl, FormLabel, Alert, Breadcrumbs, Link,
@@ -8,17 +8,13 @@ import {
 } from '@mui/joy';
 import {
   People as PeopleIcon, Add as AddIcon, Refresh as RefreshIcon,
-  ContentCopy as ContentCopyIcon, Stop as StopIcon, Check as CheckIcon, 
+  ContentCopy as ContentCopyIcon, Check as CheckIcon, 
   Close as CloseIcon, Search as SearchIcon, FilterList as FilterIcon,
-  Home as HomeIcon, PlayArrow as PlayArrowIcon,
-  Check,
-  Close,
-  QrCode as QrCodeIcon,
+  Home as HomeIcon,
   Edit as EditIcon
 } from '@mui/icons-material';
 import { QRCodeCanvas } from 'qrcode.react';
 import SidebarGuru from '../components/SidebarGuru';
-import { useAuth } from '../components/Middleware';
 import { 
   fetchAbsensiPertemuanSiswa, 
   fetchDetailAbsensi, 
@@ -67,63 +63,63 @@ interface AbsensiSiswa {
 const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 const STATUS_KEHADIRAN = ['Hadir', 'Alpha', 'Sakit', 'Izin'];
 
-// Dummy data for demonstration
-const DUMMY_JADWAL: JadwalKelas[] = [
-  {
-    jadwal_id: 1,
-    nama_mapel: 'Matematika',
-    nama_kelas: 'XII IPA 1',
-    hari: 'Senin',
-    waktu_mulai: '07:30',
-    waktu_selesai: '09:00',
-    ruang: 'A-101'
-  },
-  {
-    jadwal_id: 2,
-    nama_mapel: 'Fisika',
-    nama_kelas: 'XII IPA 2',
-    hari: 'Selasa',
-    waktu_mulai: '09:15',
-    waktu_selesai: '10:45',
-    ruang: 'Lab Fisika'
-  },
-  {
-    jadwal_id: 3,
-    nama_mapel: 'Matematika',
-    nama_kelas: 'XI IPA 1',
-    hari: 'Rabu',
-    waktu_mulai: '13:00',
-    waktu_selesai: '14:30',
-    ruang: 'A-102'
-  }
-];
+// // Dummy data for demonstration
+// const DUMMY_JADWAL: JadwalKelas[] = [
+//   {
+//     jadwal_id: 1,
+//     nama_mapel: 'Matematika',
+//     nama_kelas: 'XII IPA 1',
+//     hari: 'Senin',
+//     waktu_mulai: '07:30',
+//     waktu_selesai: '09:00',
+//     ruang: 'A-101'
+//   },
+//   {
+//     jadwal_id: 2,
+//     nama_mapel: 'Fisika',
+//     nama_kelas: 'XII IPA 2',
+//     hari: 'Selasa',
+//     waktu_mulai: '09:15',
+//     waktu_selesai: '10:45',
+//     ruang: 'Lab Fisika'
+//   },
+//   {
+//     jadwal_id: 3,
+//     nama_mapel: 'Matematika',
+//     nama_kelas: 'XI IPA 1',
+//     hari: 'Rabu',
+//     waktu_mulai: '13:00',
+//     waktu_selesai: '14:30',
+//     ruang: 'A-102'
+//   }
+// ];
 
-const DUMMY_PERTEMUAN: PertemuanData[] = [
-  {
-    id_pertemuan: 1,
-    pertemuan_ke: 1,
-    materi: 'Pengenalan Limit Fungsi',
-    tanggal: '2024-01-15',
-    token_absen: '123456',
-    is_active: false,
-    waktu_mulai_absen: '07:30:00',
-    waktu_selesai_absen: '08:30:00',
-    total_hadir: 28,
-    total_siswa: 32
-  },
-  {
-    id_pertemuan: 2,
-    pertemuan_ke: 2,
-    materi: 'Sifat-sifat Limit',
-    tanggal: '2024-01-22',
-    token_absen: '789012',
-    is_active: false,
-    waktu_mulai_absen: '07:30:00',
-    waktu_selesai_absen: '08:30:00',
-    total_hadir: 25,
-    total_siswa: 32
-  }
-];
+// const DUMMY_PERTEMUAN: PertemuanData[] = [
+//   {
+//     id_pertemuan: 1,
+//     pertemuan_ke: 1,
+//     materi: 'Pengenalan Limit Fungsi',
+//     tanggal: '2024-01-15',
+//     token_absen: '123456',
+//     is_active: false,
+//     waktu_mulai_absen: '07:30:00',
+//     waktu_selesai_absen: '08:30:00',
+//     total_hadir: 28,
+//     total_siswa: 32
+//   },
+//   {
+//     id_pertemuan: 2,
+//     pertemuan_ke: 2,
+//     materi: 'Sifat-sifat Limit',
+//     tanggal: '2024-01-22',
+//     token_absen: '789012',
+//     is_active: false,
+//     waktu_mulai_absen: '07:30:00',
+//     waktu_selesai_absen: '08:30:00',
+//     total_hadir: 25,
+//     total_siswa: 32
+//   }
+// ];
 
 // const DUMMY_SISWA: AbsensiSiswa[] = [
 //   {
@@ -283,9 +279,15 @@ const GuruAbsensi: React.FC = () => {
             'Authorization': 'zZfEWfejvZfJWdXWw9kz' // Ganti dengan token Anda
           }
         });
+        if (responseSendLink.status !== 200) {
+          throw new Error(`Gagal mengirim link absensi: ${responseSendLink.statusText}`);
+        }
+
   
         console.log(`Mengirim link absensi ke ${siswa.nama_lengkap} (${siswa.no_telepon})`);
       }
+
+     
   
       setSuccess('Semua link absensi berhasil dikirim!');
   
@@ -441,17 +443,6 @@ const GuruAbsensi: React.FC = () => {
     }
   };
   
-  const endPertemuan = (pertemuanId: number) => {
-    setPertemuanList(prevList => 
-      prevList.map(pertemuan => 
-        pertemuan.id_pertemuan === pertemuanId 
-          ? { ...pertemuan, status_pertemuan: 'Selesai' }
-          : pertemuan
-      )
-    );
-    setSuccess('Pertemuan berhasil diakhiri');
-    setShowDetailModal(false);
-  };
   
   // Function to handle changing pertemuan status (active/inactive)
   const handleChangeConditionAbsensi = async (isActive: boolean) => {
@@ -504,18 +495,6 @@ const GuruAbsensi: React.FC = () => {
       case 'Alpha': return 'danger';
       default: return 'neutral';
     }
-  };
-  
-  const getProgressData = (hadir: number, total: number) => {
-    const percentage = total > 0 ? Math.round((hadir / total) * 100) : 0;
-    let color: 'success' | 'warning' | 'danger' | 'primary';
-    
-    if (percentage >= 80) color = 'success';
-    else if (percentage >= 60) color = 'primary';
-    else if (percentage >= 40) color = 'warning';
-    else color = 'danger';
-    
-    return { percentage, color };
   };
   
   const filteredJadwal = jadwalList.filter(jadwal => {
@@ -745,8 +724,8 @@ const GuruAbsensi: React.FC = () => {
                     <tr>
                       <th style={{ width: '8%' }}>Pertemuan</th>
                       <th style={{ width: '12%' }}>Tanggal</th>
-                      <th style={{ width: '30%' }}>Materi</th>
-                      <th style={{ width: '12%' }}>Token</th>
+                      <th style={{ width: '25%' }}>Materi</th>
+                      <th style={{ width: '17%' }}>Token</th>
                       <th style={{ width: '12%' }}>Status</th>
                       <th style={{ width: '15%' }}>Aksi</th>
                     </tr>
@@ -947,9 +926,12 @@ const GuruAbsensi: React.FC = () => {
         
         {/* Modal: View Absensi Detail */}
         <Modal open={showDetailModal} onClose={() => setShowDetailModal(false)}>
-          <ModalDialog sx={{ maxWidth: '800px', width: '90vw' }}>
+          <ModalDialog sx={{ mmaxWidth: '800px',
+                      width: '90vw',
+                      maxHeight: '90vh', 
+                      overflow: 'auto'}}>
             <ModalClose />
-            <Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Typography level="h4" component="h2" sx={{ mb: 2 }}>
                 Detail Absensi Pertemuan {selectedPertemuan?.pertemuan_ke}
               </Typography>
@@ -1058,8 +1040,8 @@ const GuruAbsensi: React.FC = () => {
                   </Box>
                   
                   {/* Absensi Siswa Table */}
-                  <Sheet sx={{ maxHeight: '400px', overflow: 'auto' }}>
-                    <Table stickyHeader hoverRow>
+                  <Sheet sx={{ flex: 1, overflow: 'auto', maxHeight: 300, borderRadius: 8 }}>
+                    <Table hoverRow>
                       <thead>
                         <tr>
                           <th style={{ width: '5%' }}>No</th>

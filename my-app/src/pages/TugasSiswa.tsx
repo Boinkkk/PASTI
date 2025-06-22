@@ -661,8 +661,16 @@ const TugasSiswa: React.FC = () => {
           </Stack>
         )}        {/* Submit/Edit Modal */}
         <Modal open={submitModalOpen} onClose={() => setSubmitModalOpen(false)}>
-          <ModalDialog sx={{ minWidth: 600, maxWidth: 700 }}>
-            <ModalClose />
+            <ModalDialog
+              sx={{
+                minWidth: 300,
+                maxWidth: 700,
+                width: '90vw',
+                maxHeight: '90vh',
+                overflow: 'auto',
+              }}
+            >
+              <ModalClose />
             <Typography level="h4" sx={{ mb: 2 }}>
               {selectedTugas?.status_pengumpulan === 'Belum Mengerjakan' ? 'Kumpulkan Tugas' : 'Edit Pengumpulan'}
             </Typography>

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: pasti-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ivan
+      MYSQL_DATABASE: pasti
+      MYSQL_USER: pasti_user
+      MYSQL_PASSWORD: ivan
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./pasti.sql:/docker-entrypoint-initdb.d/pasti.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - pasti-network
+
+  backend:
+    build: .
+    container_name: pasti-backend
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=pasti_user
+      - DB_PASSWORD=ivan
+      - DB_NAME=pasti
+      - JWT_SECRET=ivan
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - pasti-network
+
+  frontend:
+    build: ./my-app
+    container_name: pasti-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - pasti-network
+
+volumes:
+  mysql_data:
+
+networks:
+  pasti-network:
+    driver: bridge

@@ -146,16 +146,16 @@ const SiswaProfile: React.FC = () => {
     setError(null);
   };
 
-  const getDisciplineColor = (tingkat: string) => {
-    switch (tingkat) {
-      case 'Sangat Baik': return 'success';
-      case 'Baik': return 'primary';
-      case 'Cukup': return 'warning';
-      case 'Kurang': return 'danger';
-      case 'Sangat Kurang': return 'danger';
-      default: return 'neutral';
-    }
-  };
+  // const getDisciplineColor = (tingkat: string) => {
+  //   switch (tingkat) {
+  //     case 'Sangat Baik': return 'success';
+  //     case 'Baik': return 'primary';
+  //     case 'Cukup': return 'warning';
+  //     case 'Kurang': return 'danger';
+  //     case 'Sangat Kurang': return 'danger';
+  //     default: return 'neutral';
+  //   }
+  // };
 
   if (loading && !profileData) {
     return (      <Box sx={{ display: 'flex', height: '100vh' }}>

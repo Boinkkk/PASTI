@@ -18,7 +18,6 @@ import {
   FilterList as FilterIcon
 } from '@mui/icons-material';
 import SidebarGuru from '../components/SidebarGuru';
-import { useAuth } from '../components/Middleware';
 
 const GuruSiswa: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);

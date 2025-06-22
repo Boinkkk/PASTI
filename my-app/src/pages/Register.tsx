@@ -14,32 +14,32 @@ import {
     Option,
     FormHelperText
   } from '@mui/joy';
-import axios, { AxiosError } from 'axios';
+import axios  from 'axios';
   import { useState, useEffect } from 'react';
   import { useNavigate } from 'react-router-dom';
   
   // Interface untuk response API
-  interface RegisterResponse {
-      message: string;
-      user: {
-          siswa_id: number;
-          nis: string;
-          nama_lengkap: string;
-          kelas_id: number;
-          email: string;
-      };
-  }
+//   interface RegisterResponse {
+//       message: string;
+//       user: {
+//           siswa_id: number;
+//           nis: string;
+//           nama_lengkap: string;
+//           kelas_id: number;
+//           email: string;
+//       };
+//   }
   
-  interface ValidationError {
-      field: string;
-      message: string;
-  }
+//   interface ValidationError {
+//       field: string;
+//       message: string;
+//   }
   
-  interface ErrorResponse {
-      error: string;
-      message: string;
-      errors?: ValidationError[];
-  }
+//   interface ErrorResponse {
+//       error: string;
+//       message: string;
+//       errors?: ValidationError[];
+//   }
   
   function Register() {
       const navigate = useNavigate();

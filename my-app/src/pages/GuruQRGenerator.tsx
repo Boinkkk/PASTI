@@ -18,7 +18,6 @@ import {
 } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';
 import SidebarGuru from '../components/SidebarGuru';
-import { useAuth } from '../components/Middleware';
 
 const GuruQRGenerator: React.FC = () => {  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [inputText, setInputText] = useState('');
