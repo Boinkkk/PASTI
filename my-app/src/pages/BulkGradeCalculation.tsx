@@ -95,7 +95,7 @@ const BulkGradeCalculation: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.status === 'succes') {
+        if (data.status === 'success') {
           setClasses(data.data || []);
         }
       }
@@ -122,7 +122,7 @@ const BulkGradeCalculation: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.status === 'succes') {
+        if (data.status === 'success') {
           setSubjects(data.data || []);
         }
       }
@@ -149,7 +149,7 @@ const BulkGradeCalculation: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.status === 'succes') {
+        if (data.status === 'success') {
           setHistory(data.data?.history || []);
           setTotalPages(data.data?.pagination?.total_pages || 1);
         }
@@ -424,7 +424,7 @@ const BulkGradeCalculation: React.FC = () => {
                     <thead>
                       <tr>
                         <th style={{ width: '200px' }}>Student</th>
-                        <th style={{ width: '120px' }}>Lecture</th>
+                        <th style={{ width: '120px' }}>Mata Pelajaran</th>
                         <th style={{ width: '120px', textAlign: 'center' }}>Assignments</th>
                         <th style={{ width: '120px', textAlign: 'center' }}>Completed</th>
                         <th style={{ width: '140px', textAlign: 'center' }}>Points</th>
