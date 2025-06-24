@@ -12,7 +12,8 @@ import {
   Logout as LogoutIcon,
   Settings as SettingsIcon,
   Dashboard as DashboardIcon,
-  Assessment as AssessmentIcon
+  Assessment as AssessmentIcon,
+  Calculate as CalculateIcon
 } from '@mui/icons-material';
 
 interface AdminSidebarProps {
@@ -23,8 +24,7 @@ interface AdminSidebarProps {
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminUsername, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const menuItems = [
-    {
+  const menuItems = [    {
       category: "Analytics",
       items: [
         {
@@ -36,6 +36,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminUsername, onLogout }) 
           label: "Laporan Kehadiran",
           path: "/admin/analytics/attendance-report",
           icon: <AssessmentIcon />,
+        },
+        {
+          label: "Bulk Grade Calculation",
+          path: "/admin/analytics/bulk-grade-calculation",
+          icon: <CalculateIcon />,
         }
       ]
     },

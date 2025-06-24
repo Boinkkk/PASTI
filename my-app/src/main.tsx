@@ -32,6 +32,7 @@ import AdminViewSiswa from './pages/AdminViewSiswa.tsx'
 import AdminViewGuru from './pages/AdminViewGuru.tsx'
 import AnalyticsDashboard from './pages/AnalyticsDashboard.tsx'
 import AttendanceReport from './pages/AttendanceReport.tsx'
+import BulkGradeCalculation from './pages/BulkGradeCalculation.tsx'
 
 const router = createBrowserRouter([
   {
@@ -237,6 +238,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requireAuth={false}>
         <AttendanceReport/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/analytics/bulk-grade-calculation',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <BulkGradeCalculation/>
       </ProtectedRoute>
     )
   },

@@ -184,9 +184,43 @@ const AnalyticsDashboard: React.FC = () => {
       </AdminLayout>
     );
   }
-
   return (    <AdminLayout adminUsername={adminUsername}>
       <Box sx={{ p: 3 }}>
+        
+        {/* Breadcrumb Analytics Navigation */}
+        <Card sx={{ mb: 3, p: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: 'sm', color: 'text.secondary', mb: 2 }}>
+            <Typography level="body-sm">Analytics</Typography>
+            <Typography level="body-sm">/</Typography>
+            <Typography level="body-sm" sx={{ fontWeight: 'md', color: 'primary.600' }}>Dashboard</Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Chip 
+              size="sm" 
+              variant="solid" 
+              color="primary"
+            >
+              📊 Dashboard
+            </Chip>
+            <Chip 
+              size="sm" 
+              variant="outlined"
+              onClick={() => navigate('/admin/analytics/attendance-report')}
+              sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'background.level1' } }}
+            >
+              📈 Attendance Report
+            </Chip>
+            <Chip 
+              size="sm" 
+              variant="outlined"
+              onClick={() => navigate('/admin/analytics/bulk-grade-calculation')}
+              sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'background.level1' } }}
+            >
+              🧮 Bulk Grade Calculation
+            </Chip>
+          </Box>
+        </Card>
         {/* Debug Info - Remove in production */}
         <Card sx={{ mb: 3, backgroundColor: '#f5f5f5' }}>
           <CardContent>

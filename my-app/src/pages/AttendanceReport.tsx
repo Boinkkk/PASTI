@@ -260,10 +260,45 @@ const AttendanceReport: React.FC = () => {
       return dateString; // Fallback to original string
     }
   };
-
   return (
     <AdminLayout adminUsername={adminUsername}>
       <Box sx={{ p: 3 }}>
+        
+        {/* Breadcrumb Analytics Navigation */}
+        <Card sx={{ mb: 3, p: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: 'sm', color: 'text.secondary', mb: 2 }}>
+            <Typography level="body-sm">Analytics</Typography>
+            <Typography level="body-sm">/</Typography>
+            <Typography level="body-sm" sx={{ fontWeight: 'md', color: 'primary.600' }}>Attendance Report</Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Chip 
+              size="sm" 
+              variant="outlined"
+              onClick={() => window.location.href = '/admin/analytics/dashboard'}
+              sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'background.level1' } }}
+            >
+              📊 Dashboard
+            </Chip>
+            <Chip 
+              size="sm" 
+              variant="solid" 
+              color="primary"
+            >
+              📈 Attendance Report
+            </Chip>
+            <Chip 
+              size="sm" 
+              variant="outlined"
+              onClick={() => window.location.href = '/admin/analytics/bulk-grade-calculation'}
+              sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'background.level1' } }}
+            >
+              🧮 Bulk Grade Calculation
+            </Chip>
+          </Box>
+        </Card>
+        
         {/* Header */}
         <Box sx={{ mb: 4 }}>
           <Typography level="h2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>

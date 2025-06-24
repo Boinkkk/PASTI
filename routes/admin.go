@@ -47,9 +47,13 @@ func AdminRoutes(r *mux.Router) {
 	adminProtected.HandleFunc("/upload-jadwal", controllers.UploadJadwalData).Methods("POST")
 		// Admin upload jadwal pelajaran (CSV)
 	adminProtected.HandleFunc("/upload-jadwal-csv", controllers.UploadJadwalCSV).Methods("POST")
-		// Analytics dashboard
+	// Analytics dashboard
 	adminProtected.HandleFunc("/analytics/dashboard", controllers.GetAnalyticsDashboard).Methods("GET")
 	
 	// Attendance report dengan cursor pagination
 	adminProtected.HandleFunc("/analytics/attendance-report", controllers.GetAttendanceReport).Methods("GET")
+	
+	// Bulk grade calculation endpoints
+	adminProtected.HandleFunc("/analytics/bulk-grade-calculation", controllers.CalculateBulkGrades).Methods("POST")
+	adminProtected.HandleFunc("/analytics/bulk-grade-history", controllers.GetBulkGradeHistory).Methods("GET")
 }
