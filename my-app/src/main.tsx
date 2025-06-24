@@ -30,6 +30,8 @@ import AdminUploadGuru from './pages/AdminUploadGuru.tsx'
 import AdminUploadJadwal from './pages/AdminUploadJadwal.tsx'
 import AdminViewSiswa from './pages/AdminViewSiswa.tsx'
 import AdminViewGuru from './pages/AdminViewGuru.tsx'
+import AnalyticsDashboard from './pages/AnalyticsDashboard.tsx'
+import AttendanceReport from './pages/AttendanceReport.tsx'
 
 const router = createBrowserRouter([
   {
@@ -219,6 +221,22 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requireAuth={false}>
         <AdminViewGuru/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/analytics/dashboard',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <AnalyticsDashboard/>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/admin/analytics/attendance-report',
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <AttendanceReport/>
       </ProtectedRoute>
     )
   },

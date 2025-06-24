@@ -10,7 +10,9 @@ import {
   Schedule as ScheduleIcon,
   Upload as UploadIcon,
   Logout as LogoutIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Dashboard as DashboardIcon,
+  Assessment as AssessmentIcon
 } from '@mui/icons-material';
 
 interface AdminSidebarProps {
@@ -21,8 +23,22 @@ interface AdminSidebarProps {
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminUsername, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
   const menuItems = [
+    {
+      category: "Analytics",
+      items: [
+        {
+          label: "Dashboard Analytics",
+          path: "/admin/analytics/dashboard",
+          icon: <DashboardIcon />,
+        },
+        {
+          label: "Laporan Kehadiran",
+          path: "/admin/analytics/attendance-report",
+          icon: <AssessmentIcon />,
+        }
+      ]
+    },
     {
       category: "Upload Data",
       items: [

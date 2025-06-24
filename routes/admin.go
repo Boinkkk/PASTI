@@ -45,7 +45,11 @@ func AdminRoutes(r *mux.Router) {
 	
 	// Admin upload jadwal pelajaran (manual)
 	adminProtected.HandleFunc("/upload-jadwal", controllers.UploadJadwalData).Methods("POST")
-	
-	// Admin upload jadwal pelajaran (CSV)
+		// Admin upload jadwal pelajaran (CSV)
 	adminProtected.HandleFunc("/upload-jadwal-csv", controllers.UploadJadwalCSV).Methods("POST")
+		// Analytics dashboard
+	adminProtected.HandleFunc("/analytics/dashboard", controllers.GetAnalyticsDashboard).Methods("GET")
+	
+	// Attendance report dengan cursor pagination
+	adminProtected.HandleFunc("/analytics/attendance-report", controllers.GetAttendanceReport).Methods("GET")
 }
